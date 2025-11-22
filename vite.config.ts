@@ -5,5 +5,8 @@ export default defineConfig({
   plugins: [react()],
   server: {
     host: true
+  },
+  build: {
+    chunkSizeWarningLimit: 1600, // evita warnings de bundle grande na Vercel
   }
 })
