@@ -1,11 +1,8 @@
 {
+  "trailingSlash": false,
   "rewrites": [
     {
-      "source": "/api/:match*",
-      "destination": "/api/:match*"
-    },
-    {
-      "source": "/((?!api/|_next/|static/|favicon.ico).*)",
+      "source": "/((?!api/|_next/|static/|assets/|favicon.ico).*)",
       "destination": "/index.html"
     }
   ]

@@ -1,121 +1,104 @@
 import { MercadoPagoConfig, Payment } from 'mercadopago';
 import { createClient } from '@supabase/supabase-js';
 
+// ==== CONFIGURAÇÃO ====
+// Em produção use token de produção, em teste use token de teste
+const MP_ACCESS_TOKEN = process.env.MP_ACCESS_TOKEN!;
+const SUPABASE_URL = process.env.VITE_SUPABASE_URL!;
+const SUPABASE_SERVICE_KEY = process.env.SUPABASE_SERVICE_ROLE_KEY!;
+
+// ==== HANDLER ====
 export default async function handler(req: any, res: any) {
-  // 1. Configurar Headers CORS e JSON
+  // CORS + Preflight
   res.setHeader('Access-Control-Allow-Origin', '*');
-  res.setHeader('Access-Control-Allow-Methods', 'POST, GET, OPTIONS');
+  res.setHeader('Access-Control-Allow-Methods', 'POST, OPTIONS');
   res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
-  
-  // Tratamento de Pre-flight request (OPTIONS)
-  if (req.method === 'OPTIONS') {
-    return res.status(200).end();
+
+  if (req.method === 'OPTIONS') return res.status(200).end();
+  if (req.method === 'GET') return res.status(200).json({ status: 'webhook vivo' });
+
+  if (req.method !== 'POST') return res.status(405).end();
+
+  // Validação das chaves apenas dentro da execução para não quebrar o build se faltarem localmente
+  if (!MP_ACCESS_TOKEN || !SUPABASE_URL || !SUPABASE_SERVICE_KEY) {
+    console.error('❌ ERRO CRÍTICO: Variáveis de ambiente faltando (MP_ACCESS_TOKEN, VITE_SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY)');
+    return res.status(500).json({ error: 'Server Misconfiguration' });
   }
 
-  // Teste simples via browser (GET)
-  if (req.method === 'GET') {
-    return res.status(200).json({ status: 'Webhook online', time: new Date().toISOString() });
-  }
-
-  // Apenas POST é aceito para o webhook real
-  if (req.method !== 'POST') {
-    return res.status(405).json({ error: 'Method not allowed' });
-  }
-
-  console.log('--- 🔔 WEBHOOK MERCADO PAGO INICIADO ---');
-
-  // 2. Validar Variáveis de Ambiente
-  const accessToken = process.env.MP_ACCESS_TOKEN;
-  const supabaseUrl = process.env.VITE_SUPABASE_URL;
-  const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
-
-  if (!accessToken || !supabaseUrl || !supabaseServiceKey) {
-    console.error('❌ ERRO CRÍTICO: Variáveis de ambiente ausentes.');
-    return res.status(500).json({ error: 'Internal Server Error: Config missing' });
-  }
+  const mpClient = new MercadoPagoConfig({ accessToken: MP_ACCESS_TOKEN });
+  const payment = new Payment(mpClient);
+  const supabase = createClient(SUPABASE_URL, SUPABASE_SERVICE_KEY);
 
   try {
-    // Inicializar clientes
-    const client = new MercadoPagoConfig({ accessToken: accessToken });
-    const payment = new Payment(client);
-    const supabase = createClient(supabaseUrl, supabaseServiceKey);
+    const payload = req.body;
 
-    const { action, type, data } = req.body || {};
-    const id = data?.id || req.body?.data?.id;
+    // O Mercado Pago manda assim: { "action": "payment.updated", "data": { "id": "123456789" }, "type": "payment" }
+    // Às vezes manda o ID na raiz do objeto dependendo da versão do webhook
+    const paymentId = payload?.data?.id || payload?.id;
 
-    console.log(`📩 Evento recebido: ${action || type} | ID: ${id}`);
+    // Teste do painel do MP (id = 123456) → só confirma recebimento
+    if (paymentId == '123456' || paymentId === 123456) {
+      console.log('🧪 Teste do painel MP recebido com sucesso');
+      return res.status(200).json({ received: true });
+    }
 
-    // Filtrar eventos de pagamento
-    if (action === 'payment.created' || action === 'payment.updated' || type === 'payment') {
-      if (!id) {
-        console.warn('⚠️ ID de pagamento não encontrado no corpo da requisição.');
-        return res.status(200).json({ message: 'No ID provided, ignored' });
+    if (!paymentId) {
+      console.warn('⚠️ Payload recebido sem ID de pagamento', payload);
+      return res.status(200).end();
+    }
+
+    console.log(`🔍 Consultando pagamento ${paymentId}...`);
+
+    // Busca os detalhes do pagamento na API do Mercado Pago
+    const mpResponse = await payment.get({ id: Number(paymentId) });
+
+    const status = mpResponse.status;
+    const email = mpResponse.payer?.email;
+    const externalRef = mpResponse.external_reference; // Passado no checkout ('monthly' ou 'yearly')
+
+    console.log(`✅ Pagamento ${paymentId}: Status=${status} | Email=${email}`);
+
+    if (status === 'approved' && email) {
+      // Busca usuário pelo e-mail na tabela profiles
+      const { data: user, error: searchError } = await supabase
+        .from('profiles')
+        .select('id')
+        .eq('email', email)
+        .single();
+
+      if (searchError) {
+          console.error('Erro ao buscar usuário no Supabase:', searchError);
       }
 
-      console.log(`🔍 Consultando pagamento ${id} no Mercado Pago...`);
-
-      // Buscar detalhes do pagamento
-      const paymentData = await payment.get({ id: id });
-      const status = paymentData.status;
-      const payerEmail = paymentData.payer?.email;
-      const externalReference = paymentData.external_reference;
-
-      console.log(`✅ Status: ${status} | Email: ${payerEmail} | Ref: ${externalReference}`);
-
-      if (status === 'approved' && payerEmail) {
-        console.log(`🚀 Pagamento APROVADO. Atualizando usuário ${payerEmail}...`);
-
-        // 1. Encontrar usuário pelo email
-        const { data: profiles, error: searchError } = await supabase
-          .from('profiles')
-          .select('id')
-          .eq('email', payerEmail)
-          .limit(1);
-
-        if (searchError) {
-          console.error('❌ Erro ao buscar perfil:', searchError);
-          throw searchError;
-        }
-
-        if (!profiles || profiles.length === 0) {
-          console.warn(`⚠️ Usuário com email ${payerEmail} não encontrado no Supabase.`);
-          // Retornar 200 para não travar o Mercado Pago, pois o erro é de negócio (email não existe)
-          return res.status(200).json({ warning: 'User not found', email: payerEmail });
-        }
-
-        const userId = profiles[0].id;
-
-        // 2. Atualizar usuário para Premium
+      if (user) {
         const { error: updateError } = await supabase
           .from('profiles')
           .update({
             is_premium: true,
-            subscription_type: externalReference === 'yearly' ? 'yearly' : 'monthly',
-            subscription_id: id.toString(),
-            subscription_method: paymentData.payment_type_id || 'credit_card',
-            updated_at: new Date().toISOString()
+            subscription_type: externalRef === 'yearly' ? 'yearly' : 'monthly',
+            subscription_id: paymentId.toString(),
+            subscription_method: 'mercadopago',
+            updated_at: new Date().toISOString(),
           })
-          .eq('id', userId);
+          .eq('id', user.id);
 
         if (updateError) {
-          console.error('❌ Erro ao atualizar perfil:', updateError);
-          throw updateError;
+            console.error('Erro ao atualizar perfil:', updateError);
+        } else {
+            console.log(`🎉 Usuário ${email} atualizado para PREMIUM com sucesso.`);
         }
-
-        console.log(`🎉 SUCESSO! Usuário ${userId} agora é Premium.`);
       } else {
-        console.log(`ℹ️ Pagamento não aprovado ou email ausente. Status: ${status}`);
+        console.warn(`⚠️ E-mail ${email} não encontrado no banco de dados do Supabase. O usuário precisa criar conta antes.`);
       }
-    } else {
-      console.log('ℹ️ Evento ignorado (não é atualização de pagamento).');
     }
 
-    // Sempre retornar 200 para o Mercado Pago
-    return res.status(200).json({ success: true });
+    return res.status(200).json({ ok: true });
 
   } catch (error: any) {
-    console.error('❌ ERRO NO WEBHOOK:', error);
-    // Retornar 500 faz o Mercado Pago tentar novamente mais tarde
-    return res.status(500).json({ error: error.message });
+    console.error('❌ ERRO WEBHOOK:', error.message || error);
+
+    // IMPORTANTE: retornar 200 mesmo com erro interno
+    // senão o Mercado Pago fica reenviando a notificação por dias
+    return res.status(200).json({ error: error.message });
   }
 }
