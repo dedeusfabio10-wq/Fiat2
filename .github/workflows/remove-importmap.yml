@@ -1,0 +1,42 @@
+name: Remove React importmap and build
+
+on:
+  push:
+    branches:
+      - main    # ou branch de produção
+
+jobs:
+  remove-importmap:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Remove importmap script block
+        run: |
+          sed -i '/<script type="importmap">/,/<\/script>/d' index.html
+
+      - name: Commit changes
+        run: |
+          git config --local user.email "github-actions[bot]@users.noreply.github.com"
+          git config --local user.name "github-actions[bot]"
+          git add index.html
+          git commit -m "ci: remove importmap for production build" || echo "No changes to commit"
+          git push
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      - name: Install deps & build
+        run: |
+          npm ci
+          npm run build
+
+      - name: Deploy to Vercel
+        # Se você usa integração direta com Vercel, pode disparar via Vercel CLI ou usar deploy automático
+        env:
+          VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
+        run: |
+          npx vercel --prod --token $VERCEL_TOKEN
