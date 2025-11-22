@@ -1,0 +1,514 @@
+import React, { useContext, useState, useRef } from 'react';
+import { AppContext } from '../App';
+import { Button, Card, Input } from '../ui/UIComponents';
+import PremiumModal from '../ui/PremiumModal';
+import { useNavigate } from 'react-router-dom';
+import { Crown, Settings, LogOut, BarChart3, Heart, Camera, Lock, Palette, Moon, PenLine, X, Search, Check, CreditCard, CalendarClock, AlertTriangle, ExternalLink } from 'lucide-react';
+import { toast } from 'sonner';
+import { SAINTS } from '../constants';
+import { SaintIcon } from '../ui/SaintIcons';
+import { playSoftBell } from '../services/audio';
+import { cancelSubscription } from '../services/mercadopago';
+import { supabase } from '../services/supabase';
+
+const ProfilePage: React.FC = () => {
+  const { profile, updateProfile } = useContext(AppContext);
+  const navigate = useNavigate();
+  const fileInputRef = useRef<HTMLInputElement>(null);
+  
+  // Modals State
+  const [showPasswordModal, setShowPasswordModal] = useState(false);
+  const [showSaintModal, setShowSaintModal] = useState(false);
+  const [showAboutFiat, setShowAboutFiat] = useState(false);
+  const [showPremiumModal, setShowPremiumModal] = useState(false);
+  const [showCancelModal, setShowCancelModal] = useState(false);
+  
+  const [saintSearch, setSaintSearch] = useState('');
+  const [editName, setEditName] = useState(false);
+  const [tempName, setTempName] = useState(profile.name);
+
+  // Computed Data
+  const devotionalSaint = SAINTS.find(s => s.id === profile.devotionalSaintId);
+
+  const handleLogout = async () => {
+    try {
+        await supabase.auth.signOut();
+    } catch (e) {
+        console.error("Logout error", e);
+    }
+    
+    if (navigator.vibrate) navigator.vibrate([50, 100, 50]);
+    toast("Volte sempre, alma devota ♡", { 
+        icon: "🙏",
+        style: { background: '#0f172a', color: '#d4af37', border: '1px solid #d4af37' }
+    });
+    localStorage.clear();
+    updateProfile({
+        name: '',
+        email: '',
+        streak: 0,
+        rosaries_prayed: 0,
+        is_premium: false,
+        onboarding_completed: false,
+        favorites: [],
+        active_novenas: []
+    });
+    navigate('/auth');
+  };
+
+  const handlePhotoUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (e.target.files && e.target.files[0]) {
+        const file = e.target.files[0];
+        const reader = new FileReader();
+        reader.onloadend = () => {
+            updateProfile({ ...profile, photo: reader.result as string });
+            toast.success("Foto atualizada!");
+        };
+        reader.readAsDataURL(file);
+    }
+  };
+
+  const handleSaveName = () => {
+      if (tempName.trim()) {
+          updateProfile({...profile, name: tempName});
+          setEditName(false);
+          toast.success("Nome atualizado.");
+      }
+  };
+
+  const selectSaint = (id: string) => {
+      updateProfile({ ...profile, devotionalSaintId: id });
+      setShowSaintModal(false);
+      playSoftBell();
+      if(navigator.vibrate) navigator.vibrate(50);
+      toast.success("Santo de devoção definido!");
+  };
+
+  const setTheme = (theme: 'purple' | 'green' | 'white' | 'rose') => {
+      updateProfile({ ...profile, customTheme: theme });
+      toast.success(`Tema ${theme} aplicado.`);
+  };
+
+  const handleCancelSubscription = async () => {
+      const updated = await cancelSubscription();
+      updateProfile({ ...profile, ...updated });
+      setShowCancelModal(false);
+      toast.success("Assinatura cancelada.", { description: "Você não será mais cobrado." });
+  };
+
+  return (
+    <div className={`min-h-screen pb-32 animate-fade-in ${profile.nightModeSpiritual ? 'bg-black' : ''}`}>
+      
+      {/* --- SECTION 1: HEADER & PUBLIC INFO --- */}
+      <div className="relative p-6 pb-8 bg-gradient-to-b from-black/40 to-transparent">
+        {profile.nightModeSpiritual && (
+            <div className="absolute inset-0 pointer-events-none">
+                {Array.from({length:20}).map((_,i) => (
+                    <div key={i} className="absolute bg-white rounded-full w-0.5 h-0.5 animate-pulse" 
+                         style={{top: Math.random()*100+'%', left: Math.random()*100+'%', animationDelay: Math.random()*2+'s'}} />
+                ))}
+            </div>
+        )}
+
+        <div className="flex flex-col items-center gap-4 mt-4">
+            <div 
+                className={`relative group cursor-pointer w-28 h-28 rounded-full flex items-center justify-center shadow-2xl
+                           ${profile.is_premium ? 'border-[3px] border-sacred-gold p-1' : 'border-4 border-white/10 bg-gray-800'}`}
+                onClick={() => fileInputRef.current?.click()}
+            >
+                {profile.is_premium && (
+                    <div className="absolute inset-0 rounded-full animate-spin-slow border-t-2 border-b-2 border-sacred-gold/50 opacity-50"></div>
+                )}
+                
+                <div className="w-full h-full rounded-full overflow-hidden bg-stone-900 flex items-center justify-center relative">
+                    {profile.photo ? (
+                        <img src={profile.photo} alt="Profile" className="w-full h-full object-cover" />
+                    ) : (
+                        <span className="text-4xl font-serif font-bold text-gray-500">{profile.name?.[0]?.toUpperCase()}</span>
+                    )}
+                    <div className="absolute inset-0 bg-black/50 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
+                        <Camera className="text-white" />
+                    </div>
+                </div>
+
+                {profile.is_premium && (
+                    <div className="absolute -bottom-2 bg-sacred-gold text-sacred-sapphire text-[10px] font-bold px-2 py-0.5 rounded-full shadow-lg flex items-center gap-1 border border-white/20">
+                        <Crown size={10} fill="currentColor" /> PREMIUM
+                    </div>
+                )}
+                <input type="file" ref={fileInputRef} className="hidden" accept="image/*" onChange={handlePhotoUpload} />
+            </div>
+
+            <div className="text-center space-y-1 z-10">
+                {editName ? (
+                    <div className="flex gap-2 items-center justify-center">
+                        <Input 
+                           value={tempName} 
+                           onChange={e => setTempName(e.target.value)} 
+                           className="h-8 w-40 text-center bg-black/40"
+                           autoFocus 
+                        />
+                        <Button size="sm" variant="sacred" onClick={handleSaveName} className="h-8 w-8 !p-0"><Check size={14}/></Button>
+                    </div>
+                ) : (
+                    <h2 className="text-2xl font-serif text-white flex items-center justify-center gap-2" onClick={() => { setTempName(profile.name); setEditName(true); }}>
+                        {profile.name} 
+                        <PenLine size={14} className="text-gray-500 opacity-50" />
+                    </h2>
+                )}
+                
+                {devotionalSaint && (
+                    <p className="text-sacred-gold text-sm flex items-center justify-center gap-1 font-serif italic animate-fade-in">
+                        <SaintIcon id={devotionalSaint.id} className="w-4 h-4" /> Devoto de {devotionalSaint.name} ♡
+                    </p>
+                )}
+                
+                {!profile.is_premium && <p className="text-xs text-gray-500">Peregrino</p>}
+                
+                <div className="pt-2">
+                    <button onClick={() => setShowPasswordModal(true)} className="text-xs text-gray-400 underline hover:text-white">Alterar senha</button>
+                </div>
+            </div>
+        </div>
+      </div>
+
+      {/* --- SECTION 2: PREMIUM CUSTOMIZATION --- */}
+      <div className="p-6 space-y-6">
+         {profile.is_premium ? (
+             <div className="space-y-6 animate-slide-up">
+                 {/* SUBSCRIPTION INFO CARD */}
+                 <div className="bg-gradient-to-br from-slate-800 to-slate-900 rounded-xl border border-white/10 p-5 relative overflow-hidden shadow-lg">
+                     <div className="absolute top-0 right-0 p-3 opacity-5 text-white">
+                         <Crown size={80} />
+                     </div>
+                     
+                     <div className="flex items-start justify-between mb-4 relative z-10">
+                         <div>
+                            <h3 className="text-xs font-bold text-sacred-gold uppercase tracking-widest mb-1 flex items-center gap-2">
+                                <CreditCard size={12} /> Assinatura Ativa
+                            </h3>
+                            <p className="text-white font-serif text-xl">
+                                {profile.subscriptionType === 'yearly' ? 'Plano Anual' : 'Plano Mensal'}
+                            </p>
+                         </div>
+                         <div className="bg-green-500/20 text-green-400 px-2 py-1 rounded text-[10px] font-bold border border-green-500/30">
+                             ATIVO
+                         </div>
+                     </div>
+
+                     <div className="space-y-2 relative z-10">
+                         <div className="flex items-center gap-2 text-xs text-gray-400">
+                             <CalendarClock size={14} />
+                             <span>Renovação automática via {profile.subscriptionMethod === 'card' ? 'Cartão' : 'Pix'}</span>
+                         </div>
+                         {profile.subscriptionMethod === 'card' && (
+                            <div className="flex items-center gap-2 text-xs text-gray-400">
+                                <CreditCard size={14} />
+                                <span>Cartão final 4242 (Simulado)</span>
+                            </div>
+                         )}
+                         {profile.subscriptionId && (
+                             <p className="text-[10px] text-gray-500 font-mono">ID: {profile.subscriptionId.slice(0,12)}...</p>
+                         )}
+                     </div>
+
+                     <div className="mt-4 pt-4 border-t border-white/5 flex gap-3">
+                         <Button 
+                            size="sm" 
+                            variant="outline" 
+                            className="flex-1 text-xs h-8 border-white/10 text-gray-400 hover:text-white"
+                            onClick={() => window.open('https://www.mercadopago.com.br/subscriptions', '_blank')}
+                         >
+                             <ExternalLink size={12} className="mr-2"/> Gerenciar
+                         </Button>
+                         <Button 
+                            size="sm" 
+                            variant="ghost" 
+                            className="text-[10px] h-8 text-red-400 hover:bg-red-900/20" 
+                            onClick={() => setShowCancelModal(true)}
+                         >
+                             Cancelar
+                         </Button>
+                     </div>
+                 </div>
+
+                 <div className="flex items-center gap-2 mb-4 opacity-80 pt-2">
+                     <Crown size={16} className="text-sacred-gold" />
+                     <h3 className="text-xs font-bold text-sacred-gold uppercase tracking-widest">Área da Alma Premium</h3>
+                 </div>
+
+                 <Card className="bg-white/5 border-sacred-gold/20 group cursor-pointer hover:border-sacred-gold/50 transition-all">
+                     <div className="p-4 flex items-center justify-between" onClick={() => setShowSaintModal(true)}>
+                         <div className="flex items-center gap-4">
+                             <div className="w-10 h-10 rounded-full bg-sacred-gold/10 flex items-center justify-center text-sacred-gold border border-sacred-gold/20">
+                                 {devotionalSaint ? <SaintIcon id={devotionalSaint.id} className="w-6 h-6" /> : <Heart size={20} />}
+                             </div>
+                             <div>
+                                 <h4 className="text-white font-serif">Santo de Devoção</h4>
+                                 <p className="text-xs text-gray-400">{devotionalSaint ? devotionalSaint.name : 'Escolha seu intercessor'}</p>
+                             </div>
+                         </div>
+                         <div className="text-sacred-gold text-xs font-bold uppercase px-3 py-1 rounded border border-sacred-gold/30">Alterar</div>
+                     </div>
+                 </Card>
+
+                 <div className="bg-white/5 p-4 rounded-xl border border-white/10">
+                     <label className="text-xs text-gray-400 uppercase tracking-wider font-bold mb-2 block">Frase / Lema Espiritual</label>
+                     <div className="relative">
+                        <Input 
+                           value={profile.favoriteQuote || ''}
+                           onChange={e => updateProfile({...profile, favoriteQuote: e.target.value})}
+                           placeholder="Ex: Jesus, eu confio em Vós!"
+                           className="bg-black/20 border-none text-white font-serif italic text-center placeholder:text-gray-600 focus:ring-1 focus:ring-sacred-gold"
+                        />
+                        <span className="absolute right-3 top-3 text-gray-600"><PenLine size={14} /></span>
+                     </div>
+                 </div>
+
+                 <div className="bg-white/5 p-4 rounded-xl border border-white/10">
+                     <div className="flex items-center gap-2 mb-4">
+                         <Palette size={16} className="text-gray-400" />
+                         <span className="text-xs text-gray-400 uppercase tracking-wider font-bold">Cor Litúrgica Pessoal</span>
+                     </div>
+                     <div className="flex justify-between gap-2">
+                         <ThemeOption color="bg-purple-600" label="Roxo" active={profile.customTheme === 'purple'} onClick={() => setTheme('purple')} />
+                         <ThemeOption color="bg-green-600" label="Verde" active={profile.customTheme === 'green'} onClick={() => setTheme('green')} />
+                         <ThemeOption color="bg-slate-200" label="Branco" active={profile.customTheme === 'white'} onClick={() => setTheme('white')} light />
+                         <ThemeOption color="bg-pink-600" label="Rosa" active={profile.customTheme === 'rose'} onClick={() => setTheme('rose')} />
+                     </div>
+                 </div>
+
+                 <div className="flex items-center justify-between bg-white/5 p-4 rounded-xl border border-white/10">
+                     <div className="flex items-center gap-3">
+                         <div className="p-2 bg-indigo-900/30 rounded-lg text-indigo-300"><Moon size={18} /></div>
+                         <div>
+                             <h4 className="text-sm font-medium text-white">Modo Noturno Espiritual</h4>
+                             <p className="text-[10px] text-gray-500">Ambiente ultra-escuro para vigílias.</p>
+                         </div>
+                     </div>
+                     <button 
+                       onClick={() => updateProfile({...profile, nightModeSpiritual: !profile.nightModeSpiritual})}
+                       className={`w-12 h-6 rounded-full transition-colors relative ${profile.nightModeSpiritual ? 'bg-sacred-gold' : 'bg-gray-700'}`}
+                     >
+                         <div className={`absolute top-1 left-1 w-4 h-4 bg-white rounded-full transition-transform ${profile.nightModeSpiritual ? 'translate-x-6' : ''}`}></div>
+                     </button>
+                 </div>
+
+             </div>
+         ) : (
+             <div className="relative overflow-hidden rounded-xl bg-gradient-to-b from-gray-800 to-gray-900 border border-yellow-600/30 p-0 shadow-lg">
+                 <div className="bg-gradient-to-r from-yellow-700 via-yellow-600 to-yellow-500 p-4 flex items-center justify-between">
+                    <div className="flex items-center gap-2 text-white font-bold">
+                         <Crown size={20} fill="currentColor" />
+                         <span className="font-serif tracking-wide">Premium</span>
+                    </div>
+                    <Lock size={16} className="text-yellow-100 opacity-70" />
+                 </div>
+                 
+                 <div className="p-6 space-y-4">
+                     <p className="text-gray-300 text-sm font-serif italic leading-relaxed text-center">
+                         "Apoie o Fiat com apenas R$ 4,90 por mês (menos que um café — e ajuda a levar Jesus a milhares de lares ♡)"
+                     </p>
+                     
+                     <div className="space-y-3">
+                         <FeatureRow icon={<Heart size={14} />} text="Santo de Devoção no Perfil" />
+                         <FeatureRow icon={<PenLine size={14} />} text="Frase Espiritual Favorita" />
+                         <FeatureRow icon={<Palette size={14} />} text="Temas Litúrgicos Exclusivos" />
+                         <FeatureRow icon={<Moon size={14} />} text="Modo Noturno Espiritual" />
+                     </div>
+
+                     <Button onClick={() => setShowPremiumModal(true)} variant="sacred" className="w-full mt-4 shadow-[0_0_15px_rgba(212,175,55,0.2)]">
+                         Tornar-se Premium ♡
+                     </Button>
+                 </div>
+             </div>
+         )}
+
+         <div 
+           onClick={() => setShowAboutFiat(true)}
+           className="bg-white/5 border border-white/10 p-4 rounded-xl flex items-center gap-4 cursor-pointer hover:bg-white/10 hover:border-sacred-gold/30 transition-all group"
+         >
+             <div className="w-10 h-10 rounded-full bg-sacred-gold/10 flex items-center justify-center text-sacred-gold group-hover:scale-110 transition-transform shadow-[0_0_10px_rgba(212,175,55,0.1)]">
+                 <Heart size={20} fill="currentColor" className="text-sacred-gold" />
+             </div>
+             <div className="flex-1">
+                 <h3 className="text-white font-serif font-medium">Sobre o Fiat</h3>
+                 <p className="text-xs text-gray-400">O significado do seu Sim</p>
+             </div>
+             <div className="text-gray-500 group-hover:text-sacred-gold transition-colors">›</div>
+         </div>
+
+         <div className="space-y-3 pt-2">
+             <h3 className="text-xs font-bold text-gray-500 uppercase tracking-widest px-2">Configurações</h3>
+             <div className="bg-white/5 rounded-xl border border-white/5 overflow-hidden">
+                <MenuRow icon={<BarChart3 size={18} />} label="Estatísticas" onClick={() => {}} value={`${profile.rosaries_prayed} Terços`} />
+                <MenuRow icon={<Settings size={18} />} label="Preferências do App" onClick={() => {}} />
+                <MenuRow icon={<LogOut size={18} />} label="Sair do App" onClick={handleLogout} danger />
+             </div>
+         </div>
+      </div>
+
+      {/* --- MODALS --- */}
+      <PremiumModal isOpen={showPremiumModal} onClose={() => setShowPremiumModal(false)} />
+
+      {showCancelModal && (
+          <div className="fixed inset-0 z-50 flex items-center justify-center p-6 bg-black/90 backdrop-blur-sm animate-fade-in">
+              <div className="bg-stone-900 border border-red-900/50 p-6 rounded-xl w-full max-w-sm space-y-4 shadow-2xl text-center">
+                  <div className="mx-auto w-12 h-12 bg-red-900/20 rounded-full flex items-center justify-center text-red-500 mb-2">
+                      <AlertTriangle size={24} />
+                  </div>
+                  <h3 className="text-white font-serif text-lg">Cancelar Assinatura?</h3>
+                  <p className="text-sm text-gray-400">
+                      Você perderá o acesso à voz guiada, planner e catequese premium.
+                  </p>
+                  <div className="flex gap-2 pt-2">
+                      <Button variant="ghost" className="flex-1" onClick={() => setShowCancelModal(false)}>Voltar</Button>
+                      <Button variant="secondary" className="flex-1 bg-red-900/50 hover:bg-red-800 text-white" onClick={handleCancelSubscription}>Confirmar</Button>
+                  </div>
+              </div>
+          </div>
+      )}
+
+     {showAboutFiat && (
+  <div className="fixed inset-0 z-[60] flex items-center justify-center p-6 animate-fade-in" onClick={() => setShowAboutFiat(false)}>
+    <div className="absolute inset-0 bg-black/90 backdrop-blur-sm" />
+    <div className="relative bg-[#0f172a] w-full max-w-md rounded-2xl border border-sacred-gold/40 shadow-2xl overflow-hidden animate-scale-in" onClick={e => e.stopPropagation()}>
+      {/* Fundo suave da Anunciação */}
+      <div className="absolute inset-0 opacity-20">
+        <img src="https://i.ibb.co/5Yk5Z3Q/annunciation-fiat.jpg" alt="Anunciação" className="w-full h-full object-cover" />
+      </div>
+      <div className="absolute inset-0 bg-gradient-to-b from-[#0f172a]/90 via-[#0f172a]/70 to-[#0f172a]"></div>
+
+      {/* Partículas douradas */}
+      <div className="absolute inset-0 pointer-events-none">
+        {Array.from({length: 18}).map((_, i) => (
+          <div key={i} className="absolute w-1 h-1 bg-sacred-gold rounded-full animate-float"
+               style={{ left: `${Math.random()*100}%`, top: `${Math.random()*100}%`, animationDuration: `${4+Math.random()*8}s` }}
+          />
+        ))}
+      </div>
+
+      <div className="relative z-10 p-8 text-center space-y-7">
+        <div className="w-20 h-20 mx-auto bg-sacred-gold/10 rounded-full flex items-center justify-center border-2 border-sacred-gold/50 shadow-[0_0_30px_rgba(212,175,55,0.4)] animate-pulse-slow">
+          <Heart size={40} fill="#d4af37" className="text-sacred-gold" />
+        </div>
+
+        <div className="space-y-5">
+          <h2 className="text-3xl font-serif text-sacred-gold">FIAT</h2>
+          <p className="text-xl italic text-sacred-gold/90 font-serif">"Faça-se em mim segundo a tua palavra"</p>
+          <p className="text-lg text-sacred-gold/80 font-serif">(Lc 1,38)</p>
+        </div>
+
+        <div className="space-y-5 text-gray-200 text-sm leading-relaxed px-4">
+          <p>
+            Foi com esse <span className="text-sacred-gold font-bold">FIAT</span> que Maria disse <span className="font-bold text-sacred-gold">SIM total</span> a Deus — e o Verbo se fez carne.
+          </p>
+          <p>
+            Aqui no app você também diz o seu <span className="text-sacred-gold font-bold">fiat</span> todos os dias:
+          </p>
+          <ul className="space-y-3 text-left mx-auto max-w-xs">
+            <li className="flex items-start gap-2">
+              <span className="text-sacred-gold mt-1">•</span>
+              <span>quando reza o terço com voz guiada</span>
+            </li>
+            <li className="flex items-start gap-2">
+              <span className="text-sacred-gold mt-1">•</span>
+              <span>quando segue o planner espiritual</span>
+            </li>
+            <li className="flex items-start gap-2">
+              <span className="text-sacred-gold mt-1">•</span>
+              <span>quando mergulha na catequese e liturgia</span>
+            </li>
+          </ul>
+
+          <p className="italic text-sacred-gold pt-4">
+            “Minha alma glorifica ao Senhor,<br />
+            porque realizou em mim maravilhas” (Lc 1,48-49)
+          </p>
+
+          <p className="font-medium text-lg">
+            Fiat é o seu <span className="text-sacred-gold">SIM diário</span> a Jesus —<br />
+            com Maria e como Maria ♡
+          </p>
+        </div>
+
+        <Button variant="outline" className="w-full border-sacred-gold/50 text-sacred-gold hover:bg-sacred-gold/10" onClick={() => setShowAboutFiat(false)}>
+          Fechar ♡
+        </Button>
+      </div>
+    </div>
+  </div>
+)}
+      
+      {/* Saint Selection Modal */}
+      {showSaintModal && (
+          <div className="fixed inset-0 z-[70] flex items-center justify-center p-4">
+               <div className="absolute inset-0 bg-black/90 backdrop-blur-sm" onClick={() => setShowSaintModal(false)} />
+               <div className="bg-[#0f172a] w-full max-w-md h-[80vh] rounded-2xl border border-sacred-gold/20 relative z-10 flex flex-col overflow-hidden">
+                   <div className="p-4 border-b border-white/10 bg-black/40 flex items-center gap-2">
+                       <Search size={18} className="text-gray-400" />
+                       <input 
+                          className="bg-transparent border-none outline-none text-white flex-1 placeholder-gray-500"
+                          placeholder="Buscar santo..."
+                          value={saintSearch}
+                          onChange={e => setSaintSearch(e.target.value)}
+                          autoFocus
+                       />
+                       <button onClick={() => setShowSaintModal(false)}><X className="text-gray-400" /></button>
+                   </div>
+                   <div className="flex-1 overflow-y-auto p-2">
+                       {SAINTS.filter(s => s.name.toLowerCase().includes(saintSearch.toLowerCase())).map(s => (
+                           <div 
+                             key={s.id} 
+                             onClick={() => selectSaint(s.id)}
+                             className="flex items-center gap-4 p-3 hover:bg-white/5 rounded-xl cursor-pointer transition-colors border-b border-white/5 last:border-0"
+                           >
+                               <div className="w-12 h-12 rounded-full bg-sacred-gold/5 flex items-center justify-center border border-sacred-gold/10">
+                                   <SaintIcon id={s.id} className="w-6 h-6" />
+                               </div>
+                               <div>
+                                   <h4 className="text-white font-medium">{s.name}</h4>
+                                   <p className="text-[10px] text-gray-500">{s.title}</p>
+                               </div>
+                           </div>
+                       ))}
+                   </div>
+               </div>
+          </div>
+      )}
+
+    </div>
+  );
+};
+
+const FeatureRow: React.FC<{ icon: React.ReactNode, text: string }> = ({ icon, text }) => (
+    <div className="flex items-center gap-3 text-gray-300 text-sm">
+        <div className="text-sacred-gold">{icon}</div>
+        {text}
+    </div>
+);
+
+const MenuRow: React.FC<{ icon: React.ReactNode, label: string, onClick: () => void, value?: string, danger?: boolean }> = ({ icon, label, onClick, value, danger }) => (
+    <div 
+      onClick={onClick}
+      className={`flex items-center justify-between p-4 cursor-pointer hover:bg-white/5 transition-colors border-b border-white/5 last:border-0 ${danger ? 'text-red-400 hover:bg-red-900/10' : 'text-white'}`}
+    >
+        <div className="flex items-center gap-3">
+            <div className="opacity-70">{icon}</div>
+            <span className="font-medium text-sm">{label}</span>
+        </div>
+        {value ? <span className="text-xs text-gray-500">{value}</span> : !danger && <div className="text-gray-600">›</div>}
+    </div>
+);
+
+const ThemeOption: React.FC<{ color: string, label: string, active: boolean, onClick: () => void, light?: boolean }> = ({ color, label, active, onClick, light }) => (
+    <button 
+      onClick={onClick}
+      className={`flex-1 h-10 rounded-lg transition-all flex items-center justify-center relative ${color} ${active ? 'ring-2 ring-white scale-105' : 'opacity-60 hover:opacity-100'}`}
+    >
+        {active && <Check size={16} className={light ? 'text-black' : 'text-white'} />}
+        <span className="sr-only">{label}</span>
+    </button>
+);
+
+export default ProfilePage;
