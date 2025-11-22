@@ -1,0 +1,69 @@
+name: Fix importmap, ensure tsconfig.node.json and Deploy
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  fix-and-deploy:
+    if: ${{ github.actor != 'github-actions[bot]' }}
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          persist-credentials: true
+
+      - name: Remove importmap block from index.html (if exists)
+        run: |
+          if grep -q '<script type="importmap">' index.html; then
+            sed -i '/<script type="importmap">/,/<\/script>/d' index.html
+            echo "importmap removed"
+          else
+            echo "no importmap found"
+          fi
+
+      - name: Create tsconfig.node.json if missing
+        run: |
+          if [ -f tsconfig.node.json ]; then
+            echo "tsconfig.node.json already exists"
+          else
+            cat > tsconfig.node.json <<'JSON'
+{
+  "compilerOptions": {
+    "composite": true,
+    "module": "ESNext",
+    "moduleResolution": "Node",
+    "allowSyntheticDefaultImports": true,
+    "types": ["node"]
+  },
+  "include": ["vite.config.ts"]
+}
+JSON
+            echo "tsconfig.node.json created"
+          fi
+
+      - name: Commit changes (if any)
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add index.html tsconfig.node.json || true
+          git diff --quiet --staged || (git commit -m "ci: remove importmap and ensure tsconfig.node.json [skip ci]" && git push)
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      - name: Install & build
+        run: |
+          npm ci
+          npm run build
+
+      - name: Deploy to Vercel
+        env:
+          VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
+        run: |
+          npx vercel --prod --token $VERCEL_TOKEN
