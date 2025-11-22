@@ -12,10 +12,22 @@ export default defineConfig({
     chunkSizeWarningLimit: 1000, 
     rollupOptions: {
         output: {
-            manualChunks: {
-                vendor: ['react', 'react-dom', 'react-router-dom'],
-                ui: ['lucide-react', 'sonner'],
-                data: ['./src/constants.ts'] // Separa os dados pesados de texto
+            manualChunks(id) {
+                // Separate vendor libs
+                if (id.includes('node_modules')) {
+                    if (id.includes('react') || id.includes('react-dom') || id.includes('react-router-dom')) {
+                        return 'vendor';
+                    }
+                    if (id.includes('lucide-react') || id.includes('sonner') || id.includes('@supabase')) {
+                        return 'ui';
+                    }
+                    return 'deps'; // other dependencies
+                }
+                
+                // Separate heavy data file
+                if (id.includes('constants.ts')) {
+                    return 'data';
+                }
             }
         }
     }
