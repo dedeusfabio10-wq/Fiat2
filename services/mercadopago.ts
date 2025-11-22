@@ -8,19 +8,22 @@ const getEnvVar = (key: string): string => {
 };
 
 export const createSubscription = async (email: string, plan: 'monthly' | 'yearly') => {
-  // Mapeia o plano para a variável de ambiente correta
-  const linkMonthly = getEnvVar('VITE_MP_LINK_MONTHLY');
-  const linkYearly = getEnvVar('VITE_MP_LINK_YEARLY');
+  // Mapeia o plano para a variável de ambiente correta (suporta nomes em PT e EN)
+  // Tenta ler VITE_MP_LINK_MONTHLY ou VITE_MP_LINK_MENSAL
+  const linkMonthly = getEnvVar('VITE_MP_LINK_MONTHLY') || getEnvVar('VITE_MP_LINK_MENSAL');
+  // Tenta ler VITE_MP_LINK_YEARLY ou VITE_MP_LINK_ANUAL
+  const linkYearly = getEnvVar('VITE_MP_LINK_YEARLY') || getEnvVar('VITE_MP_LINK_ANUAL');
   
   const link = plan === 'monthly' ? linkMonthly : linkYearly;
 
   console.log(`[MercadoPago] Tentando abrir plano: ${plan}`);
+  console.log(`[MercadoPago] Link encontrado: ${link ? 'SIM' : 'NÃO'}`);
 
   // Validação para evitar erros silenciosos
   if (!link || link === '' || link.includes('placeholder')) {
       console.error("⚠️ LINKS DE PAGAMENTO NÃO CONFIGURADOS");
       console.warn("Vá no painel da Vercel > Settings > Environment Variables.");
-      console.warn("Adicione VITE_MP_LINK_MONTHLY e VITE_MP_LINK_YEARLY com os links do Mercado Pago.");
+      console.warn("Adicione VITE_MP_LINK_MENSAL e VITE_MP_LINK_ANUAL com os links do Mercado Pago.");
       
       return {
         id: 'error',
