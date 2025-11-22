@@ -109,6 +109,61 @@ export const playMysteryBell = () => {
   }
 };
 
+/**
+ * Toca um "Acorde Celestial" suave para introdução do app.
+ * Simula um coro/órgão usando múltiplos osciladores.
+ */
+export const playSacredIntro = () => {
+  try {
+    const ctx = getAudioContext();
+    if (ctx.state === 'suspended') {
+      ctx.resume();
+    }
+
+    const now = ctx.currentTime;
+    const duration = 4.0;
+    
+    // Acorde Dó Maior com 7ª Maior (C Major 7) para um som etéreo/celestial
+    // C4, E4, G4, B4, C5
+    const frequencies = [261.63, 329.63, 392.00, 493.88, 523.25];
+    
+    const masterGain = ctx.createGain();
+    masterGain.gain.setValueAtTime(0, now);
+    masterGain.gain.linearRampToValueAtTime(0.15, now + 1.0); // Fade in lento (1s)
+    masterGain.gain.exponentialRampToValueAtTime(0.001, now + duration); // Fade out longo
+    masterGain.connect(ctx.destination);
+
+    frequencies.forEach((freq, i) => {
+        const osc = ctx.createOscillator();
+        const oscGain = ctx.createGain();
+        
+        // Mistura ondas seno (suave) e triângulo (brilho)
+        osc.type = i % 2 === 0 ? 'sine' : 'triangle';
+        osc.frequency.setValueAtTime(freq, now);
+        
+        // Leve detune para efeito de "coro" (chorus effect)
+        osc.detune.setValueAtTime(Math.random() * 10 - 5, now);
+
+        // Pan estéreo sutil para abrir o som
+        const panner = ctx.createStereoPanner();
+        panner.pan.value = (i / (frequencies.length - 1)) * 0.5 - 0.25; // Espalha levemente da esq para dir
+
+        osc.connect(oscGain);
+        oscGain.connect(panner);
+        panner.connect(masterGain);
+        
+        // Ajusta volume individual para equilibrar o acorde
+        oscGain.gain.value = 1.0 / frequencies.length;
+
+        osc.start(now);
+        osc.stop(now + duration + 1);
+    });
+
+  } catch (e) {
+    console.error("Intro audio failed", e);
+  }
+};
+
 // Web Speech API for Premium Voice
 let synthesis: SpeechSynthesis | null = null;
 let utterance: SpeechSynthesisUtterance | null = null;

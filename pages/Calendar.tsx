@@ -1,20 +1,34 @@
-import React, { useContext, useState, useMemo } from 'react';
+
+import React, { useContext, useState, useMemo, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Card, Button, Input } from '../ui/UIComponents';
 import { AppContext } from '../App';
 import { NOVENAS, SAINTS } from '../constants';
-import { Search, Heart, Calendar as CalendarIcon, BookOpen, X, ChevronRight } from 'lucide-react';
+import { Search, Heart, Calendar as CalendarIcon, BookOpen, X, ChevronRight, Loader2, Sparkles } from 'lucide-react';
 import { toggleFavorite } from '../services/storage';
 import { SaintIcon } from '../ui/SaintIcons';
 import { getDailyLiturgy } from '../data/liturgy';
-import { LiturgyReading } from '../types';
+import { LiturgyReading, DailyLiturgy } from '../types';
 
 const CalendarPage: React.FC = () => {
   const [activeTab, setActiveTab] = useState<'liturgy' | 'saints'>('liturgy');
   const { profile, updateProfile } = useContext(AppContext);
   const navigate = useNavigate();
   const [selectedReading, setSelectedReading] = useState<LiturgyReading | null>(null);
-  const dailyLiturgy = getDailyLiturgy();
+  
+  // Liturgy State
+  const [dailyLiturgy, setDailyLiturgy] = useState<DailyLiturgy | null>(null);
+  const [isLoading, setIsLoading] = useState(true);
+
+  useEffect(() => {
+    const fetchLiturgy = async () => {
+      setIsLoading(true);
+      const data = await getDailyLiturgy();
+      setDailyLiturgy(data);
+      setIsLoading(false);
+    };
+    fetchLiturgy();
+  }, []);
 
   const currentDay = new Date().getDate();
   const currentMonth = new Date().getMonth();
@@ -47,7 +61,7 @@ const CalendarPage: React.FC = () => {
     }
   };
 
-  // Determine card background color based on theme
+  // Determine card background color based on theme (used for Saints tab)
   const themeCardColor = useMemo(() => {
     switch (profile.customTheme) {
       case 'purple': return 'bg-[#2e1065]';
@@ -56,6 +70,55 @@ const CalendarPage: React.FC = () => {
       case 'green': default: return 'bg-fiat-card-green';
     }
   }, [profile.customTheme]);
+
+  // Dynamic Styles based on Liturgical Color for the Liturgy Tab
+  const liturgyStyles = useMemo(() => {
+    if (!dailyLiturgy) return {
+        cardBg: themeCardColor,
+        accentText: 'text-fiat-gold',
+        border: 'border-white/5',
+        subtleBg: 'bg-fiat-gold/5',
+        iconColor: 'text-fiat-gold'
+    };
+    
+    switch (dailyLiturgy.color) {
+      case 'green': return { 
+        cardBg: 'bg-gradient-to-br from-[#0c2b1e] to-[#05140e]', 
+        accentText: 'text-green-400', 
+        border: 'border-green-500/30',
+        subtleBg: 'bg-green-500/10',
+        iconColor: 'text-green-400'
+      };
+      case 'purple': return { 
+        cardBg: 'bg-gradient-to-br from-[#2e1065] to-[#170636]', 
+        accentText: 'text-purple-400', 
+        border: 'border-purple-500/30',
+        subtleBg: 'bg-purple-500/10',
+        iconColor: 'text-purple-400'
+      };
+      case 'red': return { 
+        cardBg: 'bg-gradient-to-br from-[#450a0a] to-[#210303]', 
+        accentText: 'text-red-500', 
+        border: 'border-red-500/30',
+        subtleBg: 'bg-red-500/10',
+        iconColor: 'text-red-500'
+      };
+      case 'rose': return { 
+        cardBg: 'bg-gradient-to-br from-[#831843] to-[#450a22]', 
+        accentText: 'text-pink-400', 
+        border: 'border-pink-500/30',
+        subtleBg: 'bg-pink-500/10',
+        iconColor: 'text-pink-400'
+      };
+      default: return { // White/Gold
+        cardBg: 'bg-gradient-to-br from-[#27272a] to-[#18181b]', 
+        accentText: 'text-yellow-400', 
+        border: 'border-yellow-500/30',
+        subtleBg: 'bg-yellow-500/10',
+        iconColor: 'text-yellow-400'
+      };
+    }
+  }, [dailyLiturgy, themeCardColor]);
 
   return (
     <div className="p-6 pb-24 min-h-full">
@@ -69,64 +132,78 @@ const CalendarPage: React.FC = () => {
 
       {activeTab === 'liturgy' ? (
         <div className="animate-fade-in space-y-6">
-          {/* Santo do Dia Card */}
-          <div className={`${themeCardColor} rounded-2xl p-6 border border-white/5 shadow-xl relative overflow-hidden`}>
-             <div className="absolute top-0 right-0 w-32 h-32 bg-white/5 rounded-full blur-3xl -mr-10 -mt-10"></div>
-             <div className="relative z-10 flex gap-5 items-center">
-                <div className="w-20 h-24 bg-black/20 rounded-lg overflow-hidden shrink-0 flex items-center justify-center border border-white/10 shadow-inner">
-                   <SaintIcon id="generic" className="w-10 h-10 text-fiat-gold opacity-80" />
-                </div>
-                <div>
-                   <span className="text-fiat-gold text-[10px] font-bold uppercase tracking-widest block mb-1">Santo do Dia</span>
-                   <h2 className="text-xl font-serif text-white leading-tight uppercase tracking-wide">{dailyLiturgy.saint || 'Memória Facultativa'}</h2>
-                   <p className="text-xs text-gray-300 mt-2 line-clamp-2 font-serif italic opacity-80">
-                      {dailyLiturgy.saint ? 'Memória da Apresentação da Bem-Aventurada Virgem Maria no Templo.' : 'Dia sem memória obrigatória.'}
-                   </p>
-                </div>
+          {isLoading ? (
+             <div className="flex flex-col items-center justify-center py-20 space-y-4">
+                 <Loader2 size={32} className="text-fiat-gold animate-spin" />
+                 <p className="text-xs text-gray-500 uppercase tracking-widest">Carregando Liturgia...</p>
              </div>
-          </div>
+          ) : dailyLiturgy && (
+            <>
+              {/* Santo do Dia Card (Dynamic Color) */}
+              <div className={`${liturgyStyles.cardBg} rounded-2xl p-6 border ${liturgyStyles.border} shadow-xl relative overflow-hidden transition-all duration-700`}>
+                 {/* Glow Effect specific to color */}
+                 <div className={`absolute top-0 right-0 w-32 h-32 rounded-full blur-3xl -mr-10 -mt-10 opacity-20 ${liturgyStyles.subtleBg.replace('/10','/50')}`}></div>
+                 
+                 <div className="relative z-10 flex gap-5 items-center">
+                    <div className={`w-20 h-24 bg-black/20 rounded-lg overflow-hidden shrink-0 flex items-center justify-center border border-white/10 shadow-inner`}>
+                       <SaintIcon id="generic" className={`w-10 h-10 opacity-90 ${liturgyStyles.iconColor}`} />
+                    </div>
+                    <div>
+                       <div className="flex items-center gap-2 mb-1">
+                          <Sparkles size={12} className={liturgyStyles.accentText} />
+                          <span className={`${liturgyStyles.accentText} text-[10px] font-bold uppercase tracking-widest`}>Santo do Dia</span>
+                       </div>
+                       <h2 className="text-xl font-serif text-white leading-tight uppercase tracking-wide">{dailyLiturgy.saint || 'Dia Ferial'}</h2>
+                       <p className="text-xs text-gray-300 mt-2 line-clamp-2 font-serif italic opacity-80">
+                          {dailyLiturgy.saint ? `Memória de ${dailyLiturgy.saint}.` : 'Tempo Comum.'}
+                       </p>
+                    </div>
+                 </div>
+              </div>
 
-          <div>
-            <div className="flex items-center gap-2 mb-3">
-                <BookOpen size={16} className="text-fiat-gold" />
-                <h3 className="text-fiat-gold font-serif text-sm tracking-[0.2em] uppercase font-bold">Missal do Dia</h3>
-            </div>
-            
-            {/* Missal Card - Blue */}
-            <div className="bg-fiat-card-blue rounded-2xl border border-white/5 overflow-hidden shadow-lg">
-              <div className="p-5 border-b border-white/5 bg-black/20">
-                  <h4 className="text-white font-serif text-sm mb-3 leading-relaxed uppercase">{dailyLiturgy.title}</h4>
-                  <span className={`text-[9px] font-bold uppercase tracking-widest px-2 py-1 rounded border ${getColorClass(dailyLiturgy.color)}`}>
-                      Cor Litúrgica: {dailyLiturgy.color === 'green' ? 'Verde' : dailyLiturgy.color === 'purple' ? 'Roxo' : dailyLiturgy.color === 'rose' ? 'Rosa' : 'Branco'}
-                  </span>
+              <div>
+                <div className="flex items-center gap-2 mb-3">
+                    <BookOpen size={16} className={liturgyStyles.accentText} />
+                    <h3 className={`${liturgyStyles.accentText} font-serif text-sm tracking-[0.2em] uppercase font-bold`}>Missal do Dia</h3>
+                </div>
+                
+                {/* Missal Card - Dynamic Color */}
+                <div className={`${liturgyStyles.cardBg} rounded-2xl border ${liturgyStyles.border} overflow-hidden shadow-lg transition-all duration-700`}>
+                  <div className="p-5 border-b border-white/5 bg-black/20">
+                      <h4 className="text-white font-serif text-sm mb-3 leading-relaxed uppercase">{dailyLiturgy.title}</h4>
+                      <span className={`text-[9px] font-bold uppercase tracking-widest px-2 py-1 rounded border ${getColorClass(dailyLiturgy.color)}`}>
+                          Cor Litúrgica: {dailyLiturgy.color === 'green' ? 'Verde' : dailyLiturgy.color === 'purple' ? 'Roxo' : dailyLiturgy.color === 'rose' ? 'Rosa' : dailyLiturgy.color === 'red' ? 'Vermelho' : 'Branco'}
+                      </span>
+                  </div>
+                  <div className="divide-y divide-white/5">
+                    <div className="p-4 hover:bg-white/5 transition-colors cursor-pointer flex items-center justify-between group" onClick={() => setSelectedReading(dailyLiturgy.readings.firstReading)}>
+                        <div>
+                            <p className={`text-[10px] font-bold uppercase tracking-widest mb-1 ${liturgyStyles.accentText}`}>1ª Leitura</p>
+                            <p className="text-sm text-gray-300 font-serif">{dailyLiturgy.readings.firstReading.reference}</p>
+                        </div>
+                        <ChevronRight size={16} className="text-gray-600 group-hover:text-white" />
+                    </div>
+                    <div className="p-4 hover:bg-white/5 transition-colors cursor-pointer flex items-center justify-between group" onClick={() => setSelectedReading(dailyLiturgy.readings.psalm)}>
+                        <div>
+                            <p className={`text-[10px] font-bold uppercase tracking-widest mb-1 ${liturgyStyles.accentText}`}>Salmo Responsorial</p>
+                            <p className="text-sm text-gray-300 font-serif">{dailyLiturgy.readings.psalm.reference}</p>
+                        </div>
+                        <ChevronRight size={16} className="text-gray-600 group-hover:text-white" />
+                    </div>
+                    <div className={`p-4 hover:bg-white/5 transition-colors cursor-pointer flex items-center justify-between group ${liturgyStyles.subtleBg}`} onClick={() => setSelectedReading(dailyLiturgy.readings.gospel)}>
+                        <div>
+                            <p className={`text-[10px] font-bold uppercase tracking-widest mb-1 ${liturgyStyles.accentText}`}>Evangelho</p>
+                            <p className="text-sm text-white font-serif font-medium">{dailyLiturgy.readings.gospel.reference}</p>
+                        </div>
+                        <div className={`w-8 h-8 rounded-full bg-black/20 flex items-center justify-center group-hover:bg-white/10`}>
+                            <BookOpen size={14} className={liturgyStyles.accentText} />
+                        </div>
+                    </div>
+                  </div>
+                </div>
               </div>
-              <div className="divide-y divide-white/5">
-                <div className="p-4 hover:bg-white/5 transition-colors cursor-pointer flex items-center justify-between group" onClick={() => setSelectedReading(dailyLiturgy.readings.firstReading)}>
-                    <div>
-                        <p className="text-[10px] text-fiat-gold font-bold uppercase tracking-widest mb-1">1ª Leitura</p>
-                        <p className="text-sm text-gray-300 font-serif">{dailyLiturgy.readings.firstReading.reference}</p>
-                    </div>
-                    <ChevronRight size={16} className="text-gray-600 group-hover:text-fiat-gold" />
-                </div>
-                <div className="p-4 hover:bg-white/5 transition-colors cursor-pointer flex items-center justify-between group" onClick={() => setSelectedReading(dailyLiturgy.readings.psalm)}>
-                    <div>
-                        <p className="text-[10px] text-fiat-gold font-bold uppercase tracking-widest mb-1">Salmo Responsorial</p>
-                        <p className="text-sm text-gray-300 font-serif">{dailyLiturgy.readings.psalm.reference}</p>
-                    </div>
-                    <ChevronRight size={16} className="text-gray-600 group-hover:text-fiat-gold" />
-                </div>
-                <div className="p-4 hover:bg-white/5 transition-colors cursor-pointer flex items-center justify-between group bg-fiat-gold/5" onClick={() => setSelectedReading(dailyLiturgy.readings.gospel)}>
-                    <div>
-                        <p className="text-[10px] text-fiat-gold font-bold uppercase tracking-widest mb-1">Evangelho</p>
-                        <p className="text-sm text-white font-serif font-medium">{dailyLiturgy.readings.gospel.reference}</p>
-                    </div>
-                    <div className="w-8 h-8 rounded-full bg-fiat-gold/10 flex items-center justify-center group-hover:bg-fiat-gold/20">
-                        <BookOpen size={14} className="text-fiat-gold" />
-                    </div>
-                </div>
-              </div>
-            </div>
-          </div>
+            </>
+          )}
 
           <div className="pt-6 border-t border-white/5 mt-4">
             <div className="flex flex-col items-center justify-center mb-6">

@@ -1,8 +1,10 @@
+
 import React, { useState, useEffect, createContext } from 'react';
 import { HashRouter, Routes, Route, Navigate } from 'react-router-dom';
 import { Toaster } from 'sonner';
 import Layout from './ui/Layout';
 import { UserProfile } from './types';
+import { initAudio, playSacredIntro } from './services/audio';
 
 // Pages
 import LandingPage from './pages/Landing';
@@ -49,6 +51,29 @@ const App: React.FC = () => {
   useEffect(() => {
     localStorage.setItem('fiat-profile', JSON.stringify(profile));
   }, [profile]);
+
+  // Global Intro Sound Logic
+  useEffect(() => {
+    const handleFirstInteraction = () => {
+      // Verifica se já tocou nesta sessão do navegador
+      if (!sessionStorage.getItem('fiat_intro_played')) {
+        initAudio(); // Destrava o AudioContext
+        playSacredIntro(); // Toca o acorde celestial
+        sessionStorage.setItem('fiat_intro_played', 'true');
+      }
+    };
+
+    // Adiciona ouvintes para o primeiro toque/clique
+    window.addEventListener('click', handleFirstInteraction, { once: true });
+    window.addEventListener('touchstart', handleFirstInteraction, { once: true });
+    window.addEventListener('keydown', handleFirstInteraction, { once: true });
+
+    return () => {
+      window.removeEventListener('click', handleFirstInteraction);
+      window.removeEventListener('touchstart', handleFirstInteraction);
+      window.removeEventListener('keydown', handleFirstInteraction);
+    };
+  }, []);
 
   const updateProfile = (p: UserProfile) => setProfile(p);
 

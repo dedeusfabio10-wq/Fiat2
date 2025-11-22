@@ -1,8 +1,10 @@
+
 import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Button } from '../ui/UIComponents';
 import { IconRosary, IconMonstrance, IconBible, IconSacredHeart, IconBookCross } from '../ui/Icons';
 import { Star, ArrowRight, Sparkles, Check, Crown, ShieldCheck, Smartphone, ChevronRight, HelpCircle, Quote } from 'lucide-react';
+import { initAudio, playSacredIntro } from '../services/audio';
 
 const LandingPage: React.FC = () => {
   const navigate = useNavigate();
@@ -14,7 +16,17 @@ const LandingPage: React.FC = () => {
     return () => window.removeEventListener('scroll', handleScroll);
   }, []);
 
-  const handleEnter = () => { navigate('/auth'); };
+  const handleEnter = () => { 
+      // Toca o som celestial ao entrar
+      initAudio();
+      playSacredIntro();
+      sessionStorage.setItem('fiat_intro_played', 'true');
+      
+      // Pequeno delay para sentir o som antes de navegar
+      setTimeout(() => {
+          navigate('/auth'); 
+      }, 500);
+  };
 
   return (
     <div className="min-h-screen bg-[#050a14] text-slate-200 overflow-x-hidden font-sans relative selection:bg-sacred-gold selection:text-sacred-sapphire">
