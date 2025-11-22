@@ -17,15 +17,16 @@ const LandingPage: React.FC = () => {
   }, []);
 
   const handleEnter = () => { 
-      // Toca o som celestial ao entrar
+      // 1. Inicializa o contexto de áudio (essencial para celulares)
       initAudio();
-      playSacredIntro();
-      sessionStorage.setItem('fiat_intro_played', 'true');
       
-      // Pequeno delay para sentir o som antes de navegar
+      // 2. Toca o som
+      playSacredIntro();
+      
+      // 3. Navega após pequeno delay
       setTimeout(() => {
           navigate('/auth'); 
-      }, 500);
+      }, 800);
   };
 
   return (

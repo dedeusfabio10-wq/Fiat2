@@ -4,7 +4,8 @@ import { HashRouter, Routes, Route, Navigate } from 'react-router-dom';
 import { Toaster } from 'sonner';
 import Layout from './ui/Layout';
 import { UserProfile } from './types';
-import { initAudio, playSacredIntro } from './services/audio';
+import { initAudio } from './services/audio';
+import { supabase, getCurrentUser } from './services/supabase';
 
 // Pages
 import LandingPage from './pages/Landing';
@@ -24,12 +25,14 @@ import AdminPage from './pages/Admin';
 interface AppContextType {
   profile: UserProfile;
   updateProfile: (p: UserProfile) => void;
+  refreshProfile: () => Promise<void>;
   themeColors: { primary: string };
 }
 
 export const AppContext = createContext<AppContextType>({
   profile: {} as UserProfile,
   updateProfile: () => {},
+  refreshProfile: async () => {},
   themeColors: { primary: '#d4af37' }
 });
 
@@ -48,37 +51,72 @@ const App: React.FC = () => {
     };
   });
 
+  // Tenta sincronizar com o Supabase na inicialização e quando solicitada
+  const fetchUserProfile = async () => {
+      try {
+          const user = await getCurrentUser();
+          if (user) {
+            // Se tivermos tabela de perfis, buscaríamos aqui:
+            const { data } = await supabase
+               .from('profiles')
+               .select('*')
+               .eq('id', user.id)
+               .single();
+            
+            if (data) {
+                // Mescla dados locais com remotos, priorizando remoto para status premium
+                setProfile(prev => ({ 
+                    ...prev, 
+                    ...data,
+                    email: user.email || prev.email 
+                }));
+                console.log('Perfil sincronizado com sucesso');
+            } else if (!profile.email) {
+                setProfile(prev => ({ ...prev, email: user.email }));
+            }
+          }
+      } catch (error) {
+          console.error('Erro ao sincronizar perfil:', error);
+      }
+  };
+
+  useEffect(() => {
+    fetchUserProfile();
+  }, []);
+
   useEffect(() => {
     localStorage.setItem('fiat-profile', JSON.stringify(profile));
   }, [profile]);
 
-  // Global Intro Sound Logic
+  // Desbloqueio Global de Áudio
   useEffect(() => {
-    const handleFirstInteraction = () => {
-      // Verifica se já tocou nesta sessão do navegador
-      if (!sessionStorage.getItem('fiat_intro_played')) {
-        initAudio(); // Destrava o AudioContext
-        playSacredIntro(); // Toca o acorde celestial
-        sessionStorage.setItem('fiat_intro_played', 'true');
-      }
+    const unlockAudio = () => {
+        initAudio();
+        window.removeEventListener('click', unlockAudio);
+        window.removeEventListener('touchstart', unlockAudio);
+        window.removeEventListener('keydown', unlockAudio);
     };
 
-    // Adiciona ouvintes para o primeiro toque/clique
-    window.addEventListener('click', handleFirstInteraction, { once: true });
-    window.addEventListener('touchstart', handleFirstInteraction, { once: true });
-    window.addEventListener('keydown', handleFirstInteraction, { once: true });
+    window.addEventListener('click', unlockAudio);
+    window.addEventListener('touchstart', unlockAudio);
+    window.addEventListener('keydown', unlockAudio);
 
     return () => {
-      window.removeEventListener('click', handleFirstInteraction);
-      window.removeEventListener('touchstart', handleFirstInteraction);
-      window.removeEventListener('keydown', handleFirstInteraction);
+      window.removeEventListener('click', unlockAudio);
+      window.removeEventListener('touchstart', unlockAudio);
+      window.removeEventListener('keydown', unlockAudio);
     };
   }, []);
 
   const updateProfile = (p: UserProfile) => setProfile(p);
 
+  // Função exposta para forçar recarregamento (ex: após pagamento)
+  const refreshProfile = async () => {
+      await fetchUserProfile();
+  };
+
   return (
-    <AppContext.Provider value={{ profile, updateProfile, themeColors: { primary: '#d4af37' } }}>
+    <AppContext.Provider value={{ profile, updateProfile, refreshProfile, themeColors: { primary: '#d4af37' } }}>
       <HashRouter>
         <Layout>
           <Routes>
