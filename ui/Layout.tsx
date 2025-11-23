@@ -13,22 +13,25 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
   const isRosary = location.pathname === '/rosary';
   const isViaSacra = location.pathname === '/viasacra';
   
-  // LÓGICA SAZONAL
-  // Inicializamos como 'christmas' para você ver o efeito IMEDIATAMENTE.
-  const [season, setSeason] = useState<'christmas' | 'newyear' | 'ordinary'>('christmas');
+  // LÓGICA SAZONAL AUTOMÁTICA
+  const [season, setSeason] = useState<'christmas' | 'newyear' | 'ordinary'>('ordinary');
   
   useEffect(() => {
     const now = new Date();
-    const m = now.getMonth(); // 0-11 (11 é Dezembro, 0 é Janeiro)
+    const m = now.getMonth(); // 0 = Janeiro, 10 = Novembro, 11 = Dezembro
     const d = now.getDate();
     
-    // Lógica Automática:
-    // Se passar do dia 25 de Dezembro até 6 de Janeiro, muda automaticamente para Ano Novo.
-    if ((m === 11 && d > 25) || (m === 0 && d <= 6)) {
-      setSeason('newyear');
+    // Natal: De 20 de Novembro (10) até 25 de Dezembro (11)
+    if ((m === 10 && d >= 20) || (m === 11 && d <= 25)) {
+      setSeason('christmas');
     } 
-    // Mantemos 'christmas' como padrão agora para testes/novembro/dezembro
-    // Para voltar ao normal, basta mudar o useState acima para 'ordinary' no futuro.
+    // Ano Novo: De 26 de Dezembro (11) até 06 de Janeiro (0)
+    else if ((m === 11 && d > 25) || (m === 0 && d <= 6)) {
+      setSeason('newyear');
+    }
+    else {
+      setSeason('ordinary');
+    }
   }, []);
 
   // Redirect to Landing (Welcome) if not onboarded
@@ -47,7 +50,7 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
         }
     }
 
-    // Priority 2: Seasonal Defaults
+    // Priority 2: Seasonal Defaults (Automatic)
     if (season === 'christmas') {
         // Gradiente Natalino Elegante (Vermelho Vinho escuro -> Verde Profundo)
         return 'bg-gradient-to-b from-[#2a0a0a] via-[#0f172a] to-[#0a2e1f]'; 

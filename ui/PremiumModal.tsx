@@ -2,7 +2,7 @@ import React, { useState, useEffect, useContext } from 'react';
 import { AppContext } from '../App';
 import { Button } from './UIComponents';
 import { createSubscription } from '../services/mercadopago';
-import { X, Check, Crown, Loader2, CreditCard, Shield, Sparkles, RefreshCw, ExternalLink, QrCode } from 'lucide-react';
+import { X, Check, Crown, Loader2, CreditCard, Shield, Sparkles, RefreshCw, ExternalLink, QrCode, AlertTriangle } from 'lucide-react';
 import { toast } from 'sonner';
 
 interface PremiumModalProps {
@@ -103,6 +103,13 @@ const PremiumModal: React.FC<PremiumModalProps> = ({ isOpen, onClose }) => {
                     <h3 className="text-white font-bold text-lg">Aguardando Pagamento</h3>
                     <p className="text-sm text-gray-400 mt-2 leading-relaxed">
                         Conclua o pagamento na aba do Mercado Pago (Pix ou Cartão).
+                    </p>
+                </div>
+
+                <div className="bg-blue-500/10 border border-blue-500/20 p-3 rounded-lg flex items-start gap-2 text-left">
+                    <AlertTriangle size={16} className="text-blue-400 shrink-0 mt-0.5" />
+                    <p className="text-[11px] text-gray-300">
+                        <strong>Dica:</strong> Use o mesmo e-mail do seu cadastro no Fiat ({profile.email}) para liberação automática imediata.
                     </p>
                 </div>
 

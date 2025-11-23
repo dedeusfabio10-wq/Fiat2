@@ -1,10 +1,11 @@
 import { MercadoPagoConfig, Payment } from 'mercadopago';
 import { createClient } from '@supabase/supabase-js';
 
-// ==== CONFIGURAÇÃO ====
-const MP_ACCESS_TOKEN = process.env.MP_ACCESS_TOKEN!;
-const SUPABASE_URL = process.env.VITE_SUPABASE_URL!;
-const SUPABASE_SERVICE_KEY = process.env.SUPABASE_SERVICE_ROLE_KEY!;
+// ==== CONFIGURAÇÃO ROBUSTA ====
+// Tenta pegar a variável padrão do Vercel, se falhar, tenta a versão VITE_
+const MP_ACCESS_TOKEN = process.env.MP_ACCESS_TOKEN || process.env.VITE_MP_ACCESS_TOKEN;
+const SUPABASE_URL = process.env.SUPABASE_URL || process.env.VITE_SUPABASE_URL;
+const SUPABASE_SERVICE_KEY = process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.VITE_SUPABASE_SERVICE_ROLE_KEY;
 
 export default async function handler(req: any, res: any) {
   res.setHeader('Access-Control-Allow-Origin', '*');
@@ -51,10 +52,11 @@ export default async function handler(req: any, res: any) {
         expiresAt.setDate(now.getDate() + 30); // +30 dias (padrão mensal)
       }
 
+      // IMPORTANTE: Busca usuário ignorando Maiúsculas/Minúsculas (.ilike)
       const { data: user } = await supabase
         .from('profiles')
         .select('id')
-        .eq('email', email)
+        .ilike('email', email) 
         .single();
 
       if (user) {
@@ -70,6 +72,8 @@ export default async function handler(req: any, res: any) {
           .eq('id', user.id);
         
         console.log(`✅ Usuário ${email} ativado até ${expiresAt.toISOString()}`);
+      } else {
+        console.warn(`⚠️ Usuário não encontrado para o email: ${email}`);
       }
     }
 
