@@ -116,36 +116,17 @@ const App: React.FC = () => {
                 setProfile(updatedProfile);
                 localStorage.setItem('fiat-profile', JSON.stringify(updatedProfile));
             } else {
-                // Perfil NÃO encontrado. Tenta criar manualmente se o trigger falhou.
-                console.log("Perfil não encontrado no DB, tentando criar...");
+                // Perfil NÃO encontrado. O Trigger do SQL deve cuidar disso, mas se falhar:
+                console.log("Perfil não encontrado no DB (Trigger pending or failed).");
                 
-                const newProfileData = {
-                    id: user.id,
+                // Não tentamos insert manual imediatamente para evitar conflito com trigger
+                // Apenas definimos o estado local para o usuário não ficar bloqueado
+                setProfile(prev => ({ 
+                    ...prev, 
+                    name: user.user_metadata?.name || user.email?.split('@')[0],
                     email: user.email,
-                    name: user.user_metadata?.name || user.email?.split('@')[0] || 'Alma Devota',
-                    created_at: new Date().toISOString(),
-                    is_premium: false,
-                    active_novenas: [],
-                    favorites: []
-                };
-                
-                const { error: insertError } = await supabase
-                    .from('profiles')
-                    .insert([newProfileData]); // Usar insert ao invés de upsert para garantir criação
-                
-                if (!insertError) {
-                    console.log("Perfil criado manualmente com sucesso.");
-                    setProfile(prev => ({ 
-                        ...prev, 
-                        name: newProfileData.name, 
-                        email: newProfileData.email,
-                        onboarding_completed: true 
-                    }));
-                } else {
-                    // Se falhar, provavelmente é RLS bloqueando INSERT se não for o próprio usuário (mas aqui é o próprio)
-                    // ou o trigger correu e criou no meio tempo.
-                    console.warn("Falha na criação manual (pode já existir):", insertError);
-                }
+                    onboarding_completed: true 
+                }));
             }
           }
       } catch (error) {

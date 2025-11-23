@@ -100,10 +100,10 @@ const PremiumModal: React.FC<PremiumModalProps> = ({ isOpen, onClose }) => {
               console.error('❌ Erro detalhado Supabase:', error);
               
               if (error.code === '42501' || error.message?.includes('row-level security')) {
-                  throw new Error("Erro de Permissão: As tabelas do banco não permitem edição. Rode o SQL no Supabase.");
+                  throw new Error("Erro de Permissão: A política de segurança do banco bloqueou a atualização. Execute o script SQL fornecido.");
               }
-              if (error.code === 'PGRST204' || error.code === '404') {
-                   throw new Error("Tabela 'profiles' não encontrada. Rode o SQL no Supabase.");
+              if (error.code === 'PGRST204' || error.code === '404' || error.message?.includes('relation "public.profiles" does not exist')) {
+                   throw new Error("Tabela 'profiles' não encontrada. Rode o script SQL no Supabase.");
               }
               throw new Error(`Erro ao salvar: ${error.message}`);
           }
