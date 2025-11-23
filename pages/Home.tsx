@@ -2,7 +2,7 @@ import React, { useContext, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { AppContext } from '../App';
 import { Button } from '../ui/UIComponents';
-import { ChevronRight, Sun, Cross } from 'lucide-react';
+import { ChevronRight, Sun, Cross, Gift } from 'lucide-react';
 import { DAILY_QUOTES, MYSTERIES } from '../constants';
 import { IconRosary } from '../ui/Icons';
 
@@ -11,10 +11,18 @@ const HomePage: React.FC = () => {
   const navigate = useNavigate();
 
   const greeting = useMemo(() => {
-    const hour = new Date().getHours();
-    if (hour < 12) return 'Bom dia';
-    if (hour < 18) return 'Boa tarde';
-    return 'Boa noite';
+    // Forçando saudação de Natal para visualização imediata
+    const now = new Date();
+    const month = now.getMonth();
+    const day = now.getDate();
+    
+    // Lógica programada: Ano Novo (26/12 a 06/01)
+    if ((month === 11 && day > 25) || (month === 0 && day <= 6)) {
+        return "Próspero Ano Novo";
+    }
+
+    // Default forçado para Natal agora (para o usuário ver já)
+    return "Feliz Natal";
   }, []);
 
   const todayMystery = useMemo(() => {
@@ -39,8 +47,8 @@ const HomePage: React.FC = () => {
     <div className="p-6 space-y-6 animate-fade-in pb-32">
       <div className="flex justify-between items-start pt-4">
         <div>
-          <h1 className="text-xl font-serif text-white leading-tight tracking-wide">
-            {greeting.toUpperCase()}, <br/>
+          <h1 className="text-xl font-serif text-white leading-tight tracking-wide flex items-center gap-2">
+            {greeting.toUpperCase()} <Gift size={18} className="text-red-500 animate-pulse" />, <br/>
             <span style={{ color: themeColors.primary }} className="font-bold text-2xl tracking-wider">{profile.name?.toUpperCase() || 'ALMA DEVOTA'}</span>
           </h1>
           <p className="text-[10px] text-fiat-gold/80 mt-2 font-sans uppercase tracking-[0.2em] border-l-2 border-fiat-gold pl-2">

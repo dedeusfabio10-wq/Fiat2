@@ -3,25 +3,31 @@ import { useNavigate } from 'react-router-dom';
 import { AppContext } from '../App';
 import { Button } from '../ui/UIComponents';
 import PremiumModal from '../ui/PremiumModal';
-import { Crown, Plus, Calendar, Lock, Trash2, User, Play, Pause, Volume2, Music } from 'lucide-react';
+import { Crown, Plus, Calendar, Lock, Trash2, User, Play, Pause, Volume2, Music, Sparkles } from 'lucide-react';
 import { getPlans, deletePlan } from '../services/storage';
 import { SpiritualPlan } from '../types';
 import { toast } from 'sonner';
 
 const SACRED_MUSIC = [
   {
+    name: "Noite Feliz (Instrumental)",
+    url: "https://cdn.pixabay.com/download/audio/2021/11/25/audio_9467727198.mp3?filename=silent-night-piano-version-11532.mp3", // Demo URL
+    desc: "Especial de Natal 🎄",
+    special: true
+  },
+  {
     name: "Ave Maria de Gounod",
-    url: "https://cdn.fiat.app/musica/ave-maria-gounod-piano.mp3",
+    url: "https://cdn.pixabay.com/download/audio/2022/10/14/audio_985871b65e.mp3?filename=ave-maria-121347.mp3", // Demo URL
     desc: "Piano sereno e celestial"
   },
   {
     name: "Adoro Te Devote",
-    url: "https://cdn.fiat.app/musica/adoro-te-devote-orgao.mp3",
+    url: "https://cdn.pixabay.com/download/audio/2022/11/02/audio_c352932906.mp3?filename=gregorian-chant-124097.mp3", // Demo URL
     desc: "Órgão gregoriano profundo"
   },
   {
     name: "Pange Lingua",
-    url: "https://cdn.fiat.app/musica/pange-lingua-harpa.mp3",
+    url: "https://cdn.pixabay.com/download/audio/2022/11/22/audio_febc508520.mp3?filename=angelic-pad-126435.mp3", // Demo URL
     desc: "Harpa contemplativa"
   }
 ];
@@ -46,8 +52,9 @@ const PlannerPage: React.FC = () => {
       audioRef.current.volume = 0.25; // Volume suave para meditação
       if (selectedMusic !== null && isPlaying) {
         audioRef.current.src = SACRED_MUSIC[selectedMusic].url;
-        audioRef.current.play().catch(() => {
-             setIsPlaying(false);
+        audioRef.current.play().catch((e) => {
+            console.error(e);
+            setIsPlaying(false);
         });
       } else {
         audioRef.current.pause();
@@ -136,7 +143,11 @@ const PlannerPage: React.FC = () => {
                   : 'bg-white/5 border-white/10 hover:border-sacred-gold/40 text-gray-300'}`}
             >
               <div className="text-left">
-                <div className="font-medium font-serif">{track.name}</div>
+                <div className="font-medium font-serif flex items-center gap-2">
+                    {track.name}
+                    {/* @ts-ignore */}
+                    {track.special && <Sparkles size={12} className="text-red-500 animate-pulse" />}
+                </div>
                 <div className="text-xs opacity-70">{track.desc}</div>
               </div>
               {selectedMusic === i && isPlaying ? <Pause size={22} /> : <Play size={22} />}

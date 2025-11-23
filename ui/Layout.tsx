@@ -1,4 +1,4 @@
-import React, { useContext } from 'react';
+import React, { useContext, useEffect, useState } from 'react';
 import { NavLink, useLocation, Navigate } from 'react-router-dom';
 import { AppContext } from '../App';
 import { IconMonstrance, IconBible, IconRosary, IconCross, IconPlanner, IconBookCross, IconSacredHeart } from './Icons';
@@ -13,24 +13,96 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
   const isRosary = location.pathname === '/rosary';
   const isViaSacra = location.pathname === '/viasacra';
   
+  // LÓGICA SAZONAL
+  // Inicializamos como 'christmas' para você ver o efeito IMEDIATAMENTE.
+  const [season, setSeason] = useState<'christmas' | 'newyear' | 'ordinary'>('christmas');
+  
+  useEffect(() => {
+    const now = new Date();
+    const m = now.getMonth(); // 0-11 (11 é Dezembro, 0 é Janeiro)
+    const d = now.getDate();
+    
+    // Lógica Automática:
+    // Se passar do dia 25 de Dezembro até 6 de Janeiro, muda automaticamente para Ano Novo.
+    if ((m === 11 && d > 25) || (m === 0 && d <= 6)) {
+      setSeason('newyear');
+    } 
+    // Mantemos 'christmas' como padrão agora para testes/novembro/dezembro
+    // Para voltar ao normal, basta mudar o useState acima para 'ordinary' no futuro.
+  }, []);
+
   // Redirect to Landing (Welcome) if not onboarded
   if (!profile?.onboarding_completed && location.pathname !== '/' && location.pathname !== '/auth' && location.pathname !== '/welcome') {
     return <Navigate to="/" replace />;
   }
 
-  // Define background based on customTheme
+  // Define background based on customTheme AND Season
   const getThemeBackground = () => {
-    switch (profile.customTheme) {
-      case 'purple': return 'bg-gradient-to-b from-[#0f172a] to-[#3b0764]'; // Deep Purple
-      case 'rose': return 'bg-gradient-to-b from-[#0f172a] to-[#881337]'; // Rose
-      case 'white': return 'bg-gradient-to-b from-[#0f172a] to-[#475569]'; // Slate/Silver (White Theme in Dark Mode)
-      case 'green': default: return 'bg-gradient-to-b from-[#0f172a] to-[#0a2e1f]'; // Original Green
+    // Priority 1: User Explicit Selection (if not default green)
+    if (profile.customTheme && profile.customTheme !== 'green') {
+        switch (profile.customTheme) {
+          case 'purple': return 'bg-gradient-to-b from-[#0f172a] to-[#3b0764]'; 
+          case 'rose': return 'bg-gradient-to-b from-[#0f172a] to-[#881337]';
+          case 'white': return 'bg-gradient-to-b from-[#0f172a] to-[#475569]'; 
+        }
     }
+
+    // Priority 2: Seasonal Defaults
+    if (season === 'christmas') {
+        // Gradiente Natalino Elegante (Vermelho Vinho escuro -> Verde Profundo)
+        return 'bg-gradient-to-b from-[#2a0a0a] via-[#0f172a] to-[#0a2e1f]'; 
+    }
+    if (season === 'newyear') {
+        // Gradiente Ano Novo (Azul Meia-Noite -> Dourado sutil)
+        return 'bg-gradient-to-b from-[#020617] via-[#1e1b4b] to-[#172554]'; 
+    }
+
+    // Priority 3: Default Green
+    return 'bg-gradient-to-b from-[#0f172a] to-[#0a2e1f]';
   };
 
   return (
     <div className={`min-h-screen flex flex-col ${getThemeBackground()} text-gray-200 relative overflow-hidden transition-colors duration-1000`}>
       
+      {/* Seasonal Effects */}
+      {season === 'christmas' && (
+        <div className="absolute inset-0 pointer-events-none overflow-hidden z-0">
+           {/* Snowflakes - Neve Caindo */}
+           {Array.from({length: 30}).map((_, i) => (
+             <div 
+                key={`snow-${i}`}
+                className={`absolute bg-white rounded-full opacity-0 ${i % 3 === 0 ? 'animate-snow-slow' : i % 2 === 0 ? 'animate-snow-medium' : 'animate-snow-fast'}`}
+                style={{
+                    width: Math.random() * 3 + 1 + 'px',
+                    height: Math.random() * 3 + 1 + 'px',
+                    left: Math.random() * 100 + '%',
+                    animationDelay: Math.random() * 5 + 's',
+                    opacity: 0.6
+                }}
+             />
+           ))}
+        </div>
+      )}
+
+      {season === 'newyear' && (
+        <div className="absolute inset-0 pointer-events-none overflow-hidden z-0">
+           {/* Rising Sparkles - Fogos/Brilhos Subindo */}
+           {Array.from({length: 20}).map((_, i) => (
+             <div 
+                key={`sparkle-${i}`}
+                className="absolute bg-fiat-gold rounded-full opacity-0 animate-rise-slow"
+                style={{
+                    width: Math.random() * 2 + 1 + 'px',
+                    height: Math.random() * 2 + 1 + 'px',
+                    left: Math.random() * 100 + '%',
+                    animationDelay: Math.random() * 8 + 's',
+                    boxShadow: '0 0 10px #d4af37'
+                }}
+             />
+           ))}
+        </div>
+      )}
+
       {/* Premium Glow Effect */}
       {profile?.is_premium && (
         <div className="absolute inset-0 pointer-events-none z-0">
@@ -39,18 +111,10 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
         </div>
       )}
 
-      {/* Ambient Particles */}
+      {/* Ambient Particles (Standard) */}
       <div className="absolute inset-0 pointer-events-none overflow-hidden">
         <div className="absolute top-10 left-10 w-2 h-2 bg-white/20 rounded-full animate-float" style={{ animationDuration: '8s' }}></div>
         <div className="absolute top-1/3 right-10 w-3 h-3 bg-white/10 rounded-full animate-float" style={{ animationDuration: '12s' }}></div>
-        
-        {/* Extra Gold Particles for Premium */}
-        {profile?.is_premium && (
-           <>
-             <div className="absolute top-20 left-1/2 w-1.5 h-1.5 bg-sacred-gold/60 rounded-full animate-float" style={{ animationDuration: '10s' }}></div>
-             <div className="absolute bottom-40 right-10 w-1 h-1 bg-sacred-gold/40 rounded-full animate-float" style={{ animationDuration: '18s' }}></div>
-           </>
-        )}
       </div>
 
       {/* Content */}
@@ -60,7 +124,7 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
 
       {/* Bottom Navigation */}
       {!isRosary && !isViaSacra && location.pathname !== '/' && location.pathname !== '/auth' && location.pathname !== '/admin' && (
-        <nav className="fixed bottom-0 left-0 right-0 z-50 bg-black/40 backdrop-blur-xl border-t border-white/5 h-20 pb-safe">
+        <nav className="fixed bottom-0 left-0 right-0 z-50 bg-black/60 backdrop-blur-xl border-t border-white/5 h-20 pb-safe">
           {/* Premium Gold Border on Nav */}
           {profile?.is_premium && <div className="absolute top-0 left-0 w-full h-px bg-gradient-to-r from-transparent via-sacred-gold/40 to-transparent"></div>}
           

@@ -3,12 +3,11 @@ import { AppContext } from '../App';
 import { Button, Card, Input } from '../ui/UIComponents';
 import PremiumModal from '../ui/PremiumModal';
 import { useNavigate } from 'react-router-dom';
-import { Crown, Settings, LogOut, BarChart3, Heart, Camera, Lock, Palette, Moon, PenLine, X, Search, Check, CreditCard, CalendarClock, AlertTriangle, ExternalLink } from 'lucide-react';
+import { Crown, Settings, LogOut, BarChart3, Heart, Camera, Lock, Palette, Moon, PenLine, Check, CalendarClock, ExternalLink, Search, X } from 'lucide-react';
 import { toast } from 'sonner';
 import { SAINTS } from '../constants';
 import { SaintIcon } from '../ui/SaintIcons';
 import { playSoftBell } from '../services/audio';
-import { cancelSubscription } from '../services/mercadopago';
 import { supabase } from '../services/supabase';
 
 const ProfilePage: React.FC = () => {
@@ -21,7 +20,6 @@ const ProfilePage: React.FC = () => {
   const [showSaintModal, setShowSaintModal] = useState(false);
   const [showAboutFiat, setShowAboutFiat] = useState(false);
   const [showPremiumModal, setShowPremiumModal] = useState(false);
-  const [showCancelModal, setShowCancelModal] = useState(false);
   
   const [saintSearch, setSaintSearch] = useState('');
   const [editName, setEditName] = useState(false);
@@ -87,13 +85,6 @@ const ProfilePage: React.FC = () => {
   const setTheme = (theme: 'purple' | 'green' | 'white' | 'rose') => {
       updateProfile({ ...profile, customTheme: theme });
       toast.success(`Tema ${theme} aplicado.`);
-  };
-
-  const handleCancelSubscription = async () => {
-      const updated = await cancelSubscription();
-      updateProfile({ ...profile, ...updated });
-      setShowCancelModal(false);
-      toast.success("Assinatura cancelada.", { description: "Você não será mais cobrado." });
   };
 
   return (
@@ -165,9 +156,6 @@ const ProfilePage: React.FC = () => {
                 
                 {!profile.is_premium && <p className="text-xs text-gray-500">Peregrino</p>}
                 
-                <div className="pt-2">
-                    <button onClick={() => setShowPasswordModal(true)} className="text-xs text-gray-400 underline hover:text-white">Alterar senha</button>
-                </div>
             </div>
         </div>
       </div>
@@ -185,10 +173,10 @@ const ProfilePage: React.FC = () => {
                      <div className="flex items-start justify-between mb-4 relative z-10">
                          <div>
                             <h3 className="text-xs font-bold text-sacred-gold uppercase tracking-widest mb-1 flex items-center gap-2">
-                                <CreditCard size={12} /> Assinatura Ativa
+                                <Crown size={12} fill="currentColor"/> Premium Ativo
                             </h3>
                             <p className="text-white font-serif text-xl">
-                                {profile.subscriptionType === 'yearly' ? 'Plano Anual' : 'Plano Mensal'}
+                                {profile.subscriptionType === 'yearly' ? 'Passe Anual' : 'Passe de 30 Dias'}
                             </p>
                          </div>
                          <div className="bg-green-500/20 text-green-400 px-2 py-1 rounded text-[10px] font-bold border border-green-500/30">
@@ -199,35 +187,22 @@ const ProfilePage: React.FC = () => {
                      <div className="space-y-2 relative z-10">
                          <div className="flex items-center gap-2 text-xs text-gray-400">
                              <CalendarClock size={14} />
-                             <span>Renovação automática via {profile.subscriptionMethod === 'card' ? 'Cartão' : 'Pix'}</span>
+                             {profile.premium_expires_at ? (
+                                <span>Válido até {new Date(profile.premium_expires_at).toLocaleDateString('pt-BR')}</span>
+                             ) : (
+                                <span>Acesso liberado</span>
+                             )}
                          </div>
-                         {profile.subscriptionMethod === 'card' && (
-                            <div className="flex items-center gap-2 text-xs text-gray-400">
-                                <CreditCard size={14} />
-                                <span>Cartão final 4242 (Simulado)</span>
-                            </div>
-                         )}
-                         {profile.subscriptionId && (
-                             <p className="text-[10px] text-gray-500 font-mono">ID: {profile.subscriptionId.slice(0,12)}...</p>
-                         )}
                      </div>
 
                      <div className="mt-4 pt-4 border-t border-white/5 flex gap-3">
                          <Button 
                             size="sm" 
                             variant="outline" 
-                            className="flex-1 text-xs h-8 border-white/10 text-gray-400 hover:text-white"
-                            onClick={() => window.open('https://www.mercadopago.com.br/subscriptions', '_blank')}
+                            className="w-full text-xs h-8 border-white/10 text-gray-400 hover:text-white"
+                            onClick={() => setShowPremiumModal(true)}
                          >
-                             <ExternalLink size={12} className="mr-2"/> Gerenciar
-                         </Button>
-                         <Button 
-                            size="sm" 
-                            variant="ghost" 
-                            className="text-[10px] h-8 text-red-400 hover:bg-red-900/20" 
-                            onClick={() => setShowCancelModal(true)}
-                         >
-                             Cancelar
+                             <ExternalLink size={12} className="mr-2"/> Renovar ou Estender
                          </Button>
                      </div>
                  </div>
@@ -351,35 +326,15 @@ const ProfilePage: React.FC = () => {
       {/* --- MODALS --- */}
       <PremiumModal isOpen={showPremiumModal} onClose={() => setShowPremiumModal(false)} />
 
-      {showCancelModal && (
-          <div className="fixed inset-0 z-50 flex items-center justify-center p-6 bg-black/90 backdrop-blur-sm animate-fade-in">
-              <div className="bg-stone-900 border border-red-900/50 p-6 rounded-xl w-full max-w-sm space-y-4 shadow-2xl text-center">
-                  <div className="mx-auto w-12 h-12 bg-red-900/20 rounded-full flex items-center justify-center text-red-500 mb-2">
-                      <AlertTriangle size={24} />
-                  </div>
-                  <h3 className="text-white font-serif text-lg">Cancelar Assinatura?</h3>
-                  <p className="text-sm text-gray-400">
-                      Você perderá o acesso à voz guiada, planner e catequese premium.
-                  </p>
-                  <div className="flex gap-2 pt-2">
-                      <Button variant="ghost" className="flex-1" onClick={() => setShowCancelModal(false)}>Voltar</Button>
-                      <Button variant="secondary" className="flex-1 bg-red-900/50 hover:bg-red-800 text-white" onClick={handleCancelSubscription}>Confirmar</Button>
-                  </div>
-              </div>
-          </div>
-      )}
-
      {showAboutFiat && (
   <div className="fixed inset-0 z-[60] flex items-center justify-center p-6 animate-fade-in" onClick={() => setShowAboutFiat(false)}>
     <div className="absolute inset-0 bg-black/90 backdrop-blur-sm" />
     <div className="relative bg-[#0f172a] w-full max-w-md rounded-2xl border border-sacred-gold/40 shadow-2xl overflow-hidden animate-scale-in" onClick={e => e.stopPropagation()}>
-      {/* Fundo suave da Anunciação */}
       <div className="absolute inset-0 opacity-20">
         <img src="https://i.ibb.co/5Yk5Z3Q/annunciation-fiat.jpg" alt="Anunciação" className="w-full h-full object-cover" />
       </div>
       <div className="absolute inset-0 bg-gradient-to-b from-[#0f172a]/90 via-[#0f172a]/70 to-[#0f172a]"></div>
 
-      {/* Partículas douradas */}
       <div className="absolute inset-0 pointer-events-none">
         {Array.from({length: 18}).map((_, i) => (
           <div key={i} className="absolute w-1 h-1 bg-sacred-gold rounded-full animate-float"
@@ -396,39 +351,11 @@ const ProfilePage: React.FC = () => {
         <div className="space-y-5">
           <h2 className="text-3xl font-serif text-sacred-gold">FIAT</h2>
           <p className="text-xl italic text-sacred-gold/90 font-serif">"Faça-se em mim segundo a tua palavra"</p>
-          <p className="text-lg text-sacred-gold/80 font-serif">(Lc 1,38)</p>
         </div>
 
         <div className="space-y-5 text-gray-200 text-sm leading-relaxed px-4">
           <p>
-            Foi com esse <span className="text-sacred-gold font-bold">FIAT</span> que Maria disse <span className="font-bold text-sacred-gold">SIM total</span> a Deus — e o Verbo se fez carne.
-          </p>
-          <p>
-            Aqui no app você também diz o seu <span className="text-sacred-gold font-bold">fiat</span> todos os dias:
-          </p>
-          <ul className="space-y-3 text-left mx-auto max-w-xs">
-            <li className="flex items-start gap-2">
-              <span className="text-sacred-gold mt-1">•</span>
-              <span>quando reza o terço com voz guiada</span>
-            </li>
-            <li className="flex items-start gap-2">
-              <span className="text-sacred-gold mt-1">•</span>
-              <span>quando segue o planner espiritual</span>
-            </li>
-            <li className="flex items-start gap-2">
-              <span className="text-sacred-gold mt-1">•</span>
-              <span>quando mergulha na catequese e liturgia</span>
-            </li>
-          </ul>
-
-          <p className="italic text-sacred-gold pt-4">
-            “Minha alma glorifica ao Senhor,<br />
-            porque realizou em mim maravilhas” (Lc 1,48-49)
-          </p>
-
-          <p className="font-medium text-lg">
-            Fiat é o seu <span className="text-sacred-gold">SIM diário</span> a Jesus —<br />
-            com Maria e como Maria ♡
+            Fiat é o seu <span className="text-sacred-gold">SIM diário</span> a Jesus.
           </p>
         </div>
 
@@ -440,7 +367,6 @@ const ProfilePage: React.FC = () => {
   </div>
 )}
       
-      {/* Saint Selection Modal */}
       {showSaintModal && (
           <div className="fixed inset-0 z-[70] flex items-center justify-center p-4">
                <div className="absolute inset-0 bg-black/90 backdrop-blur-sm" onClick={() => setShowSaintModal(false)} />

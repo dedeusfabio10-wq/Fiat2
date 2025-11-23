@@ -2,7 +2,7 @@ import React, { useState, useEffect, useContext } from 'react';
 import { AppContext } from '../App';
 import { Button } from './UIComponents';
 import { createSubscription } from '../services/mercadopago';
-import { X, Check, Crown, Loader2, CreditCard, Shield, Sparkles, RefreshCw, ExternalLink, AlertTriangle } from 'lucide-react';
+import { X, Check, Crown, Loader2, CreditCard, Shield, Sparkles, RefreshCw, ExternalLink, QrCode } from 'lucide-react';
 import { toast } from 'sonner';
 
 interface PremiumModalProps {
@@ -31,23 +31,20 @@ const PremiumModal: React.FC<PremiumModalProps> = ({ isOpen, onClose }) => {
       
       if (subData.error || !subData.init_point) {
           toast.error("Erro na Configuração", { 
-              description: "Links de pagamento não configurados na Vercel.",
-              duration: 6000,
-              icon: <AlertTriangle className="text-yellow-500"/>
+              description: "O sistema de pagamento está indisponível no momento.",
           });
           setLoading(false);
           return;
       }
 
-      // Abre o link em nova aba
       const opened = window.open(subData.init_point, '_blank');
       
       if (!opened) {
-          toast.error("Pop-up bloqueado", { description: "Por favor, permita pop-ups para abrir o pagamento." });
+          toast.error("Pop-up bloqueado", { description: "Permita pop-ups para realizar o pagamento." });
       } else {
           setStep('checkout');
-          toast.success('Aba de pagamento aberta!', { 
-              description: 'Conclua no Mercado Pago e volte aqui.',
+          toast.success('Abriu!', { 
+              description: 'Pague com Pix ou Cartão e confirme aqui.',
               duration: 5000 
           });
       }
@@ -57,15 +54,12 @@ const PremiumModal: React.FC<PremiumModalProps> = ({ isOpen, onClose }) => {
   const handleCheckStatus = async () => {
       setCheckingStatus(true);
       
-      // Simula um delay de verificação de rede
       setTimeout(async () => {
           try {
-              // Chama a função global de refresh que consulta o Supabase
               await refreshProfile();
-              
               setCheckingStatus(false);
-              toast.info('Sincronizando...', {
-                 description: 'Se o pagamento foi confirmado, seu acesso será liberado em breve.',
+              toast.info('Verificando...', {
+                 description: 'Se o pagamento foi confirmado, seu acesso será liberado.',
                  icon: <RefreshCw className="animate-spin text-blue-400"/>
               });
               onClose();
@@ -96,7 +90,7 @@ const PremiumModal: React.FC<PremiumModalProps> = ({ isOpen, onClose }) => {
             
             <h2 className="text-2xl font-serif text-sacred-gold mb-2">Fiat Premium</h2>
             <p className="text-sm text-gray-300 font-serif italic leading-relaxed px-4">
-                "Sua contribuição mantém este santuário digital vivo."
+                "Pague uma única vez e tenha acesso liberado."
             </p>
         </div>
 
@@ -106,9 +100,9 @@ const PremiumModal: React.FC<PremiumModalProps> = ({ isOpen, onClose }) => {
             <div className="space-y-6 text-center animate-slide-up py-4">
                 <div className="bg-sacred-gold/10 p-6 rounded-xl border border-sacred-gold/20">
                     <ExternalLink size={40} className="text-sacred-gold mx-auto mb-4 opacity-80" />
-                    <h3 className="text-white font-bold text-lg">Pagamento em Andamento</h3>
+                    <h3 className="text-white font-bold text-lg">Aguardando Pagamento</h3>
                     <p className="text-sm text-gray-400 mt-2 leading-relaxed">
-                        Uma aba do Mercado Pago foi aberta. Conclua o pagamento lá e clique abaixo para confirmar.
+                        Conclua o pagamento na aba do Mercado Pago (Pix ou Cartão).
                     </p>
                 </div>
 
@@ -124,7 +118,7 @@ const PremiumModal: React.FC<PremiumModalProps> = ({ isOpen, onClose }) => {
                     </Button>
                     
                     <p className="text-[10px] text-gray-500 px-4">
-                        A liberação depende da confirmação bancária (Pix é instantâneo, Cartão pode levar alguns minutos).
+                        A liberação é automática assim que o banco confirmar.
                     </p>
 
                     <Button 
@@ -132,7 +126,7 @@ const PremiumModal: React.FC<PremiumModalProps> = ({ isOpen, onClose }) => {
                         className="w-full text-xs text-gray-500 mt-2 underline"
                         onClick={() => handleSubscribe()} 
                     >
-                        O link não abriu? Tentar novamente
+                        Reabrir link de pagamento
                     </Button>
                 </div>
             </div>
@@ -143,21 +137,29 @@ const PremiumModal: React.FC<PremiumModalProps> = ({ isOpen, onClose }) => {
                         onClick={() => setPlan('monthly')}
                         className={`p-4 rounded-xl border-2 cursor-pointer transition-all text-center relative flex flex-col justify-center ${plan === 'monthly' ? 'bg-sacred-gold/10 border-sacred-gold shadow-[0_0_15px_rgba(212,175,55,0.1)]' : 'bg-white/5 border-transparent hover:bg-white/10'}`}
                     >
-                        <p className="text-xs text-gray-400 uppercase font-bold mb-1">Mensal</p>
+                        <p className="text-xs text-gray-400 uppercase font-bold mb-1">30 Dias</p>
                         <p className="text-2xl text-white font-serif font-bold">R$ 4,90</p>
-                        <p className="text-[10px] text-gray-500">Cobrança recorrente</p>
+                        <p className="text-[10px] text-gray-500">Acesso por 1 mês</p>
                     </div>
                     <div 
                         onClick={() => setPlan('yearly')}
                         className={`p-4 rounded-xl border-2 cursor-pointer transition-all text-center relative flex flex-col justify-center ${plan === 'yearly' ? 'bg-sacred-gold/10 border-sacred-gold shadow-[0_0_15px_rgba(212,175,55,0.1)]' : 'bg-white/5 border-transparent hover:bg-white/10'}`}
                     >
                         <div className="absolute -top-3 left-1/2 -translate-x-1/2 bg-green-600 text-white text-[10px] font-bold px-3 py-1 rounded-full shadow-sm whitespace-nowrap border border-green-400">
-                            Economize 30%
+                            Melhor Oferta
                         </div>
-                        <p className="text-xs text-gray-400 uppercase font-bold mb-1">Anual</p>
+                        <p className="text-xs text-gray-400 uppercase font-bold mb-1">1 Ano</p>
                         <p className="text-2xl text-white font-serif font-bold">R$ 39,90</p>
-                        <p className="text-[10px] text-gray-500">Cobrança recorrente</p>
+                        <p className="text-[10px] text-gray-500">Acesso por 12 meses</p>
                     </div>
+                </div>
+
+                <div className="bg-green-900/20 border border-green-500/20 p-3 rounded-lg flex gap-3 items-center justify-center">
+                    <QrCode className="text-green-400 shrink-0" size={16} />
+                    <p className="text-[11px] text-gray-300 leading-tight">
+                        <strong>Pagamento Único:</strong> Aceitamos Pix e Cartão. <br/>
+                        Não precisa ter conta no Mercado Pago.
+                    </p>
                 </div>
 
                 <div className="space-y-3 pt-2">
@@ -167,11 +169,11 @@ const PremiumModal: React.FC<PremiumModalProps> = ({ isOpen, onClose }) => {
                         onClick={handleSubscribe}
                         disabled={loading}
                     >
-                        {loading ? <Loader2 className="animate-spin" /> : <><CreditCard size={20} /> Assinar Agora</>}
+                        {loading ? <Loader2 className="animate-spin" /> : <><CreditCard size={20} /> Pagar e Liberar</>}
                     </Button>
                     
                     <p className="text-center text-[10px] text-gray-500 flex items-center justify-center gap-1">
-                        <Shield size={10} /> Ambiente seguro Mercado Pago • Cancele quando quiser
+                        <Shield size={10} /> Ambiente seguro • Sem renovação automática
                     </p>
                 </div>
                 

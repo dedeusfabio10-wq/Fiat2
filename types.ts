@@ -88,6 +88,7 @@ export interface UserProfile {
   email?: string;
   photo?: string;
   is_premium: boolean;
+  premium_expires_at?: string; // Novo campo para controle de vencimento
   streak: number;
   rosaries_prayed: number;
   favorites: string[];

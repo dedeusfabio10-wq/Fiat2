@@ -18,8 +18,8 @@ export default {
         fiat: {
           dark: '#05080f',
           navy: '#0d1424',
-          'card-blue': '#131c2e', // Azul Marinho Profundo (Orações/Planner)
-          'card-green': '#0c2b1e', // Verde Profundo (Home/Catequese/Santos)
+          'card-blue': '#131c2e', 
+          'card-green': '#0c2b1e', 
           gold: '#d4af37',
           text: '#e2e8f0',
           muted: '#64748b'
@@ -32,6 +32,10 @@ export default {
         'spin-slow': 'spin 12s linear infinite',
         'float': 'float 6s ease-in-out infinite',
         'scale-in': 'scaleIn 0.3s ease-out forwards',
+        'snow-slow': 'fall 10s linear infinite',
+        'snow-medium': 'fall 7s linear infinite',
+        'snow-fast': 'fall 5s linear infinite',
+        'rise-slow': 'rise 8s ease-in infinite',
       },
       keyframes: {
         fadeIn: {
@@ -49,6 +53,16 @@ export default {
         float: {
           '0%, 100%': { transform: 'translateY(0)' },
           '50%': { transform: 'translateY(-20px)' },
+        },
+        fall: {
+          '0%': { transform: 'translateY(-20px) translateX(-10px) rotate(0deg)', opacity: '0' },
+          '10%': { opacity: '0.8' },
+          '100%': { transform: 'translateY(100vh) translateX(10px) rotate(360deg)', opacity: '0' },
+        },
+        rise: {
+          '0%': { transform: 'translateY(110vh) scale(0)', opacity: '0' },
+          '50%': { opacity: '1' },
+          '100%': { transform: 'translateY(-10vh) scale(1)', opacity: '0' },
         }
       }
     },

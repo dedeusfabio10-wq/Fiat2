@@ -1,7 +1,7 @@
 
 import React, { useState, useEffect, createContext } from 'react';
 import { HashRouter, Routes, Route, Navigate } from 'react-router-dom';
-import { Toaster } from 'sonner';
+import { Toaster, toast } from 'sonner';
 import Layout from './ui/Layout';
 import { UserProfile } from './types';
 import { initAudio } from './services/audio';
@@ -51,12 +51,27 @@ const App: React.FC = () => {
     };
   });
 
-  // Tenta sincronizar com o Supabase na inicialização e quando solicitada
+  const checkExpiration = (userProfile: UserProfile): UserProfile => {
+    if (userProfile.is_premium && userProfile.premium_expires_at) {
+        const expirationDate = new Date(userProfile.premium_expires_at);
+        const now = new Date();
+        const daysLeft = Math.ceil((expirationDate.getTime() - now.getTime()) / (1000 * 60 * 60 * 24));
+
+        if (now > expirationDate) {
+            console.log('Plano Premium Expirado');
+            toast.error("Seu tempo Premium acabou.", { description: "Renove para continuar usando os recursos." });
+            return { ...userProfile, is_premium: false };
+        } else if (daysLeft <= 3 && daysLeft > 0) {
+             toast("Seu Premium vence em breve", { description: `Restam apenas ${daysLeft} dias.` });
+        }
+    }
+    return userProfile;
+  };
+
   const fetchUserProfile = async () => {
       try {
           const user = await getCurrentUser();
           if (user) {
-            // Se tivermos tabela de perfis, buscaríamos aqui:
             const { data } = await supabase
                .from('profiles')
                .select('*')
@@ -64,13 +79,15 @@ const App: React.FC = () => {
                .single();
             
             if (data) {
-                // Mescla dados locais com remotos, priorizando remoto para status premium
-                setProfile(prev => ({ 
-                    ...prev, 
+                // Mescla e verifica expiração
+                let updatedProfile = { 
+                    ...profile, 
                     ...data,
-                    email: user.email || prev.email 
-                }));
-                console.log('Perfil sincronizado com sucesso');
+                    email: user.email || profile.email 
+                };
+                
+                updatedProfile = checkExpiration(updatedProfile);
+                setProfile(updatedProfile);
             } else if (!profile.email) {
                 setProfile(prev => ({ ...prev, email: user.email }));
             }
@@ -88,7 +105,6 @@ const App: React.FC = () => {
     localStorage.setItem('fiat-profile', JSON.stringify(profile));
   }, [profile]);
 
-  // Desbloqueio Global de Áudio
   useEffect(() => {
     const unlockAudio = () => {
         initAudio();
@@ -110,7 +126,6 @@ const App: React.FC = () => {
 
   const updateProfile = (p: UserProfile) => setProfile(p);
 
-  // Função exposta para forçar recarregamento (ex: após pagamento)
   const refreshProfile = async () => {
       await fetchUserProfile();
   };

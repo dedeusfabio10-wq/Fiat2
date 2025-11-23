@@ -1,6 +1,5 @@
 import { UserProfile } from '../types';
 
-// Função segura para ler variáveis de ambiente no Vite
 const getEnvVar = (key: string): string => {
   // @ts-ignore
   const env = import.meta.env || (window as any).__env || {};
@@ -8,23 +7,17 @@ const getEnvVar = (key: string): string => {
 };
 
 export const createSubscription = async (email: string, plan: 'monthly' | 'yearly') => {
-  // Mapeia o plano para a variável de ambiente correta (suporta nomes em PT e EN)
-  // Tenta ler VITE_MP_LINK_MONTHLY ou VITE_MP_LINK_MENSAL
+  // IMPORTANTE: Use links de "Check-out Pro" (Pagamento Único) no Mercado Pago.
+  // Não use links de assinatura recorrente se quiser permitir PIX sem login.
   const linkMonthly = getEnvVar('VITE_MP_LINK_MONTHLY') || getEnvVar('VITE_MP_LINK_MENSAL');
-  // Tenta ler VITE_MP_LINK_YEARLY ou VITE_MP_LINK_ANUAL
   const linkYearly = getEnvVar('VITE_MP_LINK_YEARLY') || getEnvVar('VITE_MP_LINK_ANUAL');
   
   const link = plan === 'monthly' ? linkMonthly : linkYearly;
 
-  console.log(`[MercadoPago] Tentando abrir plano: ${plan}`);
-  console.log(`[MercadoPago] Link encontrado: ${link ? 'SIM' : 'NÃO'}`);
-
-  // Validação para evitar erros silenciosos
+  console.log(`[MercadoPago] Produto selecionado: ${plan}`);
+  
   if (!link || link === '' || link.includes('placeholder')) {
       console.error("⚠️ LINKS DE PAGAMENTO NÃO CONFIGURADOS");
-      console.warn("Vá no painel da Vercel > Settings > Environment Variables.");
-      console.warn("Adicione VITE_MP_LINK_MENSAL e VITE_MP_LINK_ANUAL com os links do Mercado Pago.");
-      
       return {
         id: 'error',
         init_point: null,
@@ -32,15 +25,15 @@ export const createSubscription = async (email: string, plan: 'monthly' | 'yearl
       };
   }
 
-  // Retorna o link real
+  // Retorna o link direto
   return {
-    id: `sub_${Math.random().toString(36).substr(2, 9)}`,
+    id: `prod_${Math.random().toString(36).substr(2, 9)}`,
     init_point: link,
     error: false
   };
 };
 
-// Simulação de cancelamento (na vida real, seria via API ou Portal do Cliente)
+// Mantido apenas para compatibilidade de tipos, mas não usado no fluxo de pagamento único
 export const cancelSubscription = async (): Promise<Partial<UserProfile>> => {
   return new Promise(resolve => {
       setTimeout(() => {
@@ -48,7 +41,8 @@ export const cancelSubscription = async (): Promise<Partial<UserProfile>> => {
               is_premium: false,
               subscriptionType: undefined,
               subscriptionId: undefined,
-              subscriptionMethod: undefined
+              subscriptionMethod: undefined,
+              premium_expires_at: undefined
           });
       }, 1000);
   });
