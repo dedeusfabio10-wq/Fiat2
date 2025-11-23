@@ -1,7 +1,7 @@
 
 import React, { useState, useEffect, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { ArrowLeft, Flame, BookOpen, Heart, Sparkles, Share2, Lock, CalendarClock, Play } from 'lucide-react';
+import { ArrowLeft, Flame, BookOpen, Heart, Sparkles, Share2, Lock, CalendarClock, Play, Wind } from 'lucide-react';
 import { Button, Card } from '../ui/UIComponents';
 import { IconRosary } from '../ui/Icons';
 import { CENACULO_CONSAGRACAO } from '../constants';
@@ -185,7 +185,24 @@ const CenaculoPage: React.FC = () => {
             </p>
          </div>
 
-         {/* 2. Mensagem do Livro Azul */}
+         {/* 2. Invocação ao Espírito Santo */}
+         <section className="space-y-4">
+             <div className="flex items-center gap-2 text-amber-400 justify-center">
+                 <Wind size={18} />
+                 <h2 className="text-xs font-bold uppercase tracking-[0.2em]">Invocação ao Espírito Santo</h2>
+             </div>
+             <Card className="bg-gradient-to-br from-amber-900/20 to-black border-amber-500/30 p-6 relative overflow-hidden">
+                 <div className="absolute top-0 right-0 w-32 h-32 bg-amber-500/10 rounded-full blur-3xl -mr-16 -mt-16"></div>
+                 <p className="text-amber-100 font-serif text-center text-lg leading-relaxed italic relative z-10">
+                    "Vinde, Espírito Santo, vinde por meio da poderosa intercessão do Imaculado Coração de Maria, vossa amadíssima Esposa."
+                 </p>
+                 <p className="text-center text-xs text-amber-500/60 mt-4 uppercase tracking-widest font-bold">
+                    (Rezar 3 vezes)
+                 </p>
+             </Card>
+         </section>
+
+         {/* 3. Mensagem do Livro Azul */}
          <section className="space-y-4">
              <div className="flex items-center gap-2 text-red-400">
                  <Sparkles size={18} />
@@ -205,7 +222,7 @@ const CenaculoPage: React.FC = () => {
              </Card>
          </section>
 
-         {/* 3. Evangelho */}
+         {/* 4. Evangelho */}
          <section className="space-y-4">
              <div className="flex items-center gap-2 text-amber-400">
                  <BookOpen size={18} />
@@ -219,7 +236,7 @@ const CenaculoPage: React.FC = () => {
              </div>
          </section>
 
-         {/* 4. Homilia / Reflexão */}
+         {/* 5. Homilia / Reflexão */}
          <section className="space-y-4">
              <div className="flex items-center gap-2 text-gray-400">
                  <div className="w-1 h-4 bg-red-500 rounded-full"></div>
@@ -232,7 +249,7 @@ const CenaculoPage: React.FC = () => {
 
          <div className="w-full h-px bg-gradient-to-r from-transparent via-red-500/30 to-transparent my-8"></div>
 
-         {/* 5. Oração do Terço */}
+         {/* 6. Oração do Terço */}
          <section className="space-y-4 text-center">
              <h2 className="text-xl font-serif text-white">O Santo Rosário</h2>
              <p className="text-xs text-gray-400 max-w-xs mx-auto mb-4">
@@ -247,7 +264,7 @@ const CenaculoPage: React.FC = () => {
              </Button>
          </section>
 
-         {/* 6. Consagração */}
+         {/* 7. Consagração */}
          <section className="space-y-4 pt-4">
              <div className="text-center mb-4">
                 <Heart className="mx-auto text-red-500 mb-2 animate-pulse" fill="currentColor" size={24} />

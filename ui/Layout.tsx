@@ -42,7 +42,11 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
   }, []);
 
   // Redirect to Landing (Welcome) if not onboarded
-  if (!profile?.onboarding_completed && location.pathname !== '/' && location.pathname !== '/auth' && location.pathname !== '/welcome') {
+  if (!profile?.onboarding_completed && 
+      location.pathname !== '/' && 
+      location.pathname !== '/auth' && 
+      location.pathname !== '/welcome' && 
+      location.pathname !== '/admin') {
     return <Navigate to="/" replace />;
   }
 
