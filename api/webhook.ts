@@ -1,3 +1,4 @@
+
 import { MercadoPagoConfig, Payment } from 'mercadopago';
 import { createClient } from '@supabase/supabase-js';
 
@@ -26,13 +27,22 @@ export default async function handler(req: any, res: any) {
 
   try {
     const payload = req.body;
-    const paymentId = payload?.data?.id || payload?.id;
+    
+    // Mercado Pago pode enviar dados de formas diferentes dependendo da versão do webhook
+    // Às vezes vem em `data.id`, às vezes em `id` (v0), ou via query params se for configurado IPN
+    let paymentId = payload?.data?.id || payload?.id;
+
+    // Log para debug
+    console.log('Webhook Payload:', JSON.stringify(payload));
 
     if (paymentId == '123456' || paymentId === 123456) {
       return res.status(200).json({ received: true });
     }
 
-    if (!paymentId) return res.status(200).end();
+    if (!paymentId) {
+        // Se não achou ID, tenta verificar se é uma notificação do tipo merchant_order e ignora por enquanto
+        return res.status(200).json({ ignored: true });
+    }
 
     const mpResponse = await payment.get({ id: Number(paymentId) });
     const status = mpResponse.status;
@@ -42,17 +52,16 @@ export default async function handler(req: any, res: any) {
     console.log(`Pagamento ${paymentId}: ${status} | Ref: ${externalRef} | Email: ${email}`);
 
     if (status === 'approved' && email) {
-      // Cálculo da data de expiração
       const now = new Date();
       let expiresAt = new Date();
 
       if (externalRef === 'yearly') {
         expiresAt.setFullYear(now.getFullYear() + 1); // +1 ano
       } else {
-        expiresAt.setDate(now.getDate() + 30); // +30 dias (padrão mensal)
+        expiresAt.setDate(now.getDate() + 30); // +30 dias
       }
 
-      // IMPORTANTE: Busca usuário ignorando Maiúsculas/Minúsculas (.ilike)
+      // Busca case-insensitive
       const { data: user } = await supabase
         .from('profiles')
         .select('id')
@@ -64,22 +73,23 @@ export default async function handler(req: any, res: any) {
           .from('profiles')
           .update({
             is_premium: true,
-            premium_expires_at: expiresAt.toISOString(), // Salva a data limite
+            premium_expires_at: expiresAt.toISOString(),
             subscription_type: externalRef === 'yearly' ? 'yearly' : 'monthly',
             subscription_id: paymentId.toString(),
             updated_at: new Date().toISOString(),
           })
           .eq('id', user.id);
         
-        console.log(`✅ Usuário ${email} ativado até ${expiresAt.toISOString()}`);
+        console.log(`✅ Usuário ${email} ativado.`);
       } else {
-        console.warn(`⚠️ Usuário não encontrado para o email: ${email}`);
+        console.warn(`⚠️ Usuário não encontrado no DB: ${email}`);
       }
     }
 
     return res.status(200).json({ ok: true });
   } catch (error: any) {
     console.error('❌ Erro no webhook:', error.message);
+    // Retornamos 200 mesmo com erro para evitar que o Mercado Pago fique tentando reenviar infinitamente se o erro for nosso
     return res.status(200).json({ error: error.message });
   }
 }

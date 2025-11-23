@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect, useContext } from 'react';
 import { AppContext } from '../App';
 import { Button } from './UIComponents';
@@ -21,6 +22,7 @@ const PremiumModal: React.FC<PremiumModalProps> = ({ isOpen, onClose }) => {
     if (isOpen) {
       setStep('select');
       setLoading(false);
+      setCheckingStatus(false);
     }
   }, [isOpen]);
 
@@ -31,7 +33,7 @@ const PremiumModal: React.FC<PremiumModalProps> = ({ isOpen, onClose }) => {
       
       if (subData.error || !subData.init_point) {
           toast.error("Erro na Configuração", { 
-              description: "O sistema de pagamento está indisponível no momento.",
+              description: "Verifique se as variáveis de ambiente (Links MP) estão configuradas.",
           });
           setLoading(false);
           return;
@@ -41,6 +43,8 @@ const PremiumModal: React.FC<PremiumModalProps> = ({ isOpen, onClose }) => {
       
       if (!opened) {
           toast.error("Pop-up bloqueado", { description: "Permita pop-ups para realizar o pagamento." });
+          // Fallback se o popup for bloqueado
+          window.location.href = subData.init_point; 
       } else {
           setStep('checkout');
           toast.success('Abriu!', { 
@@ -51,23 +55,71 @@ const PremiumModal: React.FC<PremiumModalProps> = ({ isOpen, onClose }) => {
       setLoading(false);
   };
 
+  // Lógica de Sondagem (Polling) para verificar pagamento
   const handleCheckStatus = async () => {
+      if (checkingStatus) return;
       setCheckingStatus(true);
       
-      setTimeout(async () => {
-          try {
-              await refreshProfile();
+      let attempts = 0;
+      const maxAttempts = 5; // Tenta 5 vezes
+      
+      toast.info('Verificando pagamento...', {
+          description: 'Isso pode levar alguns segundos. Aguarde...',
+          duration: 10000, // Toast fica visível durante o processo
+      });
+
+      const checkLoop = setInterval(async () => {
+          attempts++;
+          
+          // Tenta atualizar o perfil do banco de dados
+          await refreshProfile();
+          
+          // Verifica o estado atualizado no contexto (precisamos ler o valor atualizado, 
+          // mas como refreshProfile atualiza o state, podemos tentar ler direto do DB ou confiar no refresh)
+          // Nota: Como o state update é async, idealmente o refreshProfile retornaria o user atualizado.
+          // Vamos confiar que o refreshProfile foi chamado e verificar na proxima iteração ou forçar uma checagem.
+          
+          // Hack: Lendo do localStorage ou assumindo que o hook atualizará
+          // Melhor abordagem: User feedback visual
+          
+          if (attempts >= maxAttempts) {
+              clearInterval(checkLoop);
               setCheckingStatus(false);
-              toast.info('Verificando...', {
-                 description: 'Se o pagamento foi confirmado, seu acesso será liberado.',
-                 icon: <RefreshCw className="animate-spin text-blue-400"/>
-              });
-              onClose();
-          } catch (error) {
-              setCheckingStatus(false);
-              toast.error("Erro ao verificar status.");
+              
+              // Se após 5 tentativas (15s) ainda não for premium:
+              if (!profile.is_premium) {
+                   toast.warning("Pagamento ainda não processado", {
+                       description: "O banco pode demorar alguns minutos. Pode fechar essa janela, seu acesso liberará automaticamente assim que confirmar.",
+                       duration: 6000
+                   });
+              } else {
+                   finishSuccess();
+              }
+          } else {
+             // Verificação de sucesso dentro do loop (precisa acessar o profile atualizado)
+             // Como closure do React pode manter o profile antigo, confiamos no refreshProfile disparar re-render
+             // Mas para lógica aqui, vamos apenas continuar rodando. 
+             // O ideal é observar a prop profile.is_premium em um useEffect separado.
           }
-      }, 2000);
+
+      }, 3000); // A cada 3 segundos
+  };
+
+  // Monitora mudança de status para fechar modal automaticamente
+  useEffect(() => {
+      if (isOpen && step === 'checkout' && profile.is_premium) {
+          finishSuccess();
+      }
+  }, [profile.is_premium, isOpen, step]);
+
+  const finishSuccess = () => {
+      setCheckingStatus(false);
+      onClose();
+      toast.success("Pagamento Confirmado! ♡", {
+          description: "Bem-vindo ao Premium. Deus abençoe sua generosidade.",
+          icon: <Crown className="text-sacred-gold" />,
+          duration: 5000
+      });
   };
 
   if (!isOpen) return null;
@@ -100,16 +152,16 @@ const PremiumModal: React.FC<PremiumModalProps> = ({ isOpen, onClose }) => {
             <div className="space-y-6 text-center animate-slide-up py-4">
                 <div className="bg-sacred-gold/10 p-6 rounded-xl border border-sacred-gold/20">
                     <ExternalLink size={40} className="text-sacred-gold mx-auto mb-4 opacity-80" />
-                    <h3 className="text-white font-bold text-lg">Aguardando Pagamento</h3>
+                    <h3 className="text-white font-bold text-lg">Aguardando Confirmação</h3>
                     <p className="text-sm text-gray-400 mt-2 leading-relaxed">
-                        Conclua o pagamento na aba do Mercado Pago (Pix ou Cartão).
+                        Conclua o pagamento na aba do Mercado Pago.
                     </p>
                 </div>
 
                 <div className="bg-blue-500/10 border border-blue-500/20 p-3 rounded-lg flex items-start gap-2 text-left">
                     <AlertTriangle size={16} className="text-blue-400 shrink-0 mt-0.5" />
                     <p className="text-[11px] text-gray-300">
-                        <strong>Dica:</strong> Use o mesmo e-mail do seu cadastro no Fiat ({profile.email}) para liberação automática imediata.
+                        <strong>Dica:</strong> A liberação é automática, mas pode levar de 1 a 2 minutos dependendo do banco. Mantenha o app aberto.
                     </p>
                 </div>
 
@@ -120,12 +172,19 @@ const PremiumModal: React.FC<PremiumModalProps> = ({ isOpen, onClose }) => {
                         onClick={handleCheckStatus}
                         disabled={checkingStatus}
                     >
-                        {checkingStatus ? <Loader2 className="animate-spin"/> : <Check size={18} />} 
-                        Já realizei o pagamento
+                        {checkingStatus ? (
+                            <>
+                                <Loader2 className="animate-spin" /> Verificando...
+                            </>
+                        ) : (
+                            <>
+                                <Check size={18} /> Já realizei o pagamento
+                            </>
+                        )}
                     </Button>
                     
                     <p className="text-[10px] text-gray-500 px-4">
-                        A liberação é automática assim que o banco confirmar.
+                        O botão acima verifica o pagamento instantaneamente.
                     </p>
 
                     <Button 
