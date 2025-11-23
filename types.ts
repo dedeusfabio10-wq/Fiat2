@@ -101,7 +101,7 @@ export interface UserProfile {
   devotionalSaintId?: string;
   customTheme?: 'purple' | 'green' | 'white' | 'rose';
   subscriptionType?: 'monthly' | 'yearly';
-  subscriptionMethod?: 'card' | 'pix';
+  subscriptionMethod?: 'card' | 'pix' | 'pix_manual_check';
   subscriptionId?: string;
   favoriteQuote?: string;
   nightModeSpiritual?: boolean;

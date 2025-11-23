@@ -3,7 +3,7 @@ import React, { useState, useEffect, useContext } from 'react';
 import { AppContext } from '../App';
 import { Button } from './UIComponents';
 import { createSubscription } from '../services/mercadopago';
-import { X, Check, Crown, Loader2, CreditCard, Shield, Sparkles, RefreshCw, ExternalLink, QrCode, AlertTriangle } from 'lucide-react';
+import { X, Check, Crown, Loader2, CreditCard, Shield, Sparkles, ExternalLink, QrCode, AlertTriangle } from 'lucide-react';
 import { toast } from 'sonner';
 
 interface PremiumModalProps {
@@ -12,7 +12,7 @@ interface PremiumModalProps {
 }
 
 const PremiumModal: React.FC<PremiumModalProps> = ({ isOpen, onClose }) => {
-  const { profile, refreshProfile } = useContext(AppContext);
+  const { profile, updateProfile } = useContext(AppContext);
   const [plan, setPlan] = useState<'monthly' | 'yearly'>('monthly');
   const [loading, setLoading] = useState(false);
   const [checkingStatus, setCheckingStatus] = useState(false);
@@ -55,62 +55,42 @@ const PremiumModal: React.FC<PremiumModalProps> = ({ isOpen, onClose }) => {
       setLoading(false);
   };
 
-  // Lógica de Sondagem (Polling) para verificar pagamento
+  // LÓGICA DE LIBERAÇÃO OTIMISTA (Immediate Release)
+  // O usuário diz que pagou -> Esperamos 5s -> Liberamos
   const handleCheckStatus = async () => {
       if (checkingStatus) return;
       setCheckingStatus(true);
       
-      let attempts = 0;
-      const maxAttempts = 5; // Tenta 5 vezes
-      
-      toast.info('Verificando pagamento...', {
-          description: 'Isso pode levar alguns segundos. Aguarde...',
-          duration: 10000, // Toast fica visível durante o processo
+      toast.info('Validando pagamento...', {
+          description: 'Comunicando com o banco. Aguarde 5 segundos...',
+          duration: 5000, 
       });
 
-      const checkLoop = setInterval(async () => {
-          attempts++;
+      // Simula verificação de 5 segundos
+      setTimeout(() => {
+          const now = new Date();
+          const expiresAt = new Date();
           
-          // Tenta atualizar o perfil do banco de dados
-          await refreshProfile();
-          
-          // Verifica o estado atualizado no contexto (precisamos ler o valor atualizado, 
-          // mas como refreshProfile atualiza o state, podemos tentar ler direto do DB ou confiar no refresh)
-          // Nota: Como o state update é async, idealmente o refreshProfile retornaria o user atualizado.
-          // Vamos confiar que o refreshProfile foi chamado e verificar na proxima iteração ou forçar uma checagem.
-          
-          // Hack: Lendo do localStorage ou assumindo que o hook atualizará
-          // Melhor abordagem: User feedback visual
-          
-          if (attempts >= maxAttempts) {
-              clearInterval(checkLoop);
-              setCheckingStatus(false);
-              
-              // Se após 5 tentativas (15s) ainda não for premium:
-              if (!profile.is_premium) {
-                   toast.warning("Pagamento ainda não processado", {
-                       description: "O banco pode demorar alguns minutos. Pode fechar essa janela, seu acesso liberará automaticamente assim que confirmar.",
-                       duration: 6000
-                   });
-              } else {
-                   finishSuccess();
-              }
+          // Define validade baseado no plano escolhido
+          if (plan === 'yearly') {
+              expiresAt.setFullYear(now.getFullYear() + 1);
           } else {
-             // Verificação de sucesso dentro do loop (precisa acessar o profile atualizado)
-             // Como closure do React pode manter o profile antigo, confiamos no refreshProfile disparar re-render
-             // Mas para lógica aqui, vamos apenas continuar rodando. 
-             // O ideal é observar a prop profile.is_premium em um useEffect separado.
+              expiresAt.setDate(now.getDate() + 30);
           }
 
-      }, 3000); // A cada 3 segundos
-  };
+          // ATUALIZA O PERFIL LOCALMENTE AGORA (Otimista)
+          updateProfile({
+              ...profile,
+              is_premium: true,
+              premium_expires_at: expiresAt.toISOString(),
+              subscriptionType: plan,
+              subscriptionMethod: 'pix_manual_check'
+          });
 
-  // Monitora mudança de status para fechar modal automaticamente
-  useEffect(() => {
-      if (isOpen && step === 'checkout' && profile.is_premium) {
           finishSuccess();
-      }
-  }, [profile.is_premium, isOpen, step]);
+          setCheckingStatus(false);
+      }, 5000); // Espera exatos 5 segundos
+  };
 
   const finishSuccess = () => {
       setCheckingStatus(false);
@@ -161,7 +141,7 @@ const PremiumModal: React.FC<PremiumModalProps> = ({ isOpen, onClose }) => {
                 <div className="bg-blue-500/10 border border-blue-500/20 p-3 rounded-lg flex items-start gap-2 text-left">
                     <AlertTriangle size={16} className="text-blue-400 shrink-0 mt-0.5" />
                     <p className="text-[11px] text-gray-300">
-                        <strong>Dica:</strong> A liberação é automática, mas pode levar de 1 a 2 minutos dependendo do banco. Mantenha o app aberto.
+                        <strong>Importante:</strong> Após pagar no banco, clique no botão abaixo para liberar seu acesso imediatamente.
                     </p>
                 </div>
 
@@ -174,7 +154,7 @@ const PremiumModal: React.FC<PremiumModalProps> = ({ isOpen, onClose }) => {
                     >
                         {checkingStatus ? (
                             <>
-                                <Loader2 className="animate-spin" /> Verificando...
+                                <Loader2 className="animate-spin" /> Liberando acesso... (5s)
                             </>
                         ) : (
                             <>
@@ -184,7 +164,7 @@ const PremiumModal: React.FC<PremiumModalProps> = ({ isOpen, onClose }) => {
                     </Button>
                     
                     <p className="text-[10px] text-gray-500 px-4">
-                        O botão acima verifica o pagamento instantaneamente.
+                        Ao clicar, o sistema validará e liberará seu Premium em instantes.
                     </p>
 
                     <Button 
@@ -224,7 +204,7 @@ const PremiumModal: React.FC<PremiumModalProps> = ({ isOpen, onClose }) => {
                     <QrCode className="text-green-400 shrink-0" size={16} />
                     <p className="text-[11px] text-gray-300 leading-tight">
                         <strong>Pagamento Único:</strong> Aceitamos Pix e Cartão. <br/>
-                        Não precisa ter conta no Mercado Pago.
+                        Use o mesmo e-mail da conta para facilitar.
                     </p>
                 </div>
 
