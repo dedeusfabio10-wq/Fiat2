@@ -1,3 +1,4 @@
+
 import React, { useContext, useEffect, useState } from 'react';
 import { NavLink, useLocation, Navigate } from 'react-router-dom';
 import { AppContext } from '../App';
@@ -12,17 +13,23 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
   const location = useLocation();
   const isRosary = location.pathname === '/rosary';
   const isViaSacra = location.pathname === '/viasacra';
+  const isAdvento = location.pathname === '/advento';
   
   // LÓGICA SAZONAL AUTOMÁTICA
-  const [season, setSeason] = useState<'christmas' | 'newyear' | 'ordinary'>('ordinary');
+  const [season, setSeason] = useState<'advent' | 'christmas' | 'newyear' | 'ordinary'>('ordinary');
   
   useEffect(() => {
     const now = new Date();
     const m = now.getMonth(); // 0 = Janeiro, 10 = Novembro, 11 = Dezembro
     const d = now.getDate();
     
-    // Natal: De 20 de Novembro (10) até 25 de Dezembro (11)
-    if ((m === 10 && d >= 20) || (m === 11 && d <= 25)) {
+    // Advento: De ~30 de Novembro (10) até 24 de Dezembro (11)
+    // Simplificação: Últimos dias de Nov e todo Dez até 24
+    if ((m === 10 && d >= 25) || (m === 11 && d <= 24)) {
+        setSeason('advent');
+    }
+    // Natal: De 25 de Dezembro (11) em diante
+    else if (m === 11 && d >= 25) {
       setSeason('christmas');
     } 
     // Ano Novo: De 26 de Dezembro (11) até 06 de Janeiro (0)
@@ -51,6 +58,10 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
     }
 
     // Priority 2: Seasonal Defaults (Automatic)
+    if (season === 'advent') {
+        // Gradiente Roxo (Advento)
+        return 'bg-gradient-to-b from-[#1a0b2e] via-[#2e1065] to-[#0f172a]';
+    }
     if (season === 'christmas') {
         // Gradiente Natalino Elegante (Vermelho Vinho escuro -> Verde Profundo)
         return 'bg-gradient-to-b from-[#2a0a0a] via-[#0f172a] to-[#0a2e1f]'; 
@@ -121,12 +132,12 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
       </div>
 
       {/* Content */}
-      <main className={`flex-1 relative z-10 ${isRosary || isViaSacra ? 'h-screen overflow-hidden' : 'overflow-y-auto'}`}>
+      <main className={`flex-1 relative z-10 ${isRosary || isViaSacra || isAdvento ? 'h-screen overflow-hidden' : 'overflow-y-auto'}`}>
         {children}
       </main>
 
       {/* Bottom Navigation */}
-      {!isRosary && !isViaSacra && location.pathname !== '/' && location.pathname !== '/auth' && location.pathname !== '/admin' && (
+      {!isRosary && !isViaSacra && !isAdvento && location.pathname !== '/' && location.pathname !== '/auth' && location.pathname !== '/admin' && (
         <nav className="fixed bottom-0 left-0 right-0 z-50 bg-black/60 backdrop-blur-xl border-t border-white/5 h-20 pb-safe">
           {/* Premium Gold Border on Nav */}
           {profile?.is_premium && <div className="absolute top-0 left-0 w-full h-px bg-gradient-to-r from-transparent via-sacred-gold/40 to-transparent"></div>}

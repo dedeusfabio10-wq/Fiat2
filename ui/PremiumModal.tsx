@@ -3,6 +3,7 @@ import React, { useState, useEffect, useContext } from 'react';
 import { AppContext } from '../App';
 import { Button } from './UIComponents';
 import { createSubscription } from '../services/mercadopago';
+import { supabase } from '../services/supabase';
 import { X, Check, Crown, Loader2, CreditCard, Shield, Sparkles, ExternalLink, QrCode, AlertTriangle } from 'lucide-react';
 import { toast } from 'sonner';
 
@@ -55,19 +56,16 @@ const PremiumModal: React.FC<PremiumModalProps> = ({ isOpen, onClose }) => {
       setLoading(false);
   };
 
-  // LÓGICA DE LIBERAÇÃO OTIMISTA (Immediate Release)
-  // O usuário diz que pagou -> Esperamos 5s -> Liberamos
+  // LÓGICA DE LIBERAÇÃO MANUAL + SALVAMENTO NO SUPABASE
   const handleCheckStatus = async () => {
       if (checkingStatus) return;
       setCheckingStatus(true);
       
       toast.info('Validando pagamento...', {
-          description: 'Comunicando com o banco. Aguarde 5 segundos...',
-          duration: 5000, 
+          description: 'Salvando sua assinatura no servidor...',
       });
 
-      // Simula verificação de 5 segundos
-      setTimeout(() => {
+      try {
           const now = new Date();
           const expiresAt = new Date();
           
@@ -78,7 +76,28 @@ const PremiumModal: React.FC<PremiumModalProps> = ({ isOpen, onClose }) => {
               expiresAt.setDate(now.getDate() + 30);
           }
 
-          // ATUALIZA O PERFIL LOCALMENTE AGORA (Otimista)
+          // 1. Salvar no Supabase (Garante persistência)
+          const { data: { user } } = await supabase.auth.getUser();
+          
+          if (user) {
+              const { error } = await supabase
+                  .from('profiles')
+                  .update({
+                      is_premium: true,
+                      premium_expires_at: expiresAt.toISOString(),
+                      subscription_type: plan,
+                      subscription_method: 'pix_manual_check',
+                      updated_at: now.toISOString()
+                  })
+                  .eq('id', user.id);
+
+              if (error) {
+                  console.error('Erro ao salvar premium no DB:', error);
+                  throw new Error('Falha na conexão.');
+              }
+          }
+
+          // 2. Atualiza estado local (Otimista)
           updateProfile({
               ...profile,
               is_premium: true,
@@ -88,12 +107,15 @@ const PremiumModal: React.FC<PremiumModalProps> = ({ isOpen, onClose }) => {
           });
 
           finishSuccess();
+
+      } catch (error) {
+          toast.error("Não foi possível salvar.", { description: "Tente novamente ou contate o suporte." });
+      } finally {
           setCheckingStatus(false);
-      }, 5000); // Espera exatos 5 segundos
+      }
   };
 
   const finishSuccess = () => {
-      setCheckingStatus(false);
       onClose();
       toast.success("Pagamento Confirmado! ♡", {
           description: "Bem-vindo ao Premium. Deus abençoe sua generosidade.",
@@ -154,7 +176,7 @@ const PremiumModal: React.FC<PremiumModalProps> = ({ isOpen, onClose }) => {
                     >
                         {checkingStatus ? (
                             <>
-                                <Loader2 className="animate-spin" /> Liberando acesso... (5s)
+                                <Loader2 className="animate-spin" /> Salvando acesso...
                             </>
                         ) : (
                             <>
@@ -164,7 +186,7 @@ const PremiumModal: React.FC<PremiumModalProps> = ({ isOpen, onClose }) => {
                     </Button>
                     
                     <p className="text-[10px] text-gray-500 px-4">
-                        Ao clicar, o sistema validará e liberará seu Premium em instantes.
+                        Ao clicar, salvaremos seu status Premium na nuvem.
                     </p>
 
                     <Button 

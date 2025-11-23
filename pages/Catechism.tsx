@@ -1,9 +1,9 @@
 import React, { useContext, useState, useMemo } from 'react';
 import { AppContext } from '../App';
-import { CATECHISM_CONTENT, SAINTS, APOSTOLIC_LINE, CHURCH_HISTORY, HOLY_MASS, CHURCH_HIERARCHY, CHURCH_MINISTRIES, MARIAN_DOGMAS, THE_APOSTLES } from '../constants';
+import { CATECHISM_CONTENT, SAINTS, APOSTOLIC_LINE, CHURCH_HISTORY, HOLY_MASS, CHURCH_HIERARCHY, CHURCH_MINISTRIES, MARIAN_DOGMAS, THE_APOSTLES, LITURGICAL_OBJECTS } from '../constants';
 import { Button } from '../ui/UIComponents';
 import PremiumModal from '../ui/PremiumModal';
-import { Crown, Lock, ChevronDown, ChevronUp, BookOpen, Sparkles, Key, Shield, Landmark, Flame, Users, Heart, Bell, Music, Star } from 'lucide-react';
+import { Crown, Lock, ChevronDown, ChevronUp, BookOpen, Sparkles, Key, Shield, Landmark, Flame, Users, Heart, Bell, Music, Star, Grape, Circle, Cloud, Droplet, Sun } from 'lucide-react';
 import { toast } from 'sonner';
 import { SaintIcon } from '../ui/SaintIcons';
 
@@ -53,6 +53,11 @@ const CatechismPage: React.FC = () => {
       case 'Crown': return <Crown size={20} />;
       case 'Sparkles': return <Sparkles size={20} />;
       case 'Star': return <Star size={20} />;
+      case 'Grape': return <Grape size={20} />;
+      case 'Circle': return <Circle size={20} />;
+      case 'Sun': return <Sun size={20} />;
+      case 'Cloud': return <Cloud size={20} />;
+      case 'Droplet': return <Droplet size={20} />;
       default: return <Sparkles size={20} />;
     }
   };
@@ -126,7 +131,7 @@ const CatechismPage: React.FC = () => {
                )}
            </div>
 
-           {/* Os Santos Apóstolos - NOVA SEÇÃO */}
+           {/* Os Santos Apóstolos */}
            <div className={`${themeCardColor} border border-white/5 rounded-xl overflow-hidden transition-all shadow-lg`}>
                <div className="p-5 flex items-center justify-between cursor-pointer hover:bg-white/5 transition-colors" onClick={() => setExpandedSection(expandedSection === 'apostolos' ? null : 'apostolos')}>
                    <h3 className="font-serif text-white font-medium text-base uppercase tracking-wider flex items-center gap-2">
@@ -158,6 +163,39 @@ const CatechismPage: React.FC = () => {
                            ))}
                            <div className="text-center py-4">
                                <p className="text-xs text-gray-500 italic font-serif">"Ide por todo o mundo e pregai o Evangelho a toda criatura." (Mc 16,15)</p>
+                           </div>
+                       </div>
+                   </div>
+               )}
+           </div>
+
+           {/* Objetos Litúrgicos (NOVA SEÇÃO VISUAL) */}
+           <div className={`${themeCardColor} border border-white/5 rounded-xl overflow-hidden transition-all shadow-lg`}>
+               <div className="p-5 flex items-center justify-between cursor-pointer hover:bg-white/5 transition-colors" onClick={() => setExpandedSection(expandedSection === 'objetos' ? null : 'objetos')}>
+                   <h3 className="font-serif text-white font-medium text-base uppercase tracking-wider flex items-center gap-2">
+                       <Grape size={18} className="text-fiat-gold" /> Objetos Litúrgicos
+                   </h3>
+                   {expandedSection === 'objetos' ? <ChevronUp size={20} className="text-fiat-gold" /> : <ChevronDown size={20} className="text-gray-500" />}
+               </div>
+               {expandedSection === 'objetos' && (
+                   <div className="p-6 pt-2 bg-black/20 relative">
+                       <div className="h-px w-full bg-white/5 mb-6"></div>
+                       <div className="grid gap-4 relative z-10">
+                           {LITURGICAL_OBJECTS.map((obj) => (
+                               <div key={obj.id} className="bg-white/5 p-4 rounded-xl border border-white/5 hover:border-fiat-gold/30 transition-colors group">
+                                   <div className="flex items-center gap-3 mb-3">
+                                       <div className="w-12 h-12 bg-fiat-gold/10 rounded-full flex items-center justify-center text-fiat-gold border border-fiat-gold/20 shadow-[0_0_10px_rgba(212,175,55,0.15)] group-hover:scale-110 transition-transform">
+                                           {getMinistryIcon(obj.icon)}
+                                       </div>
+                                       <h4 className="font-serif font-bold text-white text-lg leading-tight">{obj.title}</h4>
+                                   </div>
+                                   <p className="text-sm text-gray-300 font-serif leading-relaxed pl-13 border-l-2 border-white/10 pl-4">
+                                       {obj.desc}
+                                   </p>
+                               </div>
+                           ))}
+                           <div className="text-center py-4">
+                               <p className="text-xs text-gray-500 italic font-serif">"A beleza da liturgia reflete a beleza de Deus."</p>
                            </div>
                        </div>
                    </div>

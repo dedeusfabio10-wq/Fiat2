@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { AppContext } from '../App';
 import { Button } from '../ui/UIComponents';
 import PremiumModal from '../ui/PremiumModal';
-import { Crown, Plus, Calendar, Lock, Trash2, User, Play, Pause, Volume2, Music, Sparkles } from 'lucide-react';
+import { Crown, Plus, Calendar, Lock, Trash2, User, Play, Pause, Volume2, Music, Sparkles, Loader2 } from 'lucide-react';
 import { getPlans, deletePlan } from '../services/storage';
 import { SpiritualPlan } from '../types';
 import { toast } from 'sonner';
@@ -36,6 +36,7 @@ const PlannerPage: React.FC = () => {
   const { profile, updateProfile } = useContext(AppContext);
   const navigate = useNavigate();
   const [plans, setPlans] = useState<SpiritualPlan[]>([]);
+  const [loadingPlans, setLoadingPlans] = useState(true);
   const [showPremiumModal, setShowPremiumModal] = useState(false);
 
   // Música sacra
@@ -44,8 +45,27 @@ const PlannerPage: React.FC = () => {
   const audioRef = useRef<HTMLAudioElement>(null);
 
   useEffect(() => {
-    setPlans(getPlans());
+    loadPlansData();
   }, []);
+
+  const loadPlansData = async () => {
+      setLoadingPlans(true);
+      const data = await getPlans();
+      setPlans(data);
+      setLoadingPlans(false);
+  };
+
+  const handleDelete = async (id: string) => {
+      if(confirm('Excluir este plano?')) {
+          const success = await deletePlan(id);
+          if (success) {
+              toast.success('Plano excluído.');
+              loadPlansData();
+          } else {
+              toast.error('Erro ao excluir.');
+          }
+      }
+  };
 
   useEffect(() => {
     if (audioRef.current) {
@@ -173,7 +193,11 @@ const PlannerPage: React.FC = () => {
       </div>
 
       {/* Lista de Planos */}
-      {plans.length === 0 ? (
+      {loadingPlans ? (
+          <div className="flex justify-center py-20">
+              <Loader2 className="animate-spin text-sacred-gold" />
+          </div>
+      ) : plans.length === 0 ? (
         <div className="flex flex-col items-center justify-center py-20 text-center space-y-6 opacity-70">
           <Calendar size={48} className="text-gray-600" />
           <p className="font-serif text-gray-400 text-lg">
@@ -194,10 +218,7 @@ const PlannerPage: React.FC = () => {
                   className="text-gray-500 hover:text-red-400 hover:bg-white/5 h-8 w-8 p-0"
                   onClick={(e) => {
                     e.stopPropagation();
-                    if(confirm('Excluir este plano?')) {
-                      deletePlan(plan.id);
-                      setPlans(getPlans());
-                    }
+                    handleDelete(plan.id);
                   }}
                 >
                   <Trash2 size={16} />
@@ -221,9 +242,9 @@ const PlannerPage: React.FC = () => {
                 </div>
               </div>
               <div className="mt-4 flex gap-2">
-                {plan.schedule.morning.length > 0 && <span className="text-[10px] bg-yellow-100/10 text-yellow-200 px-2 py-1 rounded border border-yellow-500/20">Manhã</span>}
-                {plan.schedule.afternoon.length > 0 && <span className="text-[10px] bg-orange-100/10 text-orange-200 px-2 py-1 rounded border border-orange-500/20">Tarde</span>}
-                {plan.schedule.night.length > 0 && <span className="text-[10px] bg-indigo-100/10 text-indigo-200 px-2 py-1 rounded border border-indigo-500/20">Noite</span>}
+                {plan.schedule?.morning?.length > 0 && <span className="text-[10px] bg-yellow-100/10 text-yellow-200 px-2 py-1 rounded border border-yellow-500/20">Manhã</span>}
+                {plan.schedule?.afternoon?.length > 0 && <span className="text-[10px] bg-orange-100/10 text-orange-200 px-2 py-1 rounded border border-orange-500/20">Tarde</span>}
+                {plan.schedule?.night?.length > 0 && <span className="text-[10px] bg-indigo-100/10 text-indigo-200 px-2 py-1 rounded border border-indigo-500/20">Noite</span>}
               </div>
             </div>
           ))}

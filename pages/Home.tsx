@@ -1,8 +1,9 @@
+
 import React, { useContext, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { AppContext } from '../App';
 import { Button } from '../ui/UIComponents';
-import { ChevronRight, Sun, Cross, Gift } from 'lucide-react';
+import { ChevronRight, Sun, Cross, Gift, Flame, Star } from 'lucide-react';
 import { DAILY_QUOTES, MYSTERIES } from '../constants';
 import { IconRosary } from '../ui/Icons';
 
@@ -11,7 +12,6 @@ const HomePage: React.FC = () => {
   const navigate = useNavigate();
 
   const greeting = useMemo(() => {
-    // Forçando saudação de Natal para visualização imediata
     const now = new Date();
     const month = now.getMonth();
     const day = now.getDate();
@@ -20,9 +20,16 @@ const HomePage: React.FC = () => {
     if ((month === 11 && day > 25) || (month === 0 && day <= 6)) {
         return "Próspero Ano Novo";
     }
+    // Natal
+    if ((month === 11 && day >= 25)) {
+        return "Feliz Natal";
+    }
+    // Advento
+    if ((month === 10 && day >= 25) || (month === 11 && day <= 24)) {
+        return "Santo Advento";
+    }
 
-    // Default forçado para Natal agora (para o usuário ver já)
-    return "Feliz Natal";
+    return "Salve Maria";
   }, []);
 
   const todayMystery = useMemo(() => {
@@ -32,6 +39,10 @@ const HomePage: React.FC = () => {
 
   const dailyQuote = useMemo(() => DAILY_QUOTES[Math.floor(Math.random() * DAILY_QUOTES.length)], []);
   const activeNovena = profile.active_novenas[0] || null;
+  const isSaturday = new Date().getDay() === 6;
+  
+  // Is Advent?
+  const isAdvent = new Date().getMonth() === 10 || new Date().getMonth() === 11; // Nov/Dec
 
   // Determine card background color based on theme
   const themeCardColor = useMemo(() => {
@@ -48,7 +59,7 @@ const HomePage: React.FC = () => {
       <div className="flex justify-between items-start pt-4">
         <div>
           <h1 className="text-xl font-serif text-white leading-tight tracking-wide flex items-center gap-2">
-            {greeting.toUpperCase()} <Gift size={18} className="text-red-500 animate-pulse" />, <br/>
+            {greeting.toUpperCase()} {greeting.includes('Advento') ? <Star size={18} className="text-purple-400 animate-pulse"/> : <Gift size={18} className="text-red-500 animate-pulse" />}, <br/>
             <span style={{ color: themeColors.primary }} className="font-bold text-2xl tracking-wider">{profile.name?.toUpperCase() || 'ALMA DEVOTA'}</span>
           </h1>
           <p className="text-[10px] text-fiat-gold/80 mt-2 font-sans uppercase tracking-[0.2em] border-l-2 border-fiat-gold pl-2">
@@ -71,6 +82,55 @@ const HomePage: React.FC = () => {
           — {dailyQuote.author}
         </p>
       </div>
+      
+      {/* Cenáculo Card */}
+      <div 
+        onClick={() => navigate('/cenaculo')}
+        className={`relative overflow-hidden rounded-2xl p-1 cursor-pointer group transition-all ${isSaturday ? 'animate-pulse-slow' : ''}`}
+      >
+        <div className="absolute inset-0 bg-gradient-to-r from-red-900 via-red-800 to-amber-900 opacity-90"></div>
+        <div className="absolute inset-0 bg-[url('https://www.transparenttextures.com/patterns/stardust.png')] opacity-20"></div>
+        
+        <div className="bg-black/20 backdrop-blur-sm rounded-xl p-4 relative flex items-center justify-between border border-red-500/30">
+            <div className="flex items-center gap-4">
+                <div className="w-12 h-12 rounded-full bg-gradient-to-br from-red-500 to-amber-500 flex items-center justify-center shadow-[0_0_15px_rgba(220,38,38,0.5)]">
+                    <Flame size={24} className="text-white animate-pulse" />
+                </div>
+                <div>
+                    <h3 className="text-white font-serif text-lg font-bold">Cenáculo com Maria</h3>
+                    <p className="text-xs text-red-200 uppercase tracking-wider font-medium">
+                        {isSaturday ? 'Reze conosco hoje!' : 'Todo sábado'}
+                    </p>
+                </div>
+            </div>
+            <ChevronRight className="text-red-300" />
+        </div>
+      </div>
+
+      {/* ADVENTO CARD (Conditional) */}
+      {isAdvent && (
+          <div 
+            onClick={() => navigate('/advento')}
+            className="relative overflow-hidden rounded-2xl p-1 cursor-pointer group transition-all shadow-lg shadow-purple-900/20 hover:scale-[1.02]"
+          >
+            <div className="absolute inset-0 bg-gradient-to-r from-[#2e1065] via-[#4c1d95] to-[#581c87]"></div>
+            <div className="absolute inset-0 bg-[url('https://www.transparenttextures.com/patterns/stardust.png')] opacity-10"></div>
+            
+            <div className="bg-black/10 backdrop-blur-sm rounded-xl p-5 relative flex items-center justify-between border border-purple-400/30">
+                <div className="flex items-center gap-4">
+                    <div className="w-12 h-12 rounded-full bg-purple-900 flex items-center justify-center shadow-[0_0_15px_rgba(168,85,247,0.4)] border border-purple-500">
+                        <Star size={24} className="text-yellow-300 animate-pulse" fill="currentColor" />
+                    </div>
+                    <div>
+                        <h3 className="text-white font-serif text-xl font-bold">Especial Advento</h3>
+                        <p className="text-xs text-purple-200 uppercase tracking-wider font-medium flex items-center gap-1">
+                            Coroa & Calendário <ChevronRight size={10} />
+                        </p>
+                    </div>
+                </div>
+            </div>
+          </div>
+      )}
 
       {/* Main Rosary Card */}
       <div 

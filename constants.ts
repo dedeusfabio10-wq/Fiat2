@@ -7,6 +7,11 @@ const createGenericDays = (duration: number, prayer?: string) => Array.from({ le
     prayer: prayer || 'Rogai por nós, para que sejamos dignos das promessas de Cristo.'
 }));
 
+export const CENACULO_CONSAGRACAO = {
+  title: "Consagração ao Imaculado Coração de Maria",
+  content: "Virgem de Fátima, Mãe de Misericórdia, Rainha do Céu e da Terra, refúgio dos pecadores, nós nos consagramos ao Vosso Imaculado Coração. Consagramos-Vos o nosso coração, a nossa alma, a nossa família e tudo o que somos. E para que esta consagração seja verdadeiramente eficaz e duradoura, renovamos hoje as promessas do nosso Batismo e da nossa Crisma. Comprometemo-nos a viver como bons cristãos, fiéis a Deus, à Igreja e ao Santo Padre. Queremos rezar o Santo Terço todos os dias, participar da Eucaristia e viver na vossa presença, ó Mãe, para que, por meio de Vós, cheguemos mais perfeitamente a Jesus."
+};
+
 export const PRAYERS_TEXT = {
   creio: "Creio em Deus Pai Todo-Poderoso, Criador do céu e da terra. E em Jesus Cristo, seu único Filho, nosso Senhor. Que foi concebido pelo poder do Espírito Santo. Nasceu da Virgem Maria. Padeceu sob Pôncio Pilatos, foi crucificado, morto e sepultado. Desceu à mansão dos mortos. Ressuscitou ao terceiro dia. Subiu aos céus, está sentado à direita de Deus Pai todo-poderoso. Donde há de vir a julgar os vivos e os mortos. Creio no Espírito Santo, na Santa Igreja Católica, na comunhão dos santos, na remissão dos pecados, na ressurreição da carne, na vida eterna. Amém.",
   paiNosso: "Pai Nosso que estais nos Céus, santificado seja o vosso Nome, venha a nós o vosso Reino, seja feita a vossa vontade assim na terra como no Céu. O pão nosso de cada dia nos dai hoje, perdoai-nos as nossas ofensas assim como nós perdoamos a quem nos tem ofendido, e não nos deixeis cair em tentação, mas livrai-nos do Mal. Amém.",
@@ -32,6 +37,7 @@ export const PRAYERS: Prayer[] = [
 
   // Marian Prayers
   { id: 'salve-rainha', title: 'Salve Rainha', category: 'Marian', content: PRAYERS_TEXT.salveRainha },
+  { id: 'consagracao-cenaculo', title: 'Consagração (Cenáculo)', category: 'Marian', content: CENACULO_CONSAGRACAO.content },
   { id: 'memorare', title: 'Lembrai-vos (Memorare)', category: 'Marian', content: 'Lembrai-vos, ó piíssima Virgem Maria, que nunca se ouviu dizer que algum daqueles que têm recorrido à vossa proteção, implorado a vossa assistência, e reclamado o vosso socorro, fosse por Vós desamparado. Animado eu, pois, com igual confiança, a Vós, Virgem entre todas singular, como a Mãe recorro, de Vós me valho e, gemendo sob o peso dos meus pecados, me prostro aos vossos pés. Não rejeiteis as minhas súplicas, ó Mãe do Filho de Deus humanado, mas dignai-vos de as ouvir propícia e de me alcançar o que vos rogo. Amém.' },
   { id: 'angelus', title: 'O Angelus', category: 'Marian', content: 'V. O Anjo do Senhor anunciou a Maria.\nR. E ela concebeu do Espírito Santo.\nAve Maria...\n\nV. Eis aqui a serva do Senhor.\nR. Faça-se em mim segundo a vossa palavra.\nAve Maria...\n\nV. E o Verbo se fez carne.\nR. E habitou entre nós.\nAve Maria...\n\nV. Rogai por nós, Santa Mãe de Deus.\nR. Para que sejamos dignos das promessas de Cristo.\n\nOremos: Infundi, Senhor, nós Vos pedimos, a Vossa graça em nossas almas, para que nós, que pela Anunciação do Anjo conhecemos a Encarnação de Jesus Cristo, Vosso Filho, pela Sua Paixão e Cruz sejamos conduzidos à glória da Ressurreição. Pelo mesmo Cristo, Senhor nosso. Amém.' },
   { id: 'angelus-sinos', title: 'Angelus (com Sinos)', category: 'Marian', content: '(Toca-se o sino 3 vezes)\nV. O Anjo do Senhor anunciou a Maria.\nR. E ela concebeu do Espírito Santo.\nAve Maria...\n\n(Toca-se o sino 3 vezes)\nV. Eis aqui a serva do Senhor.\nR. Faça-se em mim segundo a vossa palavra.\nAve Maria...\n\n(Toca-se o sino 3 vezes)\nV. E o Verbo se fez carne.\nR. E habitou entre nós.\nAve Maria...\n\nV. Rogai por nós, Santa Mãe de Deus.\nR. Para que sejamos dignos das promessas de Cristo.\n\n(Toca-se o sino 9 vezes)\nOremos: Infundi, Senhor, nós Vos pedimos...' },
@@ -42,7 +48,7 @@ export const PRAYERS: Prayer[] = [
   { id: 'ave-fatima', title: 'Ave de Fátima', category: 'Marian', content: 'A treze de maio na Cova da Iria, apareceu brilhando a Virgem Maria. Ave, Ave, Ave Maria. Ave, Ave, Ave Maria. A três pastorinhos, cercada de luz, visita a Maria, a Mãe de Jesus.' },
   { id: 'alma-redemptoris', title: 'Alma Redemptoris Mater', category: 'Marian', content: 'Ó Mãe do Redentor, que permaneces Porta do Céu, e Estrela do Mar, socorre o povo que cai e que procura levantar-se. Tu, que geraste, diante do espanto da natureza, o teu Santo Criador, Virgem antes e depois, acolhendo o Ave da boca de Gabriel, tem piedade dos pecadores.' },
   { id: 'virgem-silencio', title: 'Oração à Virgem do Silêncio', category: 'Marian', content: 'Senhora do Silêncio, ensina-me a calar para ouvir a voz de Deus. Fazei que o meu coração seja uma morada silenciosa onde a Palavra de Deus possa habitar e frutificar.' },
-  { id: 'desatadora', title: 'Nossa Senhora Desatadora dos Nós', category: 'Marian', content: 'Santa Maria, cheia da presença de Deus, durante os dias de tua vida aceitaste com toda a humildade a vontade do Pai, e o Maligno nunca foi capaz de te envolver com suas confusões. Junto a teu Filho, intercedeste por nossas dificuldades e, com toda simplicidade e paciência, nos deste exemplo de como desenredar o emaranhado de nossas vidas. E, ao permaneceres para sempre como Nossa Mãe, pões em ordem e fazes mais claros os laços que nos unem ao Senhor. Santa Maria, Mãe de Deus e nossa Mãe, tu que com coração materno desatas os nós que entorpecem nossa vida, te pedimos que recebas em tuas mãos (nome da pessoa) e que a livres das amarras e confusões com que o nosso inimigo a castiga. Por tua graça, por tua intercessão, com teu exemplo, livra-nos de todo o mal, Senhora nossa, e desata os nós que impedem de nos unirmos a Deus, para que, livres de toda confusão e erros, O louvemos em todas as coisas, coloquemos n’Ele nossos corações e possamos servi-Lo sempre em nossos irmãos. Amém.' },
+  { id: 'desatadora', title: 'Nossa Senhora Desatadora dos Nós', category: 'Marian', content: 'Santa Maria, cheia de graça, o Senhor é convosco, bendita sois vós entre as mulheres e bendito é o fruto do vosso ventre, Jesus. Santa Maria, Mãe de Deus e nossa Mãe, tu que com coração materno desatas os nós que entorpecem nossa vida, te pedimos que recebas em tuas mãos (nome da pessoa) e que a livres das amarras e confusões com que o nosso inimigo a castiga. Por tua graça, por tua intercessão, com teu exemplo, livra-nos de todo o mal, Senhora nossa, e desata os nós que impedem de nos unirmos a Deus, para que, livres de toda confusão e erros, O louvemos em todas as coisas, coloquemos n’Ele nossos corações e possamos servi-Lo sempre em nossos irmãos. Amém.' },
   { id: 'imaculada', title: 'Oração à Imaculada Conceição', category: 'Marian', content: 'Ó Deus, que pela Imaculada Conceição da Virgem preparastes para o vosso Filho digna morada, nós vos suplicamos que, assim como, prevendo a morte do vosso Filho, Vós a preservastes de toda a mancha, concedais também a nós, por sua intercessão, chegar até Vós purificados de todo o pecado. Por Nosso Senhor Jesus Cristo. Amém.' },
   { id: 'consagracao-montfort', title: 'Pequena Consagração (São Luís)', category: 'Marian', content: 'Eu vos escolho hoje, ó Maria, na presença de toda a corte celeste, por minha Mãe e minha Rainha. Eu vos entrego e consagro, com toda a submissão e amor, o meu corpo e a minha alma, os meus bens interiores e exteriores, e o próprio valor das minhas boas obras passadas, presentes e futuras, deixando-vos inteiro e pleno direito de dispor de mim e de tudo o que me pertence, sem exceção alguma, segundo o vosso beneplácito, para a maior glória de Deus, no tempo e na eternidade.' },
   { id: 'ladainha-ns', title: 'Ladainha de Nossa Senhora', category: 'Marian', content: 'Senhor, tende piedade de nós.\nJesus Cristo, tende piedade de nós.\nSenhor, tende piedade de nós.\n\nJesus Cristo, ouvi-nos.\nJesus Cristo, atendei-nos.\n\nPai celeste que sois Deus, tende piedade de nós.\nFilho, Redentor do mundo, que sois Deus, tende piedade de nós.\nEspírito Santo, que sois Deus, tende piedade de nós.\nSantíssima Trindade, que sois um só Deus, tende piedade de nós.\n\nSanta Maria, rogai por nós.\nSanta Mãe de Deus, rogai por nós.\nSanta Virgem das virgens, rogai por nós.\nMãe de Jesus Cristo, rogai por nós.\n(E assim segue com todas as invocações...)\n\nCordeiro de Deus, que tirais os pecados do mundo, perdoai-nos, Senhor.\nCordeiro de Deus, que tirais os pecados do mundo, ouvi-nos, Senhor.\nCordeiro de Deus, que tirais os pecados do mundo, tende piedade de nós.' },
@@ -509,6 +515,39 @@ export const CHURCH_MINISTRIES = [
   }
 ];
 
+export const LITURGICAL_OBJECTS = [
+  {
+    id: 'calice',
+    title: 'Cálice e Patena',
+    desc: 'O vaso sagrado mais importante. Nele se consagra o Vinho que se torna o Sangue de Cristo. A Patena é o prato onde se consagra a Hóstia.',
+    icon: 'Grape'
+  },
+  {
+    id: 'ostensorio',
+    title: 'Ostensório',
+    desc: 'Objeto utilizado para expor o Santíssimo Sacramento para adoração dos fiéis. Geralmente tem forma de sol, indicando que Cristo é a Luz do Mundo.',
+    icon: 'Sun'
+  },
+  {
+    id: 'ambula',
+    title: 'Cibório (Âmbula)',
+    desc: 'Semelhante ao cálice, mas com tampa. Serve para guardar as Hóstias consagradas no sacrário e distribuí-las aos fiéis.',
+    icon: 'Circle'
+  },
+  {
+    id: 'turibulo',
+    title: 'Turíbulo e Naveta',
+    desc: 'Recipiente suspenso por correntes onde se queima o incenso. A fumaça que sobe simboliza nossas orações subindo aos céus e a presença sagrada de Deus.',
+    icon: 'Cloud'
+  },
+  {
+    id: 'galhetas',
+    title: 'Galhetas',
+    desc: 'Pequenos jarros que contêm a água e o vinho que serão usados na consagração. A mistura da água no vinho simboliza a união da divindade de Cristo com a nossa humanidade.',
+    icon: 'Droplet'
+  }
+];
+
 export const MARIAN_DOGMAS = [
   {
     id: 'mae-de-deus',
@@ -791,6 +830,42 @@ export const CATECHISM_CONTENT = [
       { id: 'pec-5', title: 'Gula vs Temperança', content: 'O excesso é vencido pelo equilíbrio.' },
       { id: 'pec-6', title: 'Inveja vs Caridade', content: 'A tristeza pelo bem alheio é vencida pelo amor.' },
       { id: 'pec-7', title: 'Preguiça vs Diligência', content: 'O desânimo é vencido pelo fervor no trabalho.' }
+    ]
+  },
+  {
+    id: 'cenaculo',
+    title: 'Cenáculo com Maria',
+    items: [
+      { id: 'cen-1', title: 'O que é?', content: 'O Cenáculo é uma reunião de oração inspirada nos Apóstolos reunidos com Maria no Cenáculo de Jerusalém, aguardando Pentecostes. É um pedido urgente de Nossa Senhora através do Movimento Sacerdotal Mariano (MSM).' },
+      { id: 'cen-2', title: 'Estrutura', content: '1. Invocação ao Espírito Santo; 2. Oração do Terço; 3. Leitura de uma mensagem do Livro Azul; 4. Consagração ao Imaculado Coração.' },
+      { id: 'cen-3', title: 'A Promessa', content: 'O objetivo principal é pedir o Segundo Pentecostes: uma descida poderosa do Espírito Santo para renovar a face da Terra e purificar a Igreja.' }
+    ]
+  },
+  {
+    id: 'advento',
+    title: 'O Santo Advento',
+    items: [
+      { id: 'adv-1', title: 'Significado', content: 'É o tempo de "espera" e preparação para o Natal. Dura 4 semanas. Liturgicamente, inicia o Ano da Igreja.' },
+      { id: 'adv-2', title: 'A Coroa do Advento', content: 'Círculo de ramos verdes com 4 velas. Simboliza a eternidade de Deus e a luz de Cristo chegando. Acende-se uma vela por domingo.' },
+      { id: 'adv-3', title: 'As Velas', content: '1ª (Roxa): Profecia/Esperança. 2ª (Roxa): Belém/Fé. 3ª (Rosa): Pastores/Alegria (Gaudete). 4ª (Roxa): Anjos/Paz.' }
+    ]
+  },
+  {
+    id: 'quaresma',
+    title: 'A Santa Quaresma',
+    items: [
+      { id: 'qua-1', title: 'O Deserto', content: '40 dias de preparação para a Páscoa, imitando os 40 dias de Jesus no deserto. Tempo de conversão e penitência.' },
+      { id: 'qua-2', title: 'Os 3 Pilares', content: 'Oração (para a alma), Jejum (para o corpo) e Esmola (para o próximo).' },
+      { id: 'qua-3', title: 'Cinzas', content: 'Inicia na Quarta-feira de Cinzas ("Lembra-te que és pó"). A cor litúrgica é o Roxo.' }
+    ]
+  },
+  {
+    id: 'quaresma-miguel',
+    title: 'Quaresma de São Miguel',
+    items: [
+      { id: 'mig-1', title: 'Origem', content: 'Devoção criada por São Francisco de Assis. Ele se retirava para o Monte Alverne para jejuar e rezar em honra ao Arcanjo.' },
+      { id: 'mig-2', title: 'Quando Rezar', content: 'Inicia em 15 de agosto (Assunção) e termina em 29 de setembro (Festa dos Arcanjos).' },
+      { id: 'mig-3', title: 'Como fazer', content: 'Reza-se diariamente a coroinha de São Miguel ou o pequeno exorcismo, com alguma penitência, pedindo proteção na batalha espiritual.' }
     ]
   }
 ];

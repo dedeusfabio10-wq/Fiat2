@@ -193,7 +193,7 @@ const Rosary: React.FC<{ mystery: Mystery, onComplete: () => void, voice: 'femal
                  navigator.share({ 
                    title: 'Fiat - Oração', 
                    text: `Rezei o Santo Terço hoje com o app Fiat. Junte-se a mim em oração! 🙏✨` 
-                 });
+                 }).catch((err) => console.log('Share dismissed', err));
                } else {
                  toast.success('Link copiado para compartilhar!');
                }

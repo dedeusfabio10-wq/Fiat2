@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Button, Input } from '../ui/UIComponents';
-import { ArrowLeft, Sun, Moon, Sunset, Plus, X, Search, CalendarDays, ArrowRight, User } from 'lucide-react';
+import { ArrowLeft, Sun, Moon, Sunset, Plus, X, Search, CalendarDays, ArrowRight, User, Loader2 } from 'lucide-react';
 import { PRAYERS, DEVOTIONAL_ROSARIES, NOVENAS } from '../constants';
 import { PlanItem, SpiritualPlan } from '../types';
 import { addPlan } from '../services/storage';
@@ -21,6 +21,7 @@ const PlanCreatorPage: React.FC = () => {
   const [duration, setDuration] = useState('30');
   const [startDate, setStartDate] = useState(getLocalDateStr()); 
   const [endDateDisplay, setEndDateDisplay] = useState('');
+  const [isSaving, setIsSaving] = useState(false);
 
   const [morning, setMorning] = useState<PlanItem[]>([]);
   const [afternoon, setAfternoon] = useState<PlanItem[]>([]);
@@ -81,18 +82,20 @@ const PlanCreatorPage: React.FC = () => {
       if (section === 'night') setNight(night.filter(i => i.id !== id));
   };
 
-  const handleSave = () => {
+  const handleSave = async () => {
       if (!title.trim()) {
           toast.error("Dê um nome ao seu plano.");
           return;
       }
+
+      setIsSaving(true);
 
       if ("Notification" in window && Notification.permission !== "granted") {
           Notification.requestPermission();
       }
 
       const newPlan: SpiritualPlan = {
-          id: Math.random().toString(36).substr(2, 9),
+          id: '', // Será gerado no DB
           title,
           spiritualDirector: spiritualDirector.trim() || undefined,
           durationDays: parseInt(duration) || 30,
@@ -108,9 +111,15 @@ const PlanCreatorPage: React.FC = () => {
           }
       };
 
-      addPlan(newPlan);
-      toast.success("Plano criado com sucesso!");
-      navigate('/planner');
+      const success = await addPlan(newPlan);
+      setIsSaving(false);
+
+      if (success) {
+          toast.success("Plano salvo na nuvem com sucesso!");
+          navigate('/planner');
+      } else {
+          toast.error("Erro ao salvar. Verifique sua conexão.");
+      }
   };
 
   return (
@@ -209,8 +218,8 @@ const PlanCreatorPage: React.FC = () => {
           />
       </div>
 
-      <Button variant="sacred" className="w-full mt-8 h-12 text-lg shadow-xl" onClick={handleSave}>
-          Salvar Plano
+      <Button variant="sacred" className="w-full mt-8 h-12 text-lg shadow-xl" onClick={handleSave} disabled={isSaving}>
+          {isSaving ? <Loader2 className="animate-spin" /> : 'Salvar Plano'}
       </Button>
 
       {isModalOpen && (

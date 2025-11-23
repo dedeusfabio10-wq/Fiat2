@@ -21,6 +21,8 @@ import ViaSacraPage from './pages/ViaSacra';
 import PlanCreatorPage from './pages/PlanCreator';
 import NovenaDetailPage from './pages/NovenaDetail';
 import AdminPage from './pages/Admin';
+import CenaculoPage from './pages/Cenaculo';
+import AdventoPage from './pages/Advento';
 
 interface AppContextType {
   profile: UserProfile;
@@ -142,6 +144,8 @@ const App: React.FC = () => {
             <Route path="/calendar" element={<CalendarPage />} />
             <Route path="/prayers" element={<PrayersPage />} />
             <Route path="/rosary" element={<RosaryPage />} />
+            <Route path="/cenaculo" element={<CenaculoPage />} />
+            <Route path="/advento" element={<AdventoPage />} />
             <Route path="/planner" element={<PlannerPage />} />
             <Route path="/planner/create" element={<PlanCreatorPage />} />
             <Route path="/catechism" element={<CatechismPage />} />
