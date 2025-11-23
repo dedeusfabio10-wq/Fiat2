@@ -75,31 +75,40 @@ const PremiumModal: React.FC<PremiumModalProps> = ({ isOpen, onClose }) => {
               expiresAt.setDate(now.getDate() + 30);
           }
 
-          // 1. Salvar no Supabase (UPSERT para garantir que crie se não existir)
-          const { data: { user } } = await supabase.auth.getUser();
+          // 1. Autenticação
+          const { data: { user }, error: authError } = await supabase.auth.getUser();
           
-          if (user) {
-              const payload = {
-                  id: user.id,
-                  email: user.email,
-                  is_premium: true,
-                  premium_expires_at: expiresAt.toISOString(),
-                  subscription_type: plan,
-                  subscription_method: 'pix_manual_check',
-                  updated_at: now.toISOString()
-              };
-
-              const { error } = await supabase
-                  .from('profiles')
-                  .upsert(payload); // UPSERT É CRÍTICO AQUI
-
-              if (error) {
-                  console.error('Erro ao salvar premium no DB:', error);
-                  throw new Error('Falha na conexão.');
-              }
+          if (authError || !user) {
+              throw new Error("Erro de autenticação: Usuário não encontrado. Faça login novamente.");
           }
 
-          // 2. Atualiza estado local (Otimista)
+          const payload = {
+              is_premium: true,
+              premium_expires_at: expiresAt.toISOString(),
+              subscription_type: plan,
+              subscription_method: 'pix_manual_check',
+              updated_at: now.toISOString()
+          };
+
+          // 2. Tenta atualizar. Se falhar, verifica se é erro de RLS
+          const { error } = await supabase
+              .from('profiles')
+              .update(payload)
+              .eq('id', user.id);
+
+          if (error) {
+              console.error('❌ Erro detalhado Supabase:', error);
+              
+              if (error.code === '42501' || error.message?.includes('row-level security')) {
+                  throw new Error("Erro de Permissão: As tabelas do banco não permitem edição. Rode o SQL no Supabase.");
+              }
+              if (error.code === 'PGRST204' || error.code === '404') {
+                   throw new Error("Tabela 'profiles' não encontrada. Rode o SQL no Supabase.");
+              }
+              throw new Error(`Erro ao salvar: ${error.message}`);
+          }
+
+          // 3. Atualiza estado local (Otimista)
           updateProfile({
               ...profile,
               is_premium: true,
@@ -110,8 +119,11 @@ const PremiumModal: React.FC<PremiumModalProps> = ({ isOpen, onClose }) => {
 
           finishSuccess();
 
-      } catch (error) {
-          toast.error("Não foi possível salvar.", { description: "Tente novamente ou contate o suporte." });
+      } catch (error: any) {
+          console.error("Erro crítico no checkout:", error);
+          toast.error("Falha ao Ativar Premium", { 
+              description: error.message || "Verifique o console para mais detalhes." 
+          });
       } finally {
           setCheckingStatus(false);
       }
@@ -188,7 +200,7 @@ const PremiumModal: React.FC<PremiumModalProps> = ({ isOpen, onClose }) => {
                     </Button>
                     
                     <p className="text-[10px] text-gray-500 px-4">
-                        Ao clicar, criaremos seu perfil Premium na nuvem.
+                        Ao clicar, registraremos sua conta Premium no banco de dados.
                     </p>
 
                     <Button 

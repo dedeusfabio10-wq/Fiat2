@@ -75,6 +75,7 @@ const App: React.FC = () => {
       try {
           const user = await getCurrentUser();
           if (user) {
+            // Tenta buscar o perfil
             const { data, error } = await supabase
                .from('profiles')
                .select('*')
@@ -82,29 +83,68 @@ const App: React.FC = () => {
                .single();
             
             if (data) {
-                let updatedProfile = { 
-                    ...profile, 
-                    ...data,
-                    email: user.email || profile.email 
+                // Perfil encontrado, atualiza estado local
+                let updatedProfile: UserProfile = { 
+                    ...profile,
+                    name: data.name || profile.name,
+                    email: data.email || user.email || profile.email,
+                    photo: data.photo || profile.photo,
+                    is_premium: data.is_premium,
+                    premium_expires_at: data.premium_expires_at,
+                    streak: data.streak || 0,
+                    rosaries_prayed: data.rosaries_prayed || 0,
+                    
+                    // Mapeamento de Campos
+                    active_novenas: data.active_novenas || profile.active_novenas || [],
+                    favorites: data.favorites || profile.favorites || [],
+                    
+                    // Campos de Customização
+                    devotionalSaintId: data.devotional_saint_id,
+                    customTheme: data.custom_theme,
+                    favoriteQuote: data.favorite_quote,
+                    nightModeSpiritual: data.night_mode_spiritual,
+                    
+                    // Campos de Assinatura
+                    subscriptionType: data.subscription_type,
+                    subscriptionMethod: data.subscription_method,
+                    subscriptionId: data.subscription_id,
+                    
+                    onboarding_completed: true 
                 };
+                
                 updatedProfile = checkExpiration(updatedProfile);
                 setProfile(updatedProfile);
+                localStorage.setItem('fiat-profile', JSON.stringify(updatedProfile));
             } else {
-                // Se o usuário existe na Auth mas não na tabela profiles, criar agora
-                console.log("Perfil não encontrado, criando...");
-                const newProfile = {
+                // Perfil NÃO encontrado. Tenta criar manualmente se o trigger falhou.
+                console.log("Perfil não encontrado no DB, tentando criar...");
+                
+                const newProfileData = {
                     id: user.id,
                     email: user.email,
-                    name: user.email?.split('@')[0] || 'Alma Devota',
-                    created_at: new Date().toISOString()
+                    name: user.user_metadata?.name || user.email?.split('@')[0] || 'Alma Devota',
+                    created_at: new Date().toISOString(),
+                    is_premium: false,
+                    active_novenas: [],
+                    favorites: []
                 };
                 
                 const { error: insertError } = await supabase
                     .from('profiles')
-                    .upsert(newProfile);
+                    .insert([newProfileData]); // Usar insert ao invés de upsert para garantir criação
                 
                 if (!insertError) {
-                    setProfile(prev => ({ ...prev, ...newProfile }));
+                    console.log("Perfil criado manualmente com sucesso.");
+                    setProfile(prev => ({ 
+                        ...prev, 
+                        name: newProfileData.name, 
+                        email: newProfileData.email,
+                        onboarding_completed: true 
+                    }));
+                } else {
+                    // Se falhar, provavelmente é RLS bloqueando INSERT se não for o próprio usuário (mas aqui é o próprio)
+                    // ou o trigger correu e criou no meio tempo.
+                    console.warn("Falha na criação manual (pode já existir):", insertError);
                 }
             }
           }
@@ -113,14 +153,43 @@ const App: React.FC = () => {
       }
   };
 
+  // Inicialização e Listener de Auth
   useEffect(() => {
+    // Busca inicial
     fetchUserProfile();
+
+    // Listener para mudanças de estado (login/logout)
+    const { data: authListener } = supabase.auth.onAuthStateChange((event, session) => {
+       if (event === 'SIGNED_IN' || event === 'TOKEN_REFRESHED') {
+           // Pequeno delay para dar tempo ao trigger do banco rodar
+           setTimeout(fetchUserProfile, 1500);
+       }
+       if (event === 'SIGNED_OUT') {
+           setProfile({
+              name: '',
+              email: '',
+              is_premium: false,
+              streak: 0,
+              rosaries_prayed: 0,
+              favorites: [],
+              active_novenas: [],
+              onboarding_completed: false
+           });
+           localStorage.removeItem('fiat-profile');
+       }
+    });
+
+    return () => {
+        authListener.subscription.unsubscribe();
+    };
   }, []);
 
+  // Persistência local
   useEffect(() => {
     localStorage.setItem('fiat-profile', JSON.stringify(profile));
   }, [profile]);
 
+  // Áudio unlock
   useEffect(() => {
     const unlockAudio = () => {
         initAudio();
@@ -140,7 +209,36 @@ const App: React.FC = () => {
     };
   }, []);
 
-  const updateProfile = (p: UserProfile) => setProfile(p);
+  const updateProfile = async (p: UserProfile) => {
+      // Atualiza estado local imediatamente (Optimistic UI)
+      setProfile(p);
+      
+      // Atualiza no banco
+      try {
+          const user = await getCurrentUser();
+          if (user) {
+              const { error } = await supabase
+                  .from('profiles')
+                  .update({
+                      name: p.name,
+                      photo: p.photo,
+                      streak: p.streak,
+                      rosaries_prayed: p.rosaries_prayed,
+                      favorites: p.favorites,
+                      active_novenas: p.active_novenas,
+                      devotional_saint_id: p.devotionalSaintId,
+                      custom_theme: p.customTheme,
+                      favorite_quote: p.favoriteQuote,
+                      night_mode_spiritual: p.nightModeSpiritual
+                  })
+                  .eq('id', user.id);
+              
+              if (error) console.error('Erro ao salvar perfil no Supabase:', error);
+          }
+      } catch (e) {
+          console.error('Erro de conexão ao atualizar:', e);
+      }
+  };
 
   const refreshProfile = async () => {
       await fetchUserProfile();
