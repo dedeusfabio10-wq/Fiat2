@@ -1,3 +1,4 @@
+
 import { supabase } from './supabase';
 import { SpiritualPlan } from '../types';
 
@@ -33,10 +34,6 @@ export const getPlans = async (): Promise<SpiritualPlan[]> => {
       return [];
     }
 
-    // Mapeia o snake_case do banco para camelCase do frontend se necessário, 
-    // mas aqui assumimos que o frontend vai ler as propriedades corretamente ou fazemos o cast.
-    // Como definimos a tabela com snake_case mas o tipo TS é camelCase, precisamos ajustar:
-    
     return data.map((item: any) => ({
         id: item.id,
         title: item.title,
@@ -44,15 +41,46 @@ export const getPlans = async (): Promise<SpiritualPlan[]> => {
         durationDays: item.duration_days,
         startDate: item.start_date,
         createdAt: item.created_at,
-        streak: 0, // Campo calculado localmente ou novo campo no DB
-        progress: {}, // Campo novo no DB se quiser persistir progresso diário
-        notes: {},
+        streak: item.streak || 0,
+        progress: item.progress || {},
+        notes: item.notes || {},
         schedule: item.schedule || { morning: [], afternoon: [], night: [] }
     })) as SpiritualPlan[];
 
   } catch (e) {
     console.error("Erro no serviço de planos:", e);
     return [];
+  }
+};
+
+export const getPlanById = async (id: string): Promise<SpiritualPlan | null> => {
+  try {
+    const { data, error } = await supabase
+      .from('spiritual_plans')
+      .select('*')
+      .eq('id', id)
+      .single();
+
+    if (error || !data) {
+      console.error('Erro ao buscar plano:', error);
+      return null;
+    }
+
+    return {
+        id: data.id,
+        title: data.title,
+        spiritualDirector: data.spiritual_director,
+        durationDays: data.duration_days,
+        startDate: data.start_date,
+        createdAt: data.created_at,
+        streak: data.streak || 0,
+        progress: data.progress || {},
+        notes: data.notes || {},
+        schedule: data.schedule || { morning: [], afternoon: [], night: [] }
+    } as SpiritualPlan;
+
+  } catch (e) {
+    return null;
   }
 };
 
@@ -64,14 +92,16 @@ export const addPlan = async (plan: SpiritualPlan): Promise<boolean> => {
         return false;
     }
 
-    // Converter para formato do banco (snake_case)
     const dbPayload = {
         user_id: user.id,
         title: plan.title,
         spiritual_director: plan.spiritualDirector,
         duration_days: plan.durationDays,
         start_date: plan.startDate,
-        schedule: plan.schedule
+        schedule: plan.schedule,
+        progress: {},
+        notes: {},
+        streak: 0
     };
 
     const { error } = await supabase
@@ -87,6 +117,25 @@ export const addPlan = async (plan: SpiritualPlan): Promise<boolean> => {
     console.error("Erro ao salvar plano:", e);
     return false;
   }
+};
+
+export const updatePlan = async (plan: SpiritualPlan): Promise<boolean> => {
+    try {
+        const { error } = await supabase
+            .from('spiritual_plans')
+            .update({
+                progress: plan.progress,
+                streak: plan.streak,
+                notes: plan.notes
+            })
+            .eq('id', plan.id);
+        
+        if (error) throw error;
+        return true;
+    } catch (e) {
+        console.error("Erro ao atualizar plano", e);
+        return false;
+    }
 };
 
 export const deletePlan = async (id: string): Promise<boolean> => {

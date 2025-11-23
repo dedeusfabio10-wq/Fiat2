@@ -44,7 +44,6 @@ const PremiumModal: React.FC<PremiumModalProps> = ({ isOpen, onClose }) => {
       
       if (!opened) {
           toast.error("Pop-up bloqueado", { description: "Permita pop-ups para realizar o pagamento." });
-          // Fallback se o popup for bloqueado
           window.location.href = subData.init_point; 
       } else {
           setStep('checkout');
@@ -76,20 +75,23 @@ const PremiumModal: React.FC<PremiumModalProps> = ({ isOpen, onClose }) => {
               expiresAt.setDate(now.getDate() + 30);
           }
 
-          // 1. Salvar no Supabase (Garante persistência)
+          // 1. Salvar no Supabase (UPSERT para garantir que crie se não existir)
           const { data: { user } } = await supabase.auth.getUser();
           
           if (user) {
+              const payload = {
+                  id: user.id,
+                  email: user.email,
+                  is_premium: true,
+                  premium_expires_at: expiresAt.toISOString(),
+                  subscription_type: plan,
+                  subscription_method: 'pix_manual_check',
+                  updated_at: now.toISOString()
+              };
+
               const { error } = await supabase
                   .from('profiles')
-                  .update({
-                      is_premium: true,
-                      premium_expires_at: expiresAt.toISOString(),
-                      subscription_type: plan,
-                      subscription_method: 'pix_manual_check',
-                      updated_at: now.toISOString()
-                  })
-                  .eq('id', user.id);
+                  .upsert(payload); // UPSERT É CRÍTICO AQUI
 
               if (error) {
                   console.error('Erro ao salvar premium no DB:', error);
@@ -186,7 +188,7 @@ const PremiumModal: React.FC<PremiumModalProps> = ({ isOpen, onClose }) => {
                     </Button>
                     
                     <p className="text-[10px] text-gray-500 px-4">
-                        Ao clicar, salvaremos seu status Premium na nuvem.
+                        Ao clicar, criaremos seu perfil Premium na nuvem.
                     </p>
 
                     <Button 
@@ -226,7 +228,7 @@ const PremiumModal: React.FC<PremiumModalProps> = ({ isOpen, onClose }) => {
                     <QrCode className="text-green-400 shrink-0" size={16} />
                     <p className="text-[11px] text-gray-300 leading-tight">
                         <strong>Pagamento Único:</strong> Aceitamos Pix e Cartão. <br/>
-                        Use o mesmo e-mail da conta para facilitar.
+                        Sem assinaturas recorrentes.
                     </p>
                 </div>
 
@@ -241,7 +243,7 @@ const PremiumModal: React.FC<PremiumModalProps> = ({ isOpen, onClose }) => {
                     </Button>
                     
                     <p className="text-center text-[10px] text-gray-500 flex items-center justify-center gap-1">
-                        <Shield size={10} /> Ambiente seguro • Sem renovação automática
+                        <Shield size={10} /> Ambiente seguro • Mercado Pago
                     </p>
                 </div>
                 

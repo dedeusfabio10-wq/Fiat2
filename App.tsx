@@ -19,6 +19,7 @@ import CatechismPage from './pages/Catechism';
 import CalendarPage from './pages/Calendar';
 import ViaSacraPage from './pages/ViaSacra';
 import PlanCreatorPage from './pages/PlanCreator';
+import PlanDetailPage from './pages/PlanDetail';
 import NovenaDetailPage from './pages/NovenaDetail';
 import AdminPage from './pages/Admin';
 import CenaculoPage from './pages/Cenaculo';
@@ -74,24 +75,37 @@ const App: React.FC = () => {
       try {
           const user = await getCurrentUser();
           if (user) {
-            const { data } = await supabase
+            const { data, error } = await supabase
                .from('profiles')
                .select('*')
                .eq('id', user.id)
                .single();
             
             if (data) {
-                // Mescla e verifica expiração
                 let updatedProfile = { 
                     ...profile, 
                     ...data,
                     email: user.email || profile.email 
                 };
-                
                 updatedProfile = checkExpiration(updatedProfile);
                 setProfile(updatedProfile);
-            } else if (!profile.email) {
-                setProfile(prev => ({ ...prev, email: user.email }));
+            } else {
+                // Se o usuário existe na Auth mas não na tabela profiles, criar agora
+                console.log("Perfil não encontrado, criando...");
+                const newProfile = {
+                    id: user.id,
+                    email: user.email,
+                    name: user.email?.split('@')[0] || 'Alma Devota',
+                    created_at: new Date().toISOString()
+                };
+                
+                const { error: insertError } = await supabase
+                    .from('profiles')
+                    .upsert(newProfile);
+                
+                if (!insertError) {
+                    setProfile(prev => ({ ...prev, ...newProfile }));
+                }
             }
           }
       } catch (error) {
@@ -148,6 +162,7 @@ const App: React.FC = () => {
             <Route path="/advento" element={<AdventoPage />} />
             <Route path="/planner" element={<PlannerPage />} />
             <Route path="/planner/create" element={<PlanCreatorPage />} />
+            <Route path="/planner/:id" element={<PlanDetailPage />} />
             <Route path="/catechism" element={<CatechismPage />} />
             <Route path="/profile" element={<ProfilePage />} />
             <Route path="/viasacra" element={<ViaSacraPage />} />
