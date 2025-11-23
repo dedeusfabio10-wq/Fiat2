@@ -92,7 +92,7 @@ const PlanDetailPage: React.FC = () => {
 
   // --- CÁLCULO DE DIAS ---
   const dayInfo = useMemo(() => {
-      if (!plan) return { current: 0, total: 0, label: 'Carregando...' };
+      if (!plan) return { current: 0, total: 0, label: 'Carregando...', status: 'loading', progress: 0 };
       
       const start = new Date(plan.startDate);
       // Zerar horas para evitar problemas de fuso na conta de dias
