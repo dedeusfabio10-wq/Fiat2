@@ -133,7 +133,7 @@ const App: React.FC = () => {
     fetchUserProfile();
 
     // Listener para mudanças de estado (login/logout)
-    const { data: authListener } = supabase.auth.onAuthStateChange((event, session) => {
+    const { data: authListener } = supabase.auth.onAuthStateChange((event: any, session: any) => {
        if (event === 'SIGNED_IN' || event === 'TOKEN_REFRESHED') {
            // Pequeno delay para dar tempo ao trigger do banco rodar
            setTimeout(fetchUserProfile, 1000);
