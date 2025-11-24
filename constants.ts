@@ -215,10 +215,10 @@ export const CHURCH_HISTORY = [
 export const HOLY_MASS = {
   intro: { title: 'O Mistério da Fé', text: 'A Santa Missa é a renovação incruenta do sacrifício do Calvário.' },
   rites: [
-    { part: 'Ritos Iniciais', desc: 'Preparação e Ato Penitencial', actions: [{name: 'Sinal da Cruz', meaning: 'Início em nome da Trindade'}, {name: 'Kyrie', meaning: 'Pedido de perdão'}] },
-    { part: 'Liturgia da Palavra', desc: 'Deus fala ao seu povo', actions: [{name: 'Leituras', meaning: 'Antigo e Novo Testamento'}, {name: 'Homilia', meaning: 'Explicação da Palavra'}] },
-    { part: 'Liturgia Eucarística', desc: 'O Sacrifício', actions: [{name: 'Ofertório', meaning: 'Entrega dos dons'}, {name: 'Consagração', meaning: 'Transubstanciação'}]},
-    { part: 'Ritos Finais', desc: 'Envio', actions: [{name: 'Bênção', meaning: 'Envio para a missão'}]}
+    { part: 'Ritos Iniciais', desc: 'Preparação e Ato Penitencial', highlight: false, actions: [{name: 'Sinal da Cruz', meaning: 'Início em nome da Trindade'}, {name: 'Kyrie', meaning: 'Pedido de perdão'}] },
+    { part: 'Liturgia da Palavra', desc: 'Deus fala ao seu povo', highlight: false, actions: [{name: 'Leituras', meaning: 'Antigo e Novo Testamento'}, {name: 'Homilia', meaning: 'Explicação da Palavra'}] },
+    { part: 'Liturgia Eucarística', desc: 'O Sacrifício', highlight: true, actions: [{name: 'Ofertório', meaning: 'Entrega dos dons'}, {name: 'Consagração', meaning: 'Transubstanciação'}]},
+    { part: 'Ritos Finais', desc: 'Envio', highlight: false, actions: [{name: 'Bênção', meaning: 'Envio para a missão'}]}
   ],
   spiritual: { title: 'Mundo Invisível', desc: 'O que acontece espiritualmente', points: ['O céu se abre', 'Anjos ao redor do altar', 'As almas do purgatório recebem alívio'] },
   etiquette: ['Chegar cedo', 'Vestir-se com modéstia', 'Fazer jejum eucarístico de 1 hora', 'Participar ativamente das respostas']
