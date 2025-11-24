@@ -15,6 +15,8 @@ export interface Novena {
   duration: number;
   days: { title: string; reflection: string; prayer: string }[];
   standardPrayer?: string;
+  fixedDay?: number;
+  fixedMonth?: number;
 }
 
 export interface Saint {
@@ -95,7 +97,7 @@ export interface UserProfile {
   active_novenas: {
     novenaId: string;
     currentDay: number;
-    lastDate: string;
+    lastDate: string | null; // Pode ser null se acabou de se inscrever
     startDate: string;
   }[];
   devotionalSaintId?: string;
