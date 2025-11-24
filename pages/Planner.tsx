@@ -3,7 +3,7 @@ import React, { useContext, useEffect, useState, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { AppContext } from '../contexts/AppContext';
 import { Button } from '../ui/UIComponents';
-import { Crown, Plus, Calendar, Lock, Trash2, User, Play, Pause, Volume2, Music, Sparkles, Loader2, CheckCircle2, Clock, Check } from 'lucide-react';
+import { Crown, Plus, Calendar, Lock, Trash2, User, Play, Pause, Volume2, Music, Sparkles, Loader2, CheckCircle2, Clock, Check, RotateCw } from 'lucide-react';
 import { getPlans, deletePlan } from '../services/storage';
 import { SpiritualPlan } from '../types';
 import { toast } from 'sonner';
@@ -35,7 +35,7 @@ const SACRED_MUSIC = [
 ];
 
 const PlannerPage: React.FC = () => {
-  const { profile, updateProfile, isLoadingProfile } = useContext(AppContext);
+  const { profile, isLoadingProfile, refreshProfile } = useContext(AppContext);
   const navigate = useNavigate();
   const [plans, setPlans] = useState<SpiritualPlan[]>([]);
   const [loadingPlans, setLoadingPlans] = useState(true);
@@ -120,23 +120,19 @@ const PlannerPage: React.FC = () => {
     toast.success('Aba de pagamento aberta. Confirme abaixo.');
   };
 
-  // Função de Liberação Imediata (Optimistic Update)
+  // Função de Verificação Real (Sem otimismo)
   const handleConfirmPayment = async () => {
-      const now = new Date();
-      const expiresAt = new Date();
-      expiresAt.setDate(now.getDate() + 30);
-
-      // 1. Libera no App Instantaneamente
-      updateProfile({ 
-          ...profile, 
-          is_premium: true,
-          premium_expires_at: expiresAt.toISOString()
+      setLoadingPayment(true);
+      
+      // Atualiza dados do servidor
+      await refreshProfile();
+      
+      toast.info("Verificando...", { 
+          description: "Se o pagamento foi processado, seu acesso será liberado automaticamente."
       });
       
-      toast.success("Acesso Liberado! Bem-vindo(a) ao Premium. ♡");
-
-      // 2. O Webhook atualizará o banco de dados em paralelo.
-      // Se o webhook falhar ou atrasar, o usuário já tem acesso na sessão atual.
+      setLoadingPayment(false);
+      // Se o perfil atualizou, o componente vai re-renderizar e sair desta tela de bloqueio
   };
 
   // --- LOADING STATE ---
@@ -174,42 +170,49 @@ const PlannerPage: React.FC = () => {
                  <div className="bg-yellow-500/10 p-3 rounded-lg border border-yellow-500/20">
                      <p className="text-xs text-yellow-200">Conclua o pagamento na nova aba e confirme:</p>
                  </div>
-                 <button
+                 <Button
+                    variant="sacred"
                     onClick={handleConfirmPayment}
-                    className="w-full bg-green-600 text-white font-bold py-5 rounded-xl text-lg shadow-lg hover:bg-green-500 transition-all flex items-center justify-center gap-2 animate-pulse"
+                    className="w-full h-14 text-lg font-bold animate-pulse gap-2 shadow-[0_0_20px_rgba(34,197,94,0.4)]"
+                    disabled={loadingPayment}
                  >
-                    <Check size={24} /> JÁ FIZ O PAGAMENTO
-                 </button>
-                 <button 
+                    {loadingPayment ? <Loader2 className="animate-spin" /> : <><Check size={20} /> JÁ FIZ O PAGAMENTO</>}
+                 </Button>
+                 
+                 <Button 
+                    variant="ghost"
+                    size="sm"
                     onClick={() => setPaymentPending(false)} 
-                    className="text-xs text-gray-400 underline w-full"
+                    className="text-xs text-gray-400 underline w-full hover:text-white"
                  >
-                    Voltar / Tentar Novamente
-                 </button>
+                    <RotateCw size={12} className="mr-1" /> Tentar Novamente
+                 </Button>
              </div>
           ) : (
-             <>
+             <div className="space-y-4">
                 {/* Botão Mensal */}
-                <button
+                <Button
+                    variant="outline"
                     onClick={() => handleSubscribe('monthly')}
                     disabled={loadingPayment}
-                    className="w-full bg-white text-black font-bold py-5 rounded-xl text-lg shadow-lg hover:shadow-xl transition-all"
+                    className="w-full border-white/20 hover:bg-white/10 h-14 text-base"
                 >
                     {loadingPayment ? 'Processando...' : 'R$ 4,90 - Assinatura Mensal'}
-                </button>
+                </Button>
 
                 {/* Botão Anual (Melhor oferta) */}
-                <button
+                <Button
+                    variant="sacred"
                     onClick={() => handleSubscribe('yearly')}
                     disabled={loadingPayment}
-                    className="w-full bg-gradient-to-r from-yellow-500 to-yellow-400 text-black font-bold py-6 rounded-xl text-xl shadow-2xl relative overflow-hidden"
+                    className="w-full h-16 text-lg shadow-xl relative overflow-hidden border-2 border-yellow-200/20"
                 >
-                    <span className="absolute -top-1 -right-1 bg-green-500 text-black text-xs px-3 py-1 rounded-bl-lg font-bold">
-                    MELHOR OFERTA
+                    <span className="absolute -top-2 -right-8 bg-green-600 text-white text-[9px] px-8 py-1 rotate-45 font-bold shadow-sm">
+                    OFERTA
                     </span>
                     {loadingPayment ? 'Processando...' : 'R$ 39,90 - Assinatura Anual'}
-                </button>
-             </>
+                </Button>
+             </div>
           )}
 
           <p className="text-xs text-gray-400 mt-4">

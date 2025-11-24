@@ -2,8 +2,7 @@ import React, { useState, useEffect, useContext } from 'react';
 import { AppContext } from '../contexts/AppContext';
 import { Button } from './UIComponents';
 import { createSubscription } from '../services/mercadopago';
-import { supabase } from '../services/supabase';
-import { X, Check, Crown, Loader2, CreditCard, Shield, Sparkles, ExternalLink, QrCode, AlertTriangle, ArrowLeft } from 'lucide-react';
+import { X, Check, Crown, Loader2, CreditCard, Shield, Sparkles, ExternalLink, QrCode, AlertTriangle, ArrowLeft, RotateCw } from 'lucide-react';
 import { toast } from 'sonner';
 
 interface PremiumModalProps {
@@ -12,7 +11,7 @@ interface PremiumModalProps {
 }
 
 const PremiumModal: React.FC<PremiumModalProps> = ({ isOpen, onClose }) => {
-  const { profile, updateProfile } = useContext(AppContext);
+  const { profile, refreshProfile } = useContext(AppContext);
   const [plan, setPlan] = useState<'monthly' | 'yearly'>('monthly');
   const [loading, setLoading] = useState(false);
   const [checkingStatus, setCheckingStatus] = useState(false);
@@ -29,7 +28,6 @@ const PremiumModal: React.FC<PremiumModalProps> = ({ isOpen, onClose }) => {
   const handleSubscribe = async () => {
       setLoading(true);
       
-      // Chama o serviço que se comunica com a API Serverless
       const subData = await createSubscription(plan);
       
       if (subData.error || !subData.init_point) {
@@ -40,63 +38,37 @@ const PremiumModal: React.FC<PremiumModalProps> = ({ isOpen, onClose }) => {
           return;
       }
 
-      // Abre em nova aba
       const opened = window.open(subData.init_point, '_blank');
-      
-      // Avança para a tela de confirmação imediatamente
       setStep('checkout');
       
       if (!opened) {
           toast.error("Pop-up bloqueado", { description: "Permita pop-ups ou clique no link abaixo." });
-          // Fallback: Redireciona na mesma aba se pop-up falhar, mas idealmente mantemos o app aberto
-          // window.location.href = subData.init_point; 
       } else {
           toast.success('Página de pagamento aberta!', { 
-              description: 'Após pagar, confirme clicando no botão abaixo.',
+              description: 'Após pagar, clique em Confirmar Pagamento.',
               duration: 5000 
           });
       }
       setLoading(false);
   };
 
-  // LÓGICA DE LIBERAÇÃO IMEDIATA (SOLICITAÇÃO DO USUÁRIO)
+  // LÓGICA REAL: Verifica no servidor se o webhook já processou
   const handleCheckStatus = async () => {
       if (checkingStatus) return;
       setCheckingStatus(true);
       
-      // 1. Define Vencimento (Otimista)
-      const now = new Date();
-      const expiresAt = new Date();
-      
-      if (plan === 'yearly') {
-          expiresAt.setFullYear(now.getFullYear() + 1);
-      } else {
-          expiresAt.setDate(now.getDate() + 30);
-      }
+      // Tenta atualizar os dados do servidor
+      await refreshProfile();
 
-      const expirationString = expiresAt.toISOString();
-
-      // 2. LIBERAÇÃO IMEDIATA NO APP (Optimistic UI)
-      updateProfile({
-          ...profile,
-          is_premium: true,
-          premium_expires_at: expirationString,
-          subscriptionType: plan,
-          subscriptionMethod: 'pix_manual_check'
+      toast.info("Verificando assinatura...", {
+          description: "Se o pagamento foi concluído, seu acesso será liberado em instantes.",
+          icon: <Loader2 className="animate-spin" />
       });
 
-      // Feedback Visual
-      toast.success("Premium Liberado! ♡", {
-          description: "Seu acesso foi desbloqueado.",
-          icon: <Crown className="text-sacred-gold" />,
-          duration: 5000
-      });
-
-      // Fecha o modal imediatamente
-      onClose();
+      // Fecha o modal para o usuário ver se atualizou
+      // Se o webhook for rápido, o perfil já estará atualizado na UI
       setCheckingStatus(false);
-      
-      // 3. O Webhook tratará a atualização real no Banco de Dados após a confirmação do pagamento.
+      onClose();
   };
 
   if (!isOpen) return null;
@@ -108,7 +80,6 @@ const PremiumModal: React.FC<PremiumModalProps> = ({ isOpen, onClose }) => {
       <div className="relative bg-[#0f172a] w-full max-w-md rounded-2xl border border-sacred-gold/30 shadow-2xl overflow-hidden flex flex-col max-h-[95vh]">
         
         <div className="p-6 pb-4 text-center bg-gradient-to-b from-sacred-gold/5 to-transparent relative">
-            {/* Esconde o botão X durante o checkout para evitar saída acidental */}
             {step === 'select' && (
                 <button onClick={onClose} className="absolute right-4 top-4 text-gray-500 hover:text-white"><X size={24} /></button>
             )}
@@ -141,8 +112,8 @@ const PremiumModal: React.FC<PremiumModalProps> = ({ isOpen, onClose }) => {
                 <div className="bg-blue-500/10 border border-blue-500/20 p-4 rounded-lg flex items-start gap-3 text-left">
                     <AlertTriangle size={20} className="text-blue-400 shrink-0 mt-0.5" />
                     <div className="text-sm text-gray-300">
-                        <strong className="text-blue-300 block mb-1">Importante:</strong>
-                        Após realizar o pagamento, <strong>clique no botão abaixo</strong> para liberar seu acesso imediatamente.
+                        <strong className="text-blue-300 block mb-1">Já pagou?</strong>
+                        Clique no botão abaixo para atualizar seu status. O sistema identificará seu pagamento automaticamente.
                     </div>
                 </div>
 
@@ -155,7 +126,7 @@ const PremiumModal: React.FC<PremiumModalProps> = ({ isOpen, onClose }) => {
                     >
                         {checkingStatus ? (
                             <>
-                                <Loader2 className="animate-spin" /> Liberando...
+                                <Loader2 className="animate-spin" /> Verificando...
                             </>
                         ) : (
                             <>
@@ -164,24 +135,24 @@ const PremiumModal: React.FC<PremiumModalProps> = ({ isOpen, onClose }) => {
                         )}
                     </Button>
                     
-                    <p className="text-[10px] text-gray-500 px-4">
-                        Ao clicar, o sistema libera seu Premium imediatamente.
-                    </p>
-
                     <div className="pt-4 flex justify-between items-center">
-                        <button 
+                        <Button 
+                            variant="ghost"
+                            size="sm"
                             onClick={() => setStep('select')}
                             className="text-xs text-gray-500 hover:text-white flex items-center gap-1"
                         >
-                            <ArrowLeft size={12} /> Voltar / Escolher outro plano
-                        </button>
+                            <ArrowLeft size={12} /> Voltar
+                        </Button>
                         
-                        <button 
-                            className="text-xs text-sacred-gold underline"
+                        <Button 
+                            variant="ghost"
+                            size="sm"
+                            className="text-xs text-sacred-gold underline hover:bg-sacred-gold/10"
                             onClick={() => handleSubscribe()} 
                         >
-                            Reabrir link de pagamento
-                        </button>
+                            <RotateCw size={12} className="mr-1"/> Reabrir Pagamento
+                        </Button>
                     </div>
                 </div>
             </div>
