@@ -6,6 +6,7 @@ import { UserProfile } from './types';
 import { initAudio } from './services/audio';
 import { supabase, getCurrentUser } from './services/supabase';
 import { AppContext } from './contexts/AppContext';
+import { RealtimeChannel } from '@supabase/supabase-js';
 
 // Pages
 import LandingPage from './pages/Landing';
@@ -44,25 +45,33 @@ const App: React.FC = () => {
   });
 
   const checkExpiration = (userProfile: UserProfile): UserProfile => {
+    // Se for premium e tiver data de expiração, verifica
     if (userProfile.is_premium && userProfile.premium_expires_at) {
         const expirationDate = new Date(userProfile.premium_expires_at);
         const now = new Date();
-        const daysLeft = Math.ceil((expirationDate.getTime() - now.getTime()) / (1000 * 60 * 60 * 24));
+        
+        // Adiciona uma margem de segurança de algumas horas para evitar bloqueio por fuso horário no dia do vencimento
+        // expirationDate.setHours(23, 59, 59, 999); 
 
-        if (now > expirationDate) {
-            console.log('Plano Premium Expirado');
+        if (now.getTime() > expirationDate.getTime()) {
+            console.log('Plano Premium Expirado em:', expirationDate);
             toast.error("Seu tempo Premium acabou.", { description: "Renove para continuar usando os recursos." });
+            // Retorna perfil sem premium, mas mantém dados
             return { ...userProfile, is_premium: false };
-        } else if (daysLeft <= 3 && daysLeft > 0) {
-             // Apenas avisa, mas mantém premium
-             // toast("Seu Premium vence em breve", { description: `Restam apenas ${daysLeft} dias.` });
+        } 
+        
+        // Cálculo de dias restantes para aviso (opcional)
+        const daysLeft = Math.ceil((expirationDate.getTime() - now.getTime()) / (1000 * 60 * 60 * 24));
+        if (daysLeft <= 3 && daysLeft > 0) {
+             // Apenas loga ou avisa discretamente se necessário
+             // console.log(`Restam ${daysLeft} dias de Premium`);
         }
     }
     return userProfile;
   };
 
   const fetchUserProfile = async () => {
-      setIsLoadingProfile(true);
+      // Não define loading true aqui para não piscar a tela se for um refresh silencioso
       try {
           const user = await getCurrentUser();
           if (user) {
@@ -74,13 +83,15 @@ const App: React.FC = () => {
                .single();
             
             if (data) {
+                console.log("Perfil sincronizado do servidor:", data.is_premium ? "PREMIUM" : "GRÁTIS");
+                
                 // Perfil encontrado, atualiza estado local
                 let updatedProfile: UserProfile = { 
                     ...profile,
                     name: data.name || profile.name,
                     email: data.email || user.email || profile.email,
                     photo: data.photo || profile.photo,
-                    is_premium: data.is_premium,
+                    is_premium: data.is_premium, // A verdade vem do banco
                     premium_expires_at: data.premium_expires_at,
                     streak: data.streak || 0,
                     rosaries_prayed: data.rosaries_prayed || 0,
@@ -103,15 +114,14 @@ const App: React.FC = () => {
                     onboarding_completed: true 
                 };
                 
+                // Verifica validade antes de setar
                 updatedProfile = checkExpiration(updatedProfile);
+                
                 setProfile(updatedProfile);
                 localStorage.setItem('fiat-profile', JSON.stringify(updatedProfile));
             } else {
-                // Perfil NÃO encontrado. O Trigger do SQL deve cuidar disso, mas se falhar:
-                console.log("Perfil não encontrado no DB (Trigger pending or failed).");
-                
-                // Não tentamos insert manual imediatamente para evitar conflito com trigger
-                // Apenas definimos o estado local para o usuário não ficar bloqueado
+                console.log("Perfil não encontrado no DB (Trigger pending).");
+                // Fallback para não travar UI
                 setProfile(prev => ({ 
                     ...prev, 
                     name: user.user_metadata?.name || user.email?.split('@')[0],
@@ -127,6 +137,44 @@ const App: React.FC = () => {
       }
   };
 
+  // Realtime Subscription: Ouve mudanças no banco e atualiza a tela automaticamente
+  useEffect(() => {
+    let channel: RealtimeChannel;
+
+    const setupRealtime = async () => {
+        const user = await getCurrentUser();
+        if (user) {
+            channel = supabase
+                .channel('profile_updates')
+                .on(
+                    'postgres_changes',
+                    {
+                        event: 'UPDATE',
+                        schema: 'public',
+                        table: 'profiles',
+                        filter: `id=eq.${user.id}`,
+                    },
+                    (payload) => {
+                        console.log('🔔 Atualização Realtime recebida!', payload);
+                        // Se o webhook atualizar o banco, isso vai disparar e atualizar a UI
+                        fetchUserProfile();
+                        
+                        if (payload.new.is_premium && !payload.old.is_premium) {
+                            toast.success("Pagamento confirmado! Premium ativado. ♡");
+                        }
+                    }
+                )
+                .subscribe();
+        }
+    };
+
+    setupRealtime();
+
+    return () => {
+        if (channel) supabase.removeChannel(channel);
+    };
+  }, []);
+
   // Inicialização e Listener de Auth
   useEffect(() => {
     // Busca inicial
@@ -135,8 +183,7 @@ const App: React.FC = () => {
     // Listener para mudanças de estado (login/logout)
     const { data: authListener } = supabase.auth.onAuthStateChange((event: any, session: any) => {
        if (event === 'SIGNED_IN' || event === 'TOKEN_REFRESHED') {
-           // Pequeno delay para dar tempo ao trigger do banco rodar
-           setTimeout(fetchUserProfile, 1000);
+           fetchUserProfile();
        }
        if (event === 'SIGNED_OUT') {
            setProfile({
@@ -159,7 +206,7 @@ const App: React.FC = () => {
     };
   }, []);
 
-  // Persistência local
+  // Persistência local redundante
   useEffect(() => {
     localStorage.setItem('fiat-profile', JSON.stringify(profile));
   }, [profile]);
@@ -185,7 +232,7 @@ const App: React.FC = () => {
   }, []);
 
   const updateProfile = async (p: UserProfile) => {
-      // Atualiza estado local imediatamente (Optimistic UI)
+      // Atualiza estado local imediatamente (UI Responsiva)
       setProfile(p);
       
       // Atualiza no banco

@@ -25,6 +25,13 @@ const PremiumModal: React.FC<PremiumModalProps> = ({ isOpen, onClose }) => {
     }
   }, [isOpen]);
 
+  // Fecha o modal automaticamente se o usuário virar premium enquanto a tela está aberta
+  useEffect(() => {
+      if (profile.is_premium && isOpen) {
+          onClose();
+      }
+  }, [profile.is_premium, isOpen, onClose]);
+
   const handleSubscribe = async () => {
       setLoading(true);
       
@@ -52,23 +59,27 @@ const PremiumModal: React.FC<PremiumModalProps> = ({ isOpen, onClose }) => {
       setLoading(false);
   };
 
-  // LÓGICA REAL: Verifica no servidor se o webhook já processou
+  // LÓGICA REAL: Verifica no servidor se o webhook já processou.
+  // REMOVIDA LÓGICA OTIMISTA. Apenas busca a verdade.
   const handleCheckStatus = async () => {
-      if (checkingStatus) return;
       setCheckingStatus(true);
       
-      // Tenta atualizar os dados do servidor
+      // Força atualização dos dados do servidor
       await refreshProfile();
 
-      toast.info("Verificando assinatura...", {
-          description: "Se o pagamento foi concluído, seu acesso será liberado em instantes.",
-          icon: <Loader2 className="animate-spin" />
-      });
-
-      // Fecha o modal para o usuário ver se atualizou
-      // Se o webhook for rápido, o perfil já estará atualizado na UI
+      // O estado 'checkingStatus' será desligado, mas se o perfil tiver atualizado,
+      // o useEffect acima fechará o modal. Se não, o usuário vê o toast.
+      
+      if (profile.is_premium) {
+          toast.success("Pagamento confirmado! Bem-vindo(a).");
+          onClose();
+      } else {
+          toast.info("Ainda verificando...", {
+              description: "O pagamento pode levar alguns instantes para ser processado pelo banco. Tente novamente em breve.",
+              icon: <Loader2 className="animate-spin" />
+          });
+      }
       setCheckingStatus(false);
-      onClose();
   };
 
   if (!isOpen) return null;
@@ -113,7 +124,7 @@ const PremiumModal: React.FC<PremiumModalProps> = ({ isOpen, onClose }) => {
                     <AlertTriangle size={20} className="text-blue-400 shrink-0 mt-0.5" />
                     <div className="text-sm text-gray-300">
                         <strong className="text-blue-300 block mb-1">Já pagou?</strong>
-                        Clique no botão abaixo para atualizar seu status. O sistema identificará seu pagamento automaticamente.
+                        Clique no botão abaixo para verificar. O sistema identificará seu pagamento.
                     </div>
                 </div>
 

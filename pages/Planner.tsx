@@ -1,4 +1,3 @@
-
 import React, { useContext, useEffect, useState, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { AppContext } from '../contexts/AppContext';
@@ -127,12 +126,16 @@ const PlannerPage: React.FC = () => {
       // Atualiza dados do servidor
       await refreshProfile();
       
-      toast.info("Verificando...", { 
-          description: "Se o pagamento foi processado, seu acesso será liberado automaticamente."
-      });
+      // A lógica de atualização do App.tsx vai cuidar de atualizar o estado global 'profile'
+      // Se 'profile.is_premium' virar true, este componente vai re-renderizar e mostrar o conteúdo liberado.
+      
+      if (!profile.is_premium) {
+          toast.info("Verificando...", { 
+              description: "Se o pagamento foi processado, seu acesso será liberado automaticamente em instantes."
+          });
+      }
       
       setLoadingPayment(false);
-      // Se o perfil atualizou, o componente vai re-renderizar e sair desta tela de bloqueio
   };
 
   // --- LOADING STATE ---
@@ -145,6 +148,7 @@ const PlannerPage: React.FC = () => {
   }
 
   // --- PREMIUM LOCK SCREEN ---
+  // Esta verificação é a fonte única de verdade. Se for false, mostra bloqueio.
   if (!profile?.is_premium) {
     return (
       <div className="p-6 flex flex-col items-center justify-center h-full min-h-[80vh] text-center space-y-8 animate-fade-in">
@@ -190,7 +194,7 @@ const PlannerPage: React.FC = () => {
              </div>
           ) : (
              <div className="space-y-4">
-                {/* Botão Mensal */}
+                {/* Botão Mensal - Padronizado */}
                 <Button
                     variant="outline"
                     onClick={() => handleSubscribe('monthly')}
@@ -200,7 +204,7 @@ const PlannerPage: React.FC = () => {
                     {loadingPayment ? 'Processando...' : 'R$ 4,90 - Assinatura Mensal'}
                 </Button>
 
-                {/* Botão Anual (Melhor oferta) */}
+                {/* Botão Anual (Melhor oferta) - Padronizado */}
                 <Button
                     variant="sacred"
                     onClick={() => handleSubscribe('yearly')}
