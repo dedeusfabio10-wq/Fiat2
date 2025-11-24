@@ -1,5 +1,5 @@
 import React, { useContext, useState, useMemo } from 'react';
-import { AppContext } from '../App';
+import { AppContext } from '../contexts/AppContext';
 import { CATECHISM_CONTENT, SAINTS, APOSTOLIC_LINE, CHURCH_HISTORY, HOLY_MASS, CHURCH_HIERARCHY, CHURCH_MINISTRIES, MARIAN_DOGMAS, THE_APOSTLES, LITURGICAL_OBJECTS } from '../constants';
 import { Button } from '../ui/UIComponents';
 import PremiumModal from '../ui/PremiumModal';

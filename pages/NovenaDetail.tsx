@@ -1,6 +1,6 @@
 import React, { useContext, useState, useMemo } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { AppContext } from '../App';
+import { AppContext } from '../contexts/AppContext';
 import { NOVENAS } from '../constants';
 import { Button, Card } from '../ui/UIComponents';
 import { ArrowLeft, Check, Calendar, Flame } from 'lucide-react';

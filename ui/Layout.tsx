@@ -1,7 +1,6 @@
-
-import React, { useContext, useEffect, useState } from 'react';
+import React, { useContext, useEffect, useState, useRef } from 'react';
 import { NavLink, useLocation, Navigate } from 'react-router-dom';
-import { AppContext } from '../App';
+import { AppContext } from '../contexts/AppContext';
 import { IconMonstrance, IconBible, IconRosary, IconCross, IconPlanner, IconBookCross, IconSacredHeart } from './Icons';
 
 interface LayoutProps {
@@ -15,6 +14,11 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
   const isViaSacra = location.pathname === '/viasacra';
   const isAdvento = location.pathname === '/advento';
   
+  // Estado para controle da Nav Bar Retrátil
+  const [showNav, setShowNav] = useState(true);
+  const mainRef = useRef<HTMLDivElement>(null);
+  const lastScrollY = useRef(0);
+
   // LÓGICA SAZONAL AUTOMÁTICA
   const [season, setSeason] = useState<'advent' | 'christmas' | 'newyear' | 'ordinary'>('ordinary');
   
@@ -24,7 +28,6 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
     const d = now.getDate();
     
     // Advento: De ~30 de Novembro (10) até 24 de Dezembro (11)
-    // Simplificação: Últimos dias de Nov e todo Dez até 24
     if ((m === 10 && d >= 25) || (m === 11 && d <= 24)) {
         setSeason('advent');
     }
@@ -40,6 +43,40 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
       setSeason('ordinary');
     }
   }, []);
+
+  // Resetar a nav bar para visível ao mudar de rota
+  useEffect(() => {
+    setShowNav(true);
+  }, [location.pathname]);
+
+  // Lógica de Scroll aprimorada
+  const handleScroll = () => {
+    if (!mainRef.current) return;
+    
+    const currentScrollY = mainRef.current.scrollTop;
+    
+    // Sempre mostrar se estiver no topo da página (margem de 50px)
+    if (currentScrollY < 50) {
+      if (!showNav) setShowNav(true);
+      lastScrollY.current = currentScrollY;
+      return;
+    }
+
+    // Determinar direção com sensibilidade
+    const diff = currentScrollY - lastScrollY.current;
+    const threshold = 5; // Sensibilidade menor para reagir mais rápido
+
+    // Rolando para baixo (esconder)
+    if (diff > threshold && showNav) {
+      setShowNav(false);
+    } 
+    // Rolando para cima (mostrar)
+    else if (diff < -threshold && !showNav) {
+      setShowNav(true);
+    }
+
+    lastScrollY.current = currentScrollY;
+  };
 
   // Redirect to Landing (Welcome) if not onboarded
   if (!profile?.onboarding_completed && 
@@ -63,15 +100,12 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
 
     // Priority 2: Seasonal Defaults (Automatic)
     if (season === 'advent') {
-        // Gradiente Roxo (Advento)
         return 'bg-gradient-to-b from-[#1a0b2e] via-[#2e1065] to-[#0f172a]';
     }
     if (season === 'christmas') {
-        // Gradiente Natalino Elegante (Vermelho Vinho escuro -> Verde Profundo)
         return 'bg-gradient-to-b from-[#2a0a0a] via-[#0f172a] to-[#0a2e1f]'; 
     }
     if (season === 'newyear') {
-        // Gradiente Ano Novo (Azul Meia-Noite -> Dourado sutil)
         return 'bg-gradient-to-b from-[#020617] via-[#1e1b4b] to-[#172554]'; 
     }
 
@@ -136,13 +170,23 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
       </div>
 
       {/* Content */}
-      <main className={`flex-1 relative z-10 ${isRosary || isViaSacra || isAdvento ? 'h-screen overflow-hidden' : 'overflow-y-auto'}`}>
+      <main 
+        ref={mainRef}
+        onScroll={handleScroll}
+        className={`flex-1 relative z-10 ${isRosary || isViaSacra || isAdvento ? 'h-screen overflow-hidden' : 'overflow-y-auto scroll-smooth'}`}
+      >
         {children}
       </main>
 
       {/* Bottom Navigation */}
       {!isRosary && !isViaSacra && !isAdvento && location.pathname !== '/' && location.pathname !== '/auth' && location.pathname !== '/admin' && (
-        <nav className="fixed bottom-0 left-0 right-0 z-50 bg-black/60 backdrop-blur-xl border-t border-white/5 h-20 pb-safe">
+        <nav 
+          className={`
+            fixed bottom-0 left-0 right-0 z-50 bg-black/80 backdrop-blur-xl border-t border-white/5 h-20 pb-safe
+            transform-gpu will-change-transform transition-transform duration-500 ease-in-out
+            ${showNav ? 'translate-y-0' : 'translate-y-[120%]'}
+          `}
+        >
           {/* Premium Gold Border on Nav */}
           {profile?.is_premium && <div className="absolute top-0 left-0 w-full h-px bg-gradient-to-r from-transparent via-sacred-gold/40 to-transparent"></div>}
           

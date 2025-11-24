@@ -1,5 +1,5 @@
 import React, { useContext, useState, useRef } from 'react';
-import { AppContext } from '../App';
+import { AppContext } from '../contexts/AppContext';
 import { Button, Card, Input } from '../ui/UIComponents';
 import PremiumModal from '../ui/PremiumModal';
 import { useNavigate } from 'react-router-dom';

@@ -1,11 +1,10 @@
-
 import React, { useState, useEffect, useContext } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { ChevronRight, ChevronLeft, Volume2, VolumeX, X, Share2, Crown, PenLine } from 'lucide-react';
 import { Button, Input } from './UIComponents';
 import { Mystery } from '../types';
 import { playSoftBell, playMysteryBell, speakText, stopSpeech } from '../services/audio';
-import { AppContext } from '../App';
+import { AppContext } from '../contexts/AppContext';
 import { toast } from 'sonner';
 import { PRAYERS_TEXT } from '../constants';
 

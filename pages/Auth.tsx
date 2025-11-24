@@ -2,7 +2,7 @@ import React, { useState, useContext } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Input, Button } from '../ui/UIComponents';
 import { toast } from 'sonner';
-import { AppContext } from '../App';
+import { AppContext } from '../contexts/AppContext';
 import { supabase } from '../services/supabase';
 import { Chrome, Mail, Sparkles } from 'lucide-react';
 
@@ -27,7 +27,12 @@ const AuthPage: React.FC = () => {
     e.preventDefault();
     setLoading(true);
 
-    if (email === 'admin@fiat.app' && password === 'fiat2024') {
+    // Credenciais de Admin via Variáveis de Ambiente
+    const adminEmail = (import.meta as any).env.VITE_ADMIN_EMAIL;
+    const adminPass = (import.meta as any).env.VITE_ADMIN_PASSWORD;
+
+    // Verifica se as variáveis existem e se correspondem
+    if (adminEmail && adminPass && email === adminEmail && password === adminPass) {
       setTimeout(() => {
         setLoading(false);
         toast.success('Bem-vindo, Administrador.', { icon: '🛡️' });

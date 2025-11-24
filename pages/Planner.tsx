@@ -1,6 +1,6 @@
 import React, { useContext, useEffect, useState, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { AppContext } from '../App';
+import { AppContext } from '../contexts/AppContext';
 import { Button } from '../ui/UIComponents';
 import PremiumModal from '../ui/PremiumModal';
 import { Crown, Plus, Calendar, Lock, Trash2, User, Play, Pause, Volume2, Music, Sparkles, Loader2 } from 'lucide-react';

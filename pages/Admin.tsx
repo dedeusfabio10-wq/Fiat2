@@ -1,21 +1,34 @@
-
 import React, { useState, useContext, useEffect } from 'react';
-import { useNavigate, useLocation } from 'react-router-dom';
+import { useNavigate, useLocation, MemoryRouter, Routes, Route } from 'react-router-dom';
 import { Button, Input } from '../ui/UIComponents';
-import { AppContext } from '../App';
+import { AppContext } from '../contexts/AppContext';
+import Layout from '../ui/Layout';
 import { toast } from 'sonner';
 import { supabase } from '../services/supabase';
 import { 
-  Shield, Users, DollarSign, Activity, Search, Edit, Save, LogOut, 
-  Plus, Check, X, BookOpen, LayoutDashboard, Home, Flame, Calendar, 
-  Smartphone, FileText, Trash2, Crown, Lock, AlertCircle 
+  Shield, Users, DollarSign, Activity, Search, LogOut, 
+  LayoutDashboard, Smartphone, Crown, AlertCircle, X 
 } from 'lucide-react';
-import { PRAYERS, NOVENAS, CENACULO_CONSAGRACAO } from '../constants';
+
+// Import Pages for Simulator
+import HomePage from './Home';
+import PrayersPage from './Prayers';
+import RosaryPage from './Rosary';
+import PlannerPage from './Planner';
+import CatechismPage from './Catechism';
+import CalendarPage from './Calendar';
+import ProfilePage from './Profile';
+import CenaculoPage from './Cenaculo';
+import NovenaDetailPage from './NovenaDetail';
+import PlanCreatorPage from './PlanCreator';
+import PlanDetailPage from './PlanDetail';
+import ViaSacraPage from './ViaSacra';
+import AdventoPage from './Advento';
 
 const AdminPage: React.FC = () => {
     const navigate = useNavigate();
     const location = useLocation();
-    const { profile, updateProfile } = useContext(AppContext);
+    const { profile } = useContext(AppContext);
     
     // Auth State
     const [isAuthenticated, setIsAuthenticated] = useState(false);
@@ -24,16 +37,10 @@ const AdminPage: React.FC = () => {
     const [loadingAuth, setLoadingAuth] = useState(false);
 
     // Dashboard State
-    const [activeTab, setActiveTab] = useState<'overview' | 'users' | 'content'>('overview');
+    const [activeTab, setActiveTab] = useState<'overview' | 'users' | 'app_preview'>('overview');
     const [users, setUsers] = useState<any[]>([]);
     const [loadingUsers, setLoadingUsers] = useState(false);
     const [userSearch, setUserSearch] = useState('');
-    
-    // Content State
-    const [contentSection, setContentSection] = useState<'home' | 'prayers' | 'rosary' | 'cenaculo'>('home');
-    const [editingItem, setEditingItem] = useState<any | null>(null);
-    const [editContent, setEditContent] = useState('');
-    const [editTitle, setEditTitle] = useState('');
 
     // Check Authentication on Load
     useEffect(() => {
@@ -48,8 +55,6 @@ const AdminPage: React.FC = () => {
     const fetchUsers = async () => {
         setLoadingUsers(true);
         try {
-            // Tenta buscar perfis reais do Supabase
-            // Requer que RLS Policy permita leitura na tabela 'profiles'
             const { data, error } = await supabase
                 .from('profiles')
                 .select('*')
@@ -59,10 +64,7 @@ const AdminPage: React.FC = () => {
             if (data) setUsers(data);
         } catch (error: any) {
             console.error('Erro ao buscar usuários:', error);
-            toast.error('Erro ao carregar usuários', { 
-                description: 'Verifique as políticas RLS do Supabase ou sua conexão.' 
-            });
-            // Fallback visual se falhar (para não quebrar a UI do admin)
+            // Fallback for mock/demo mode if supabase fails or RLS blocks
             setUsers([
                 { id: 'local', name: profile.name || 'Admin Local', email: profile.email || 'admin@fiat.app', created_at: new Date().toISOString(), is_premium: true }
             ]);
@@ -75,21 +77,20 @@ const AdminPage: React.FC = () => {
         e.preventDefault();
         setLoadingAuth(true);
 
-        // 1. Master Key Check (Hardcoded Backdoor for Admin)
-        if (email === 'admin@fiat.app' && password === 'fiat2024') {
+        // Use Environment Variables for Admin Auth
+        const adminEmail = (import.meta as any).env.VITE_ADMIN_EMAIL;
+        const adminPass = (import.meta as any).env.VITE_ADMIN_PASSWORD;
+
+        if (adminEmail && adminPass && email === adminEmail && password === adminPass) {
             completeLogin();
             return;
         }
 
-        // 2. Real Supabase Auth Check
         try {
             const { data, error } = await supabase.auth.signInWithPassword({ email, password });
             if (error) throw error;
-            
-            // Verifica se é admin (opcional: checar uma flag no perfil)
-            if (data.user) {
-                completeLogin();
-            }
+            // TODO: Check if user is in 'admins' table for robust security
+            if (data.user) completeLogin();
         } catch (error: any) {
             toast.error('Acesso Negado', { description: 'Credenciais inválidas.' });
             setLoadingAuth(false);
@@ -112,69 +113,27 @@ const AdminPage: React.FC = () => {
     };
 
     const toggleUserPremium = async (userId: string, currentStatus: boolean) => {
-        // Otimistic UI Update
+        // Optimistic update
         setUsers(prev => prev.map(u => u.id === userId ? { ...u, is_premium: !currentStatus } : u));
-        
         try {
             const { error } = await supabase
                 .from('profiles')
                 .update({ 
                     is_premium: !currentStatus,
-                    subscription_type: !currentStatus ? 'manual_admin' : null,
                     updated_at: new Date().toISOString()
                 })
                 .eq('id', userId);
-
             if (error) throw error;
-            
             toast.success(`Usuário ${!currentStatus ? 'promovido a Premium' : 'rebaixado'}`);
-            
-            // Se for o próprio usuário logado
-            if (profile.email === users.find(u => u.id === userId)?.email) {
-                updateProfile({ ...profile, is_premium: !currentStatus });
-            }
-
         } catch (error) {
             toast.error('Erro ao atualizar banco de dados');
             fetchUsers(); // Revert
         }
     };
 
-    const saveContent = async () => {
-        if (!editingItem) return;
-
-        // Simulação de salvamento em uma tabela de conteúdo (app_content)
-        // Em um app real, você criaria uma tabela 'content_overrides' no Supabase
-        try {
-            const payload = {
-                key: editingItem.id || editingItem.key,
-                title: editTitle,
-                content: editContent,
-                updated_at: new Date().toISOString()
-            };
-
-            // Exemplo de chamada (comentada pois a tabela pode não existir)
-            // const { error } = await supabase.from('app_content').upsert(payload);
-            
-            console.log("Salvando conteúdo:", payload);
-            
-            // Atualiza estado local para feedback imediato
-            if (contentSection === 'prayers') {
-                // Apenas visual no admin, já que PRAYERS é constante
-                toast.success('Alteração salva (Simulação)', { description: 'Em produção, isso atualizaria a tabela app_content.' });
-            } else {
-                toast.success('Conteúdo atualizado!');
-            }
-            
-            setEditingItem(null);
-        } catch (e) {
-            toast.error('Erro ao salvar');
-        }
-    };
-
     // --- CALCULATIONS ---
     const premiumCount = users.filter(u => u.is_premium).length;
-    const revenue = premiumCount * 4.90;
+    const revenue = premiumCount * 4.90; // Estimativa simples baseada no mensal
     const totalUsers = users.length;
 
     // --- RENDERERS ---
@@ -227,7 +186,7 @@ const AdminPage: React.FC = () => {
                 <NavButton active={activeTab === 'users'} icon={<Users size={18} />} label="Fiéis (Usuários)" onClick={() => setActiveTab('users')} />
                 
                 <p className="text-xs text-gray-500 uppercase tracking-widest font-bold px-2 mt-6 mb-1">App & Conteúdo</p>
-                <NavButton active={activeTab === 'content'} icon={<Smartphone size={18} />} label="CMS do App" onClick={() => setActiveTab('content')} />
+                <NavButton active={activeTab === 'app_preview'} icon={<Smartphone size={18} />} label="Simulador App" onClick={() => setActiveTab('app_preview')} />
                 
                 <div className="mt-auto pt-6 border-t border-white/5">
                     <div className="flex items-center gap-3 px-2 mb-4">
@@ -252,11 +211,11 @@ const AdminPage: React.FC = () => {
                     <h2 className="text-lg font-serif text-white">
                         {activeTab === 'overview' && 'Dashboard'}
                         {activeTab === 'users' && 'Base de Usuários'}
-                        {activeTab === 'content' && 'Editor de Conteúdo'}
+                        {activeTab === 'app_preview' && 'Simulador em Tempo Real'}
                     </h2>
                     <div className="flex gap-4">
                         <Button variant="outline" size="sm" className="border-white/10 text-xs" onClick={() => navigate('/')}>
-                            Abrir App <Smartphone size={14} className="ml-2" />
+                            Abrir App Real <Smartphone size={14} className="ml-2" />
                         </Button>
                     </div>
                 </header>
@@ -304,7 +263,7 @@ const AdminPage: React.FC = () => {
                                                         <p className="text-[10px] text-gray-500">{new Date(user.created_at).toLocaleDateString()}</p>
                                                     </div>
                                                 </div>
-                                                <span className="text-xs text-green-400 bg-green-900/20 px-2 py-1 rounded border border-green-500/20">Anual</span>
+                                                <span className="text-xs text-green-400 bg-green-900/20 px-2 py-1 rounded border border-green-500/20">Ativo</span>
                                             </div>
                                         ))}
                                         {users.filter(u => u.is_premium).length === 0 && <p className="text-gray-500 text-sm italic">Nenhum assinante ainda.</p>}
@@ -340,9 +299,6 @@ const AdminPage: React.FC = () => {
                                 <div className="flex gap-2">
                                     <Button size="sm" variant="outline" className="border-white/10" onClick={fetchUsers}>
                                         Atualizar Lista
-                                    </Button>
-                                    <Button size="sm" variant="sacred" className="gap-2">
-                                        <Plus size={16} /> Adicionar Manual
                                     </Button>
                                 </div>
                             </div>
@@ -396,9 +352,6 @@ const AdminPage: React.FC = () => {
                                                             >
                                                                 {user.is_premium ? <X size={16} /> : <Crown size={16} />}
                                                             </button>
-                                                            <button className="p-1.5 text-gray-400 hover:text-white hover:bg-white/10 rounded-md">
-                                                                <Edit size={16} />
-                                                            </button>
                                                         </div>
                                                     </td>
                                                 </tr>
@@ -411,102 +364,48 @@ const AdminPage: React.FC = () => {
                         </div>
                     )}
 
-                    {/* --- TAB: CONTENT (CMS) --- */}
-                    {activeTab === 'content' && (
-                        <div className="flex flex-col md:flex-row gap-6 h-full animate-fade-in">
-                            {/* CMS Sidebar (Espelho do App) */}
-                            <div className="w-full md:w-64 bg-[#0f172a] border border-white/5 rounded-xl p-4 h-fit">
-                                <h3 className="text-xs text-gray-500 uppercase tracking-widest font-bold mb-4 px-2">Páginas do App</h3>
-                                <div className="space-y-1">
-                                    <CMSButton active={contentSection === 'home'} icon={<Home size={16} />} label="Página Inicial" onClick={() => setContentSection('home')} />
-                                    <CMSButton active={contentSection === 'prayers'} icon={<BookOpen size={16} />} label="Orações" onClick={() => setContentSection('prayers')} />
-                                    <CMSButton active={contentSection === 'cenaculo'} icon={<Flame size={16} />} label="Cenáculo" onClick={() => setContentSection('cenaculo')} />
-                                    <CMSButton active={contentSection === 'rosary'} icon={<Smartphone size={16} />} label="Santo Terço" onClick={() => setContentSection('rosary')} />
-                                </div>
+                    {/* --- TAB: APP PREVIEW (SIMULATOR) --- */}
+                    {activeTab === 'app_preview' && (
+                        <div className="h-full flex flex-col items-center justify-center animate-fade-in">
+                            <div className="mb-4 text-center">
+                                <h3 className="text-xl font-serif text-white">Simulador Premium</h3>
+                                <p className="text-gray-400 text-sm">Nesta visualização, todos os recursos estão desbloqueados.</p>
                             </div>
-
-                            {/* CMS Editor Area */}
-                            <div className="flex-1 bg-[#0f172a] border border-white/5 rounded-xl p-6 md:p-8 relative">
-                                {editingItem ? (
-                                    <div className="h-full flex flex-col animate-slide-up">
-                                        <div className="flex justify-between items-center mb-6 border-b border-white/5 pb-4">
-                                            <div>
-                                                <p className="text-xs text-sacred-gold uppercase tracking-widest font-bold mb-1">Editando</p>
-                                                <input 
-                                                    className="bg-transparent text-2xl font-serif text-white outline-none w-full placeholder-gray-600"
-                                                    value={editTitle}
-                                                    onChange={e => setEditTitle(e.target.value)}
-                                                    placeholder="Título do item"
-                                                />
-                                            </div>
-                                            <div className="flex gap-2">
-                                                <Button variant="ghost" size="sm" onClick={() => setEditingItem(null)} className="text-gray-400 hover:text-white">Cancelar</Button>
-                                                <Button variant="sacred" size="sm" onClick={saveContent} className="gap-2"><Save size={16} /> Salvar Alterações</Button>
-                                            </div>
-                                        </div>
-                                        <textarea 
-                                            className="flex-1 bg-black/20 border border-white/10 rounded-lg p-6 text-gray-200 font-serif leading-relaxed text-lg resize-none focus:border-sacred-gold/50 outline-none custom-scrollbar"
-                                            value={editContent}
-                                            onChange={e => setEditContent(e.target.value)}
-                                            placeholder="Digite o conteúdo aqui..."
-                                        />
-                                    </div>
-                                ) : (
-                                    <div className="space-y-6">
-                                        <div className="flex justify-between items-center mb-4">
-                                            <h2 className="text-2xl font-serif text-white capitalize">{contentSection === 'home' ? 'Página Inicial' : contentSection}</h2>
-                                            <Button size="sm" variant="outline" className="border-white/10 text-xs"><Plus size={14} className="mr-2"/> Novo Item</Button>
-                                        </div>
-
-                                        {contentSection === 'home' && (
-                                            <div className="grid gap-4">
-                                                <div className="bg-white/5 p-4 rounded-xl border border-white/10 hover:border-sacred-gold/30 cursor-pointer transition-all" onClick={() => { setEditingItem({ id: 'daily_quote', title: 'Frase do Dia' }); setEditTitle('Frase do Dia'); setEditContent('"Tarde Te amei, ó Beleza tão antiga e tão nova!"'); }}>
-                                                    <h4 className="text-sacred-gold font-bold text-sm mb-1">Frase do Dia</h4>
-                                                    <p className="text-gray-400 text-xs truncate">Gerenciada automaticamente, clique para override.</p>
-                                                </div>
-                                                <div className="bg-white/5 p-4 rounded-xl border border-white/10 hover:border-sacred-gold/30 cursor-pointer transition-all" onClick={() => { setEditingItem({ id: 'banner_msg', title: 'Aviso Global' }); setEditTitle('Aviso Global'); setEditContent('Bem-vindo ao Advento!'); }}>
-                                                    <h4 className="text-white font-bold text-sm mb-1">Aviso / Banner</h4>
-                                                    <p className="text-gray-400 text-xs truncate">Texto que aparece no topo da home.</p>
-                                                </div>
-                                            </div>
-                                        )}
-
-                                        {contentSection === 'prayers' && (
-                                            <div className="grid grid-cols-1 gap-3">
-                                                {PRAYERS.map(prayer => (
-                                                    <div key={prayer.id} onClick={() => { setEditingItem(prayer); setEditTitle(prayer.title); setEditContent(prayer.content); }} className="flex items-center justify-between p-4 bg-white/5 rounded-xl border border-white/5 hover:bg-white/10 cursor-pointer group transition-all">
-                                                        <div>
-                                                            <h4 className="text-white font-serif group-hover:text-sacred-gold transition-colors">{prayer.title}</h4>
-                                                            <span className="text-[10px] bg-black/30 px-2 py-0.5 rounded text-gray-500 uppercase">{prayer.category}</span>
-                                                        </div>
-                                                        <Edit size={16} className="text-gray-600 group-hover:text-white" />
-                                                    </div>
-                                                ))}
-                                            </div>
-                                        )}
-
-                                        {contentSection === 'cenaculo' && (
-                                            <div className="space-y-4">
-                                                <div className="bg-red-900/10 p-6 rounded-xl border border-red-500/20 cursor-pointer hover:bg-red-900/20 transition-all" onClick={() => { setEditingItem({ id: 'cenaculo_msg', title: 'Mensagem da Semana' }); setEditTitle('Mensagem da Semana'); setEditContent('Meus filhos prediletos...'); }}>
-                                                    <h4 className="text-red-400 font-serif text-lg mb-2 flex items-center gap-2"><Flame size={18}/> Mensagem de Nossa Senhora</h4>
-                                                    <p className="text-gray-400 text-sm">Edite o texto do Livro Azul que aparecerá neste sábado.</p>
-                                                </div>
-                                                <div className="bg-white/5 p-4 rounded-xl border border-white/10 cursor-pointer hover:border-sacred-gold/30" onClick={() => { setEditingItem({ id: 'consagracao', title: 'Ato de Consagração' }); setEditTitle('Ato de Consagração'); setEditContent(CENACULO_CONSAGRACAO.content); }}>
-                                                    <h4 className="text-white font-bold text-sm">Texto da Consagração</h4>
-                                                </div>
-                                            </div>
-                                        )}
-                                        
-                                        {contentSection === 'rosary' && (
-                                            <div className="text-center py-20 text-gray-500">
-                                                <Lock size={32} className="mx-auto mb-4 opacity-30" />
-                                                <p>A estrutura do Rosário é fixa.</p>
-                                                <p className="text-xs mt-2">Você pode editar apenas as meditações dos mistérios.</p>
-                                                <Button variant="outline" size="sm" className="mt-4 border-white/10" onClick={() => { setEditingItem({ id: 'mysteries', title: 'Meditações' }); setEditTitle('Meditações Gozosos'); setEditContent('1. A Anunciação...'); }}>Editar Meditações</Button>
-                                            </div>
-                                        )}
-                                    </div>
-                                )}
+                            
+                            {/* Phone Bezel */}
+                            <div className="relative w-[375px] h-[812px] bg-black rounded-[3rem] border-[8px] border-[#2a2a2a] shadow-2xl overflow-hidden ring-1 ring-white/10">
+                                {/* Notch */}
+                                <div className="absolute top-0 left-1/2 -translate-x-1/2 w-32 h-7 bg-black rounded-b-xl z-50 pointer-events-none"></div>
+                                
+                                {/* Simulated App Content */}
+                                <div className="w-full h-full bg-[#05080f] flex flex-col overflow-hidden relative text-left">
+                                    <AppContext.Provider value={{ 
+                                        profile: { ...profile, is_premium: true, name: 'Simulador Premium', favorites: [], active_novenas: [], streak: 5, rosaries_prayed: 10, onboarding_completed: true }, 
+                                        updateProfile: () => console.log('Profile update mocked'), 
+                                        refreshProfile: async () => {}, 
+                                        themeColors: { primary: '#d4af37' } 
+                                    }}>
+                                        <MemoryRouter initialEntries={['/home']}>
+                                            <Layout>
+                                                <Routes>
+                                                    <Route path="/home" element={<HomePage />} />
+                                                    <Route path="/prayers" element={<PrayersPage />} />
+                                                    <Route path="/rosary" element={<RosaryPage />} />
+                                                    <Route path="/planner" element={<PlannerPage />} />
+                                                    <Route path="/planner/create" element={<PlanCreatorPage />} />
+                                                    <Route path="/planner/:id" element={<PlanDetailPage />} />
+                                                    <Route path="/catechism" element={<CatechismPage />} />
+                                                    <Route path="/calendar" element={<CalendarPage />} />
+                                                    <Route path="/profile" element={<ProfilePage />} />
+                                                    <Route path="/cenaculo" element={<CenaculoPage />} />
+                                                    <Route path="/advento" element={<AdventoPage />} />
+                                                    <Route path="/viasacra" element={<ViaSacraPage />} />
+                                                    <Route path="/novena/:id" element={<NovenaDetailPage />} />
+                                                </Routes>
+                                            </Layout>
+                                        </MemoryRouter>
+                                    </AppContext.Provider>
+                                </div>
                             </div>
                         </div>
                     )}
@@ -522,14 +421,6 @@ const AdminPage: React.FC = () => {
 const NavButton: React.FC<{ active: boolean, icon: React.ReactNode, label: string, onClick: () => void }> = ({ active, icon, label, onClick }) => (
     <button onClick={onClick} className={`flex items-center gap-3 px-4 py-2.5 rounded-lg transition-all duration-300 w-full text-left ${active ? 'bg-sacred-gold text-sacred-sapphire font-bold shadow-lg shadow-sacred-gold/20' : 'text-gray-400 hover:bg-white/5 hover:text-white'}`}>
         {icon} <span className="text-xs font-medium uppercase tracking-wide">{label}</span>
-    </button>
-);
-
-const CMSButton: React.FC<{ active: boolean, icon: React.ReactNode, label: string, onClick: () => void }> = ({ active, icon, label, onClick }) => (
-    <button onClick={onClick} className={`flex items-center gap-3 px-4 py-3 rounded-lg transition-all duration-300 w-full text-left ${active ? 'bg-white/10 text-white border border-white/10' : 'text-gray-500 hover:text-white hover:bg-white/5'}`}>
-        <span className={active ? 'text-sacred-gold' : 'text-gray-600'}>{icon}</span>
-        <span className="text-sm font-medium">{label}</span>
-        {active && <div className="ml-auto w-1.5 h-1.5 rounded-full bg-sacred-gold shadow-[0_0_5px_#d4af37]"></div>}
     </button>
 );
 

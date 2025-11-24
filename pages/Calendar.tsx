@@ -1,8 +1,7 @@
-
 import React, { useContext, useState, useMemo, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Card, Button, Input } from '../ui/UIComponents';
-import { AppContext } from '../App';
+import { AppContext } from '../contexts/AppContext';
 import { NOVENAS, SAINTS } from '../constants';
 import { Search, Heart, Calendar as CalendarIcon, BookOpen, X, ChevronRight, Loader2, Sparkles } from 'lucide-react';
 import { toggleFavorite } from '../services/storage';

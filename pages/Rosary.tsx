@@ -1,11 +1,10 @@
-
 import React, { useState, useContext } from 'react';
 import Rosary from '../ui/Rosary';
 import { MYSTERIES, DEVOTIONAL_ROSARIES } from '../constants';
 import { Button } from '../ui/UIComponents';
 import { ChevronRight, X, Heart, Copy, Play } from 'lucide-react';
 import { DevotionalRosary } from '../types';
-import { AppContext } from '../App';
+import { AppContext } from '../contexts/AppContext';
 import { toggleFavorite } from '../services/storage';
 import { toast } from 'sonner';
 import { IconRosary } from '../ui/Icons';

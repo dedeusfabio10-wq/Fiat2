@@ -1,11 +1,11 @@
-
-import React, { useState, useEffect, createContext } from 'react';
+import React, { useState, useEffect } from 'react';
 import { HashRouter, Routes, Route, Navigate } from 'react-router-dom';
 import { Toaster, toast } from 'sonner';
 import Layout from './ui/Layout';
 import { UserProfile } from './types';
 import { initAudio } from './services/audio';
 import { supabase, getCurrentUser } from './services/supabase';
+import { AppContext } from './contexts/AppContext';
 
 // Pages
 import LandingPage from './pages/Landing';
@@ -21,23 +21,11 @@ import ViaSacraPage from './pages/ViaSacra';
 import PlanCreatorPage from './pages/PlanCreator';
 import PlanDetailPage from './pages/PlanDetail';
 import NovenaDetailPage from './pages/NovenaDetail';
-import AdminPage from './pages/Admin';
 import CenaculoPage from './pages/Cenaculo';
 import AdventoPage from './pages/Advento';
 
-interface AppContextType {
-  profile: UserProfile;
-  updateProfile: (p: UserProfile) => void;
-  refreshProfile: () => Promise<void>;
-  themeColors: { primary: string };
-}
-
-export const AppContext = createContext<AppContextType>({
-  profile: {} as UserProfile,
-  updateProfile: () => {},
-  refreshProfile: async () => {},
-  themeColors: { primary: '#d4af37' }
-});
+// Lazy load Admin to prevent circular dependency issues
+const AdminPage = React.lazy(() => import('./pages/Admin'));
 
 const App: React.FC = () => {
   const [profile, setProfile] = useState<UserProfile>(() => {
@@ -246,7 +234,11 @@ const App: React.FC = () => {
             <Route path="/profile" element={<ProfilePage />} />
             <Route path="/viasacra" element={<ViaSacraPage />} />
             <Route path="/novena/:id" element={<NovenaDetailPage />} />
-            <Route path="/admin" element={<AdminPage />} />
+            <Route path="/admin" element={
+                <React.Suspense fallback={<div className="flex items-center justify-center h-screen bg-[#05080f] text-fiat-gold">Carregando Admin...</div>}>
+                    <AdminPage />
+                </React.Suspense>
+            } />
             <Route path="*" element={<Navigate to="/" replace />} />
           </Routes>
         </Layout>

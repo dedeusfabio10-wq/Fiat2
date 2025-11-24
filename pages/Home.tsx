@@ -1,7 +1,6 @@
-
 import React, { useContext, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { AppContext } from '../App';
+import { AppContext } from '../contexts/AppContext';
 import { Button } from '../ui/UIComponents';
 import { ChevronRight, Sun, Cross, Gift, Flame, Star } from 'lucide-react';
 import { DAILY_QUOTES, MYSTERIES } from '../constants';

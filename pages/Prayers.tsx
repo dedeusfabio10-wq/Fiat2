@@ -1,6 +1,5 @@
-
 import React, { useState, useContext, useMemo } from 'react';
-import { AppContext } from '../App';
+import { AppContext } from '../contexts/AppContext';
 import { Card, Input, Button } from '../ui/UIComponents';
 import { PRAYERS, NOVENAS } from '../constants';
 import { Search, Heart, Book, X, Copy, Calendar } from 'lucide-react';

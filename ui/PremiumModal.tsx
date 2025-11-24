@@ -1,6 +1,5 @@
-
 import React, { useState, useEffect, useContext } from 'react';
-import { AppContext } from '../App';
+import { AppContext } from '../contexts/AppContext';
 import { Button } from './UIComponents';
 import { createSubscription } from '../services/mercadopago';
 import { supabase } from '../services/supabase';
