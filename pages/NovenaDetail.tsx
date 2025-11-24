@@ -127,7 +127,7 @@ const NovenaDetailPage: React.FC = () => {
   const isFutureDay = activeState ? viewingDay > (activeState.currentDay - 1) : viewingDay > 0;
 
   return (
-    <div className="p-6 pb-24 min-h-screen animate-fade-in">
+    <div className="p-6 pb-32 min-h-screen animate-fade-in">
       <div className="flex items-center gap-4 mb-6">
         <Button variant="ghost" onClick={() => navigate(-1)} className="!p-2 text-gray-400 hover:text-white">
             <ArrowLeft size={24} />

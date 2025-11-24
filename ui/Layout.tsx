@@ -64,7 +64,7 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
 
     // Determinar direção com sensibilidade
     const diff = currentScrollY - lastScrollY.current;
-    const threshold = 5; // Sensibilidade menor para reagir mais rápido
+    const threshold = 10; // Sensibilidade
 
     // Rolando para baixo (esconder)
     if (diff > threshold && showNav) {
@@ -114,7 +114,7 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
   };
 
   return (
-    <div className={`min-h-screen flex flex-col ${getThemeBackground()} text-gray-200 relative overflow-hidden transition-colors duration-1000`}>
+    <div className={`h-[100dvh] flex flex-col ${getThemeBackground()} text-gray-200 relative overflow-hidden transition-colors duration-1000`}>
       
       {/* Seasonal Effects */}
       {season === 'christmas' && (
