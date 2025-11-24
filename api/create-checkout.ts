@@ -1,11 +1,8 @@
-
 import { MercadoPagoConfig, Preference } from 'mercadopago';
 
-// Configuração do Mercado Pago
-// Tenta pegar do processo (Vercel) ou usa a variável VITE para fallback local/build
+// Tenta pegar do processo (Vercel) ou usa a variável VITE para fallback
+// Isso garante compatibilidade em diferentes ambientes de build
 const MP_ACCESS_TOKEN = process.env.MP_ACCESS_TOKEN || process.env.VITE_MP_ACCESS_TOKEN;
-
-const client = new MercadoPagoConfig({ accessToken: MP_ACCESS_TOKEN! });
 
 export default async function handler(req: any, res: any) {
   // Habilitar CORS
@@ -18,6 +15,13 @@ export default async function handler(req: any, res: any) {
   if (req.method !== 'POST') {
     return res.status(405).json({ error: 'Method not allowed' });
   }
+
+  if (!MP_ACCESS_TOKEN) {
+      console.error('MP_ACCESS_TOKEN missing');
+      return res.status(500).json({ error: 'Server configuration error: Missing Payment Token' });
+  }
+
+  const client = new MercadoPagoConfig({ accessToken: MP_ACCESS_TOKEN });
 
   try {
     const { plan, userId, email } = req.body;
@@ -32,11 +36,12 @@ export default async function handler(req: any, res: any) {
     const price = isYearly ? 39.90 : 4.90;
     const title = isYearly ? 'Fiat Premium - Plano Anual' : 'Fiat Premium - Plano Mensal';
 
-    // Determinar URL de retorno (dinâmico ou fallback para produção)
+    // Determinar URL de retorno dinamicamente
     const protocol = req.headers['x-forwarded-proto'] || 'https';
     const host = req.headers.host;
     const origin = `${protocol}://${host}`;
-    const returnUrl = `${origin}/#/profile`; // Redireciona para o perfil após pagamento
+    // Usar hash router path
+    const returnUrl = `${origin}/#/profile`; 
 
     const response = await preference.create({
       body: {
@@ -50,9 +55,9 @@ export default async function handler(req: any, res: any) {
           }
         ],
         payer: {
-          email: email
+          email: email || 'customer@email.com' // Fallback se email não vier
         },
-        // VINCULA O PAGAMENTO AO ID DO USUÁRIO DO SUPABASE
+        // DADO CRÍTICO: Vincula o pagamento ao usuário do Supabase
         external_reference: userId,
         metadata: {
           plan_type: plan,
