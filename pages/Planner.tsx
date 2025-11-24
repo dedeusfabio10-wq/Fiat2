@@ -34,7 +34,7 @@ const SACRED_MUSIC = [
 ];
 
 const PlannerPage: React.FC = () => {
-  const { profile, updateProfile } = useContext(AppContext);
+  const { profile, updateProfile, isLoadingProfile } = useContext(AppContext);
   const navigate = useNavigate();
   const [plans, setPlans] = useState<SpiritualPlan[]>([]);
   const [loadingPlans, setLoadingPlans] = useState(true);
@@ -98,6 +98,15 @@ const PlannerPage: React.FC = () => {
     setSelectedMusic(null);
     toast("Silêncio orante restaurado 🙏", { duration: 2000 });
   };
+
+  // --- LOADING STATE ---
+  if (isLoadingProfile) {
+      return (
+          <div className="flex items-center justify-center min-h-screen">
+              <Loader2 className="animate-spin text-sacred-gold w-8 h-8" />
+          </div>
+      );
+  }
 
   // --- PREMIUM LOCK SCREEN ---
   if (!profile.is_premium) {

@@ -1,14 +1,15 @@
+
 import React, { useContext, useState, useMemo } from 'react';
 import { AppContext } from '../contexts/AppContext';
 import { CATECHISM_CONTENT, SAINTS, APOSTOLIC_LINE, CHURCH_HISTORY, HOLY_MASS, CHURCH_HIERARCHY, CHURCH_MINISTRIES, MARIAN_DOGMAS, THE_APOSTLES, LITURGICAL_OBJECTS } from '../constants';
 import { Button } from '../ui/UIComponents';
 import PremiumModal from '../ui/PremiumModal';
-import { Crown, Lock, ChevronDown, ChevronUp, BookOpen, Sparkles, Key, Shield, Landmark, Flame, Users, Heart, Bell, Music, Star, Grape, Circle, Cloud, Droplet, Sun } from 'lucide-react';
+import { Crown, Lock, ChevronDown, ChevronUp, BookOpen, Sparkles, Key, Shield, Landmark, Flame, Users, Heart, Bell, Music, Star, Grape, Circle, Cloud, Droplet, Sun, Loader2 } from 'lucide-react';
 import { toast } from 'sonner';
 import { SaintIcon } from '../ui/SaintIcons';
 
 const CatechismPage: React.FC = () => {
-  const { profile, updateProfile } = useContext(AppContext);
+  const { profile, updateProfile, isLoadingProfile } = useContext(AppContext);
   const [expandedSection, setExpandedSection] = useState<string | null>(null);
   const [showPremiumModal, setShowPremiumModal] = useState(false);
 
@@ -21,6 +22,15 @@ const CatechismPage: React.FC = () => {
       case 'green': default: return 'bg-fiat-card-green';
     }
   }, [profile.customTheme]);
+
+  // --- LOADING STATE ---
+  if (isLoadingProfile) {
+      return (
+          <div className="flex items-center justify-center min-h-screen">
+              <Loader2 className="animate-spin text-sacred-gold w-8 h-8" />
+          </div>
+      );
+  }
 
   if (!profile.is_premium) {
     return (

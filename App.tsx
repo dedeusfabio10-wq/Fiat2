@@ -28,6 +28,7 @@ import AdventoPage from './pages/Advento';
 const AdminPage = React.lazy(() => import('./pages/Admin'));
 
 const App: React.FC = () => {
+  const [isLoadingProfile, setIsLoadingProfile] = useState(true);
   const [profile, setProfile] = useState<UserProfile>(() => {
     const saved = localStorage.getItem('fiat-profile');
     return saved ? JSON.parse(saved) : {
@@ -53,13 +54,15 @@ const App: React.FC = () => {
             toast.error("Seu tempo Premium acabou.", { description: "Renove para continuar usando os recursos." });
             return { ...userProfile, is_premium: false };
         } else if (daysLeft <= 3 && daysLeft > 0) {
-             toast("Seu Premium vence em breve", { description: `Restam apenas ${daysLeft} dias.` });
+             // Apenas avisa, mas mantém premium
+             // toast("Seu Premium vence em breve", { description: `Restam apenas ${daysLeft} dias.` });
         }
     }
     return userProfile;
   };
 
   const fetchUserProfile = async () => {
+      setIsLoadingProfile(true);
       try {
           const user = await getCurrentUser();
           if (user) {
@@ -119,6 +122,8 @@ const App: React.FC = () => {
           }
       } catch (error) {
           console.error('Erro ao sincronizar perfil:', error);
+      } finally {
+          setIsLoadingProfile(false);
       }
   };
 
@@ -131,7 +136,7 @@ const App: React.FC = () => {
     const { data: authListener } = supabase.auth.onAuthStateChange((event, session) => {
        if (event === 'SIGNED_IN' || event === 'TOKEN_REFRESHED') {
            // Pequeno delay para dar tempo ao trigger do banco rodar
-           setTimeout(fetchUserProfile, 1500);
+           setTimeout(fetchUserProfile, 1000);
        }
        if (event === 'SIGNED_OUT') {
            setProfile({
@@ -145,6 +150,7 @@ const App: React.FC = () => {
               onboarding_completed: false
            });
            localStorage.removeItem('fiat-profile');
+           setIsLoadingProfile(false);
        }
     });
 
@@ -214,7 +220,7 @@ const App: React.FC = () => {
   };
 
   return (
-    <AppContext.Provider value={{ profile, updateProfile, refreshProfile, themeColors: { primary: '#d4af37' } }}>
+    <AppContext.Provider value={{ profile, isLoadingProfile, updateProfile, refreshProfile, themeColors: { primary: '#d4af37' } }}>
       <HashRouter>
         <Layout>
           <Routes>
