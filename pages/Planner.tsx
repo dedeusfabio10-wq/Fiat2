@@ -2,11 +2,11 @@ import React, { useContext, useEffect, useState, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { AppContext } from '../contexts/AppContext';
 import { Button } from '../ui/UIComponents';
-import PremiumModal from '../ui/PremiumModal';
-import { Crown, Plus, Calendar, Lock, Trash2, User, Play, Pause, Volume2, Music, Sparkles, Loader2, CheckCircle2, Clock } from 'lucide-react';
+import { Crown, Plus, Calendar, Lock, Trash2, User, Play, Pause, Volume2, Music, Sparkles, Loader2, CheckCircle2, Clock, Check } from 'lucide-react';
 import { getPlans, deletePlan } from '../services/storage';
 import { SpiritualPlan } from '../types';
 import { toast } from 'sonner';
+import { supabase } from '../services/supabase';
 
 const SACRED_MUSIC = [
   {
@@ -37,7 +37,8 @@ const PlannerPage: React.FC = () => {
   const navigate = useNavigate();
   const [plans, setPlans] = useState<SpiritualPlan[]>([]);
   const [loadingPlans, setLoadingPlans] = useState(true);
-  const [showPremiumModal, setShowPremiumModal] = useState(false);
+  const [loadingPayment, setLoadingPayment] = useState(false);
+  const [paymentPending, setPaymentPending] = useState(false);
 
   // Música sacra
   const [selectedMusic, setSelectedMusic] = useState<number | null>(null);
@@ -98,6 +99,75 @@ const PlannerPage: React.FC = () => {
     toast("Silêncio orante restaurado", { duration: 2000 });
   };
 
+  // NOVO: Função de assinatura real com Mercado Pago (CORRIGIDA PARA EVITAR LOOP)
+  const handleSubscribe = async (plan: 'monthly' | 'yearly') => {
+    setLoadingPayment(true);
+    try {
+      const { data: { user } } = await supabase.auth.getUser();
+
+      if (!user) {
+        toast.error('Faça login primeiro');
+        setLoadingPayment(false);
+        return;
+      }
+
+      const res = await fetch('/api/mercadopago/create-subscription', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          plan,
+          userId: user.id,
+          email: user.email || user.user_metadata.email
+        })
+      });
+
+      const data = await res.json();
+      if (data.init_point) {
+        // ALTERAÇÃO CRÍTICA: Abre em nova aba e muda estado local para confirmação
+        window.open(data.init_point, '_blank');
+        setPaymentPending(true);
+        toast.success('Aba de pagamento aberta. Confirme abaixo.');
+      } else {
+        toast.error('Erro ao iniciar pagamento');
+      }
+    } catch (err) {
+      toast.error('Erro de conexão');
+    } finally {
+      setLoadingPayment(false);
+    }
+  };
+
+  // Função de Liberação Imediata (Optimistic Update)
+  const handleConfirmPayment = async () => {
+      const now = new Date();
+      const expiresAt = new Date();
+      expiresAt.setDate(now.getDate() + 30);
+
+      // 1. Libera no App Instantaneamente
+      updateProfile({ 
+          ...profile, 
+          is_premium: true,
+          premium_expires_at: expiresAt.toISOString()
+      });
+      
+      toast.success("Acesso Liberado! Bem-vindo(a) ao Premium. ♡");
+
+      // 2. Salva no Supabase em Background (Silencioso)
+      try {
+          const { data: { user } } = await supabase.auth.getUser();
+
+          if (user) {
+             await supabase.from('profiles').upsert({
+                 id: user.id,
+                 is_premium: true,
+                 premium_expires_at: expiresAt.toISOString(),
+                 subscription_type: 'manual_check',
+                 updated_at: new Date().toISOString()
+             });
+          }
+      } catch (e) { console.error("Erro ao salvar backup no banco", e); }
+  };
+
   // --- LOADING STATE ---
   if (isLoadingProfile) {
     return (
@@ -107,12 +177,10 @@ const PlannerPage: React.FC = () => {
     );
   }
 
-  // --- PREMIUM LOCK SCREEN (ATUALIZADO) ---
+  // --- PREMIUM LOCK SCREEN (ATUALIZADO COM LÓGICA ANTI-LOOP) ---
   if (!profile?.is_premium) {
     return (
       <div className="p-6 flex flex-col items-center justify-center h-full min-h-[80vh] text-center space-y-8 animate-fade-in">
-        <PremiumModal isOpen={showPremiumModal} onClose={() => setShowPremiumModal(false)} />
-        
         <div className="w-24 h-24 rounded-full bg-gradient-to-br from-yellow-600 to-yellow-900 flex items-center justify-center shadow-[0_0_40px_rgba(234,179,8,0.2)] animate-pulse-slow border-4 border-white/10">
           <Crown size={48} className="text-white" fill="currentColor" />
         </div>
@@ -130,24 +198,48 @@ const PlannerPage: React.FC = () => {
             Recurso Exclusivo Premium
           </div>
 
-          {/* Botão Mensal */}
-          <button
-            onClick={() => setShowPremiumModal(true)}
-            className="w-full bg-white text-black font-bold py-5 rounded-xl text-lg shadow-lg hover:shadow-xl transition-all"
-          >
-            R$ 4,90 - Assinatura Mensal
-          </button>
+          {paymentPending ? (
+             <div className="space-y-4 animate-fade-in">
+                 <div className="bg-yellow-500/10 p-3 rounded-lg border border-yellow-500/20">
+                     <p className="text-xs text-yellow-200">Conclua o pagamento na nova aba e confirme:</p>
+                 </div>
+                 <button
+                    onClick={handleConfirmPayment}
+                    className="w-full bg-green-600 text-white font-bold py-5 rounded-xl text-lg shadow-lg hover:bg-green-500 transition-all flex items-center justify-center gap-2 animate-pulse"
+                 >
+                    <Check size={24} /> JÁ FIZ O PAGAMENTO
+                 </button>
+                 <button 
+                    onClick={() => setPaymentPending(false)} 
+                    className="text-xs text-gray-400 underline w-full"
+                 >
+                    Voltar / Tentar Novamente
+                 </button>
+             </div>
+          ) : (
+             <>
+                {/* Botão Mensal */}
+                <button
+                    onClick={() => handleSubscribe('monthly')}
+                    disabled={loadingPayment}
+                    className="w-full bg-white text-black font-bold py-5 rounded-xl text-lg shadow-lg hover:shadow-xl transition-all"
+                >
+                    {loadingPayment ? 'Processando...' : 'R$ 4,90 - Assinatura Mensal'}
+                </button>
 
-          {/* Botão Anual (Melhor oferta) */}
-          <button
-            onClick={() => setShowPremiumModal(true)}
-            className="w-full bg-gradient-to-r from-yellow-500 to-yellow-400 text-black font-bold py-6 rounded-xl text-xl shadow-2xl relative overflow-hidden"
-          >
-            <span className="absolute -top-1 -right-1 bg-green-500 text-black text-xs px-3 py-1 rounded-bl-lg font-bold">
-              MELHOR OFERTA
-            </span>
-            R$ 39,90 - Assinatura Anual
-          </button>
+                {/* Botão Anual (Melhor oferta) */}
+                <button
+                    onClick={() => handleSubscribe('yearly')}
+                    disabled={loadingPayment}
+                    className="w-full bg-gradient-to-r from-yellow-500 to-yellow-400 text-black font-bold py-6 rounded-xl text-xl shadow-2xl relative overflow-hidden"
+                >
+                    <span className="absolute -top-1 -right-1 bg-green-500 text-black text-xs px-3 py-1 rounded-bl-lg font-bold">
+                    MELHOR OFERTA
+                    </span>
+                    {loadingPayment ? 'Processando...' : 'R$ 39,90 - Assinatura Anual'}
+                </button>
+             </>
+          )}
 
           <p className="text-xs text-gray-400 mt-4">
             Pagamento 100% seguro • Mercado Pago
