@@ -154,12 +154,12 @@ const App: React.FC = () => {
                         table: 'profiles',
                         filter: `id=eq.${user.id}`,
                     },
-                    (payload) => {
+                    (payload: any) => {
                         console.log('🔔 Atualização Realtime recebida!', payload);
                         // Se o webhook atualizar o banco, isso vai disparar e atualizar a UI
                         fetchUserProfile();
                         
-                        if (payload.new.is_premium && !payload.old.is_premium) {
+                        if (payload.new && payload.old && payload.new.is_premium && !payload.old.is_premium) {
                             toast.success("Pagamento confirmado! Premium ativado. ♡");
                         }
                     }
