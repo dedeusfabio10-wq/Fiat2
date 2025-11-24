@@ -381,6 +381,7 @@ const AdminPage: React.FC = () => {
                                 <div className="w-full h-full bg-[#05080f] flex flex-col overflow-hidden relative text-left">
                                     <AppContext.Provider value={{ 
                                         profile: { ...profile, is_premium: true, name: 'Simulador Premium', favorites: [], active_novenas: [], streak: 5, rosaries_prayed: 10, onboarding_completed: true }, 
+                                        isLoadingProfile: false,
                                         updateProfile: () => console.log('Profile update mocked'), 
                                         refreshProfile: async () => {}, 
                                         themeColors: { primary: '#d4af37' } 
