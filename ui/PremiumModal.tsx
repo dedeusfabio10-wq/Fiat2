@@ -59,99 +59,74 @@ const PremiumModal: React.FC<PremiumModalProps> = ({ isOpen, onClose }) => {
       setLoading(false);
   };
 
-  // LÓGICA DE LIBERAÇÃO MANUAL + SALVAMENTO NO SUPABASE
+  // LÓGICA DE LIBERAÇÃO IMEDIATA (SOLICITAÇÃO DO USUÁRIO)
   const handleCheckStatus = async () => {
       if (checkingStatus) return;
       setCheckingStatus(true);
       
-      toast.loading('Ativando Premium...', { id: 'activating-premium' });
-
-      try {
-          const now = new Date();
-          const expiresAt = new Date();
-          
-          // Define validade baseado no plano escolhido
-          if (plan === 'yearly') {
-              expiresAt.setFullYear(now.getFullYear() + 1);
-          } else {
-              expiresAt.setDate(now.getDate() + 30);
-          }
-
-          const expirationString = expiresAt.toISOString();
-
-          // 1. Autenticação Atual
-          const { data: { user }, error: authError } = await supabase.auth.getUser();
-          
-          if (authError || !user) {
-              throw new Error("Sessão expirada. Faça login novamente.");
-          }
-
-          // Payload de atualização
-          const payload = {
-              id: user.id, // Importante para UPSERT
-              email: user.email,
-              is_premium: true,
-              premium_expires_at: expirationString,
-              subscription_type: plan,
-              subscription_method: 'pix_manual_check',
-              updated_at: now.toISOString()
-          };
-
-          // 2. Tenta salvar no Supabase usando UPSERT (Cria se não existir, Atualiza se existir)
-          // Isso resolve problemas onde o perfil não foi criado no cadastro
-          const { error } = await supabase
-              .from('profiles')
-              .upsert(payload, { onConflict: 'id' });
-
-          if (error) {
-              console.error('Erro Supabase:', error);
-              throw error; // Joga para o catch para ativar o modo fallback
-          }
-
-          // 3. Sucesso no Banco -> Atualiza Local
-          finishSuccess(expirationString);
-
-      } catch (error: any) {
-          console.error("Falha na gravação do banco:", error);
-          
-          // --- FALLBACK DE EMERGÊNCIA ---
-          // Se o banco falhar (RLS, Rede, etc), liberamos LOCALMENTE para o usuário não ficar travado.
-          const emergencyExpire = new Date();
-          if (plan === 'yearly') emergencyExpire.setFullYear(emergencyExpire.getFullYear() + 1);
-          else emergencyExpire.setDate(emergencyExpire.getDate() + 30);
-          
-          finishSuccess(emergencyExpire.toISOString(), true);
-      } finally {
-          setCheckingStatus(false);
-          toast.dismiss('activating-premium');
+      // 1. Define Vencimento
+      const now = new Date();
+      const expiresAt = new Date();
+      
+      if (plan === 'yearly') {
+          expiresAt.setFullYear(now.getFullYear() + 1);
+      } else {
+          expiresAt.setDate(now.getDate() + 30);
       }
-  };
 
-  const finishSuccess = (expirationDate: string, isOfflineMode = false) => {
-      // Atualiza Contexto Global
+      const expirationString = expiresAt.toISOString();
+
+      // 2. LIBERAÇÃO IMEDIATA NO APP (Optimistic UI)
+      // Atualiza o estado local e o localStorage instantaneamente para o usuário não esperar
       updateProfile({
           ...profile,
           is_premium: true,
-          premium_expires_at: expirationDate,
+          premium_expires_at: expirationString,
           subscriptionType: plan,
           subscriptionMethod: 'pix_manual_check'
       });
 
-      // Fecha Modal
+      // Feedback Visual
+      toast.success("Premium Liberado! ♡", {
+          description: "Seu acesso foi desbloqueado.",
+          icon: <Crown className="text-sacred-gold" />,
+          duration: 5000
+      });
+
+      // Fecha o modal imediatamente
       onClose();
 
-      if (isOfflineMode) {
-          toast.warning("Premium Liberado (Modo Offline)", {
-              description: "Seu acesso foi liberado, mas houve um erro ao salvar na nuvem. Sincronizaremos depois.",
-              duration: 6000,
-              icon: <Shield className="text-yellow-500" />
-          });
-      } else {
-          toast.success("Pagamento Confirmado! ♡", {
-              description: "Bem-vindo ao Premium. Deus abençoe sua generosidade.",
-              icon: <Crown className="text-sacred-gold" />,
-              duration: 5000
-          });
+      // 3. GRAVAÇÃO NO SUPABASE (Background)
+      // Tenta persistir no banco. Se falhar, o usuário continua usando Premium na sessão atual.
+      try {
+          const { data: { user } } = await supabase.auth.getUser();
+          
+          if (user) {
+              const payload = {
+                  id: user.id,
+                  email: user.email,
+                  is_premium: true,
+                  premium_expires_at: expirationString,
+                  subscription_type: plan,
+                  subscription_method: 'pix_manual_check',
+                  updated_at: new Date().toISOString()
+              };
+
+              // UPSERT: Cria ou Atualiza
+              const { error } = await supabase
+                  .from('profiles')
+                  .upsert(payload, { onConflict: 'id' });
+
+              if (error) {
+                  console.error('[PremiumModal] Erro ao salvar no DB (mas liberado localmente):', error);
+              } else {
+                  console.log('[PremiumModal] Sucesso: Usuário registrado como Premium no DB.');
+              }
+          }
+      } catch (error) {
+          console.error("[PremiumModal] Erro silencioso ao gravar no banco:", error);
+      } finally {
+          setCheckingStatus(false);
       }
   };
 
@@ -211,7 +186,7 @@ const PremiumModal: React.FC<PremiumModalProps> = ({ isOpen, onClose }) => {
                     >
                         {checkingStatus ? (
                             <>
-                                <Loader2 className="animate-spin" /> Ativando...
+                                <Loader2 className="animate-spin" /> Liberando...
                             </>
                         ) : (
                             <>
@@ -221,7 +196,7 @@ const PremiumModal: React.FC<PremiumModalProps> = ({ isOpen, onClose }) => {
                     </Button>
                     
                     <p className="text-[10px] text-gray-500 px-4">
-                        Ao clicar, o sistema validará e liberará seu Premium.
+                        Ao clicar, o sistema libera seu Premium imediatamente.
                     </p>
 
                     <div className="pt-4 flex justify-between items-center">
