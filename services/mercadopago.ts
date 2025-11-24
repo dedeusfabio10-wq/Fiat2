@@ -1,39 +1,52 @@
+
+import { supabase } from './supabase';
 import { UserProfile } from '../types';
 
-const getEnvVar = (key: string): string => {
-  // @ts-ignore
-  const env = import.meta.env || (window as any).__env || {};
-  return env[key] || '';
-};
-
-export const createSubscription = async (email: string, plan: 'monthly' | 'yearly') => {
-  // IMPORTANTE: Use links de "Check-out Pro" (Pagamento Único) no Mercado Pago.
-  // Não use links de assinatura recorrente se quiser permitir PIX sem login.
-  const linkMonthly = getEnvVar('VITE_MP_LINK_MONTHLY') || getEnvVar('VITE_MP_LINK_MENSAL');
-  const linkYearly = getEnvVar('VITE_MP_LINK_YEARLY') || getEnvVar('VITE_MP_LINK_ANUAL');
+export const createSubscription = async (plan: 'monthly' | 'yearly') => {
+  // 1. Pega o usuário atual para vincular ao pagamento
+  const { data: { user } } = await supabase.auth.getUser();
   
-  const link = plan === 'monthly' ? linkMonthly : linkYearly;
-
-  console.log(`[MercadoPago] Produto selecionado: ${plan}`);
-  
-  if (!link || link === '' || link.includes('placeholder')) {
-      console.error("⚠️ LINKS DE PAGAMENTO NÃO CONFIGURADOS");
-      return {
-        id: 'error',
-        init_point: null,
-        error: true
-      };
+  if (!user) {
+      return { error: true, message: 'Usuário não logado. Faça login para assinar.' };
   }
 
-  // Retorna o link direto
-  return {
-    id: `prod_${Math.random().toString(36).substr(2, 9)}`,
-    init_point: link,
-    error: false
-  };
+  try {
+    // 2. Chama nossa API Serverless para gerar o link de pagamento
+    const response = await fetch('/api/create-checkout', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        plan,
+        userId: user.id,
+        email: user.email || user.user_metadata?.email
+      }),
+    });
+
+    if (!response.ok) {
+        throw new Error('Falha na comunicação com o servidor de pagamento');
+    }
+
+    const data = await response.json();
+    
+    if (!data.init_point) {
+        throw new Error('Link de pagamento não gerado');
+    }
+
+    // 3. Retorna o link direto do Mercado Pago
+    return { 
+        init_point: data.init_point, 
+        error: false 
+    };
+
+  } catch (error) {
+    console.error('[MercadoPago Service] Erro:', error);
+    return { error: true, message: 'Erro ao iniciar pagamento. Tente novamente.' };
+  }
 };
 
-// Mantido apenas para compatibilidade de tipos, mas não usado no fluxo de pagamento único
+// Mantido apenas para compatibilidade de tipos
 export const cancelSubscription = async (): Promise<Partial<UserProfile>> => {
   return new Promise(resolve => {
       setTimeout(() => {

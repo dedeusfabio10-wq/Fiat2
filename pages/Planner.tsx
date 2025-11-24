@@ -1,3 +1,4 @@
+
 import React, { useContext, useEffect, useState, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { AppContext } from '../contexts/AppContext';
@@ -7,6 +8,7 @@ import { getPlans, deletePlan } from '../services/storage';
 import { SpiritualPlan } from '../types';
 import { toast } from 'sonner';
 import { supabase } from '../services/supabase';
+import { createSubscription } from '../services/mercadopago';
 
 const SACRED_MUSIC = [
   {
@@ -99,42 +101,23 @@ const PlannerPage: React.FC = () => {
     toast("Silêncio orante restaurado", { duration: 2000 });
   };
 
-  // NOVO: Função de assinatura real com Mercado Pago (CORRIGIDA PARA EVITAR LOOP)
+  // Integração Mercado Pago com Serviço Unificado
   const handleSubscribe = async (plan: 'monthly' | 'yearly') => {
     setLoadingPayment(true);
-    try {
-      const { data: { user } } = await supabase.auth.getUser();
+    
+    const result = await createSubscription(plan);
 
-      if (!user) {
-        toast.error('Faça login primeiro');
-        setLoadingPayment(false);
-        return;
-      }
-
-      const res = await fetch('/api/mercadopago/create-subscription', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          plan,
-          userId: user.id,
-          email: user.email || user.user_metadata.email
-        })
-      });
-
-      const data = await res.json();
-      if (data.init_point) {
-        // ALTERAÇÃO CRÍTICA: Abre em nova aba e muda estado local para confirmação
-        window.open(data.init_point, '_blank');
-        setPaymentPending(true);
-        toast.success('Aba de pagamento aberta. Confirme abaixo.');
-      } else {
-        toast.error('Erro ao iniciar pagamento');
-      }
-    } catch (err) {
-      toast.error('Erro de conexão');
-    } finally {
+    if (result.error || !result.init_point) {
+      toast.error(result.message || 'Erro ao iniciar pagamento');
       setLoadingPayment(false);
+      return;
     }
+
+    // Abre em nova aba e muda estado local para confirmação
+    window.open(result.init_point, '_blank');
+    setPaymentPending(true);
+    setLoadingPayment(false);
+    toast.success('Aba de pagamento aberta. Confirme abaixo.');
   };
 
   // Função de Liberação Imediata (Optimistic Update)
@@ -152,20 +135,8 @@ const PlannerPage: React.FC = () => {
       
       toast.success("Acesso Liberado! Bem-vindo(a) ao Premium. ♡");
 
-      // 2. Salva no Supabase em Background (Silencioso)
-      try {
-          const { data: { user } } = await supabase.auth.getUser();
-
-          if (user) {
-             await supabase.from('profiles').upsert({
-                 id: user.id,
-                 is_premium: true,
-                 premium_expires_at: expiresAt.toISOString(),
-                 subscription_type: 'manual_check',
-                 updated_at: new Date().toISOString()
-             });
-          }
-      } catch (e) { console.error("Erro ao salvar backup no banco", e); }
+      // 2. O Webhook atualizará o banco de dados em paralelo.
+      // Se o webhook falhar ou atrasar, o usuário já tem acesso na sessão atual.
   };
 
   // --- LOADING STATE ---
@@ -177,7 +148,7 @@ const PlannerPage: React.FC = () => {
     );
   }
 
-  // --- PREMIUM LOCK SCREEN (ATUALIZADO COM LÓGICA ANTI-LOOP) ---
+  // --- PREMIUM LOCK SCREEN ---
   if (!profile?.is_premium) {
     return (
       <div className="p-6 flex flex-col items-center justify-center h-full min-h-[80vh] text-center space-y-8 animate-fade-in">
@@ -249,7 +220,7 @@ const PlannerPage: React.FC = () => {
     );
   }
 
-  // === TODO O RESTO DO CÓDIGO CONTINUA EXATAMENTE IGUAL ===
+  // === CONTEÚDO NORMAL DO PLANNER ===
   const getPlanProgressStats = (plan: SpiritualPlan) => {
     const daysDone = Object.keys(plan.progress || {}).filter(k => k.startsWith('completed_')).length;
     const daysLeft = Math.max(0, plan.durationDays - daysDone);

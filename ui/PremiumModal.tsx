@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect, useContext } from 'react';
 import { AppContext } from '../contexts/AppContext';
 import { Button } from './UIComponents';
@@ -30,11 +29,12 @@ const PremiumModal: React.FC<PremiumModalProps> = ({ isOpen, onClose }) => {
   const handleSubscribe = async () => {
       setLoading(true);
       
-      const subData = await createSubscription(profile.email || '', plan);
+      // Chama o serviço que se comunica com a API Serverless
+      const subData = await createSubscription(plan);
       
       if (subData.error || !subData.init_point) {
-          toast.error("Erro na Configuração", { 
-              description: "Verifique se as variáveis de ambiente (Links MP) estão configuradas.",
+          toast.error("Erro no Pagamento", { 
+              description: subData.message || "Não foi possível iniciar o checkout.",
           });
           setLoading(false);
           return;
@@ -64,7 +64,7 @@ const PremiumModal: React.FC<PremiumModalProps> = ({ isOpen, onClose }) => {
       if (checkingStatus) return;
       setCheckingStatus(true);
       
-      // 1. Define Vencimento
+      // 1. Define Vencimento (Otimista)
       const now = new Date();
       const expiresAt = new Date();
       
@@ -77,7 +77,6 @@ const PremiumModal: React.FC<PremiumModalProps> = ({ isOpen, onClose }) => {
       const expirationString = expiresAt.toISOString();
 
       // 2. LIBERAÇÃO IMEDIATA NO APP (Optimistic UI)
-      // Atualiza o estado local e o localStorage instantaneamente para o usuário não esperar
       updateProfile({
           ...profile,
           is_premium: true,
@@ -95,39 +94,9 @@ const PremiumModal: React.FC<PremiumModalProps> = ({ isOpen, onClose }) => {
 
       // Fecha o modal imediatamente
       onClose();
-
-      // 3. GRAVAÇÃO NO SUPABASE (Background)
-      // Tenta persistir no banco. Se falhar, o usuário continua usando Premium na sessão atual.
-      try {
-          const { data: { user } } = await supabase.auth.getUser();
-          
-          if (user) {
-              const payload = {
-                  id: user.id,
-                  email: user.email,
-                  is_premium: true,
-                  premium_expires_at: expirationString,
-                  subscription_type: plan,
-                  subscription_method: 'pix_manual_check',
-                  updated_at: new Date().toISOString()
-              };
-
-              // UPSERT: Cria ou Atualiza
-              const { error } = await supabase
-                  .from('profiles')
-                  .upsert(payload, { onConflict: 'id' });
-
-              if (error) {
-                  console.error('[PremiumModal] Erro ao salvar no DB (mas liberado localmente):', error);
-              } else {
-                  console.log('[PremiumModal] Sucesso: Usuário registrado como Premium no DB.');
-              }
-          }
-      } catch (error) {
-          console.error("[PremiumModal] Erro silencioso ao gravar no banco:", error);
-      } finally {
-          setCheckingStatus(false);
-      }
+      setCheckingStatus(false);
+      
+      // 3. O Webhook tratará a atualização real no Banco de Dados após a confirmação do pagamento.
   };
 
   if (!isOpen) return null;
@@ -173,7 +142,7 @@ const PremiumModal: React.FC<PremiumModalProps> = ({ isOpen, onClose }) => {
                     <AlertTriangle size={20} className="text-blue-400 shrink-0 mt-0.5" />
                     <div className="text-sm text-gray-300">
                         <strong className="text-blue-300 block mb-1">Importante:</strong>
-                        Após realizar o pagamento no app do banco, <strong>clique no botão abaixo</strong> para liberar seu acesso imediatamente.
+                        Após realizar o pagamento, <strong>clique no botão abaixo</strong> para liberar seu acesso imediatamente.
                     </div>
                 </div>
 

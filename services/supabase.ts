@@ -92,7 +92,7 @@ try {
   isMockMode = true;
 }
 
-export const supabase = client;
+export const supabase = client as any;
 
 export const getCurrentUser = async () => {
   try {
