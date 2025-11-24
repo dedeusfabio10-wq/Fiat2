@@ -1,9 +1,10 @@
+
 import React, { useContext, useEffect, useState, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { AppContext } from '../contexts/AppContext';
 import { Button } from '../ui/UIComponents';
 import PremiumModal from '../ui/PremiumModal';
-import { Crown, Plus, Calendar, Lock, Trash2, User, Play, Pause, Volume2, Music, Sparkles, Loader2 } from 'lucide-react';
+import { Crown, Plus, Calendar, Lock, Trash2, User, Play, Pause, Volume2, Music, Sparkles, Loader2, CheckCircle2, Clock } from 'lucide-react';
 import { getPlans, deletePlan } from '../services/storage';
 import { SpiritualPlan } from '../types';
 import { toast } from 'sonner';
@@ -133,14 +134,12 @@ const PlannerPage: React.FC = () => {
     );
   }
 
-  const formatDateRange = (plan: SpiritualPlan) => {
-      if (!plan.startDate) return `${plan.durationDays} dias`;
-      const [y, m, d] = plan.startDate.split('-').map(Number);
-      const start = new Date(y, m - 1, d);
-      const end = new Date(start);
-      end.setDate(start.getDate() + plan.durationDays - 1);
-      const format = (date: Date) => `${date.getDate().toString().padStart(2, '0')}/${(date.getMonth()+1).toString().padStart(2, '0')}`;
-      return `${format(start)} a ${format(end)}`;
+  // Função auxiliar para contar dias concluídos baseados nas chaves salvas
+  const getPlanProgressStats = (plan: SpiritualPlan) => {
+      const daysDone = Object.keys(plan.progress || {}).filter(k => k.startsWith('completed_')).length;
+      const daysLeft = Math.max(0, plan.durationDays - daysDone);
+      const progressPercent = Math.min(100, Math.round((daysDone / plan.durationDays) * 100));
+      return { daysDone, daysLeft, progressPercent };
   };
 
   return (
@@ -206,7 +205,10 @@ const PlannerPage: React.FC = () => {
         </div>
       ) : (
         <div className="space-y-4">
-          {plans.map((plan) => (
+          {plans.map((plan) => {
+            const { daysDone, daysLeft, progressPercent } = getPlanProgressStats(plan);
+            
+            return (
             <div
               key={plan.id}
               onClick={() => navigate(`/planner/${plan.id}`)}
@@ -225,29 +227,41 @@ const PlannerPage: React.FC = () => {
                 </Button>
               </div>
               <div className="flex justify-between items-start pr-8">
-                <div>
+                <div className="w-full">
                   <h3 className="text-xl font-serif text-white group-hover:text-sacred-gold transition-colors">{plan.title}</h3>
-                  <div className="flex flex-col gap-1 mt-2">
-                    <p className="text-xs text-gray-400 flex items-center gap-2 font-mono">
-                      <Calendar size={12} />
-                      {formatDateRange(plan)}
-                    </p>
+                  
+                  <div className="mt-4 mb-2">
+                      <div className="flex justify-between text-[10px] text-gray-400 mb-1 uppercase tracking-wider font-bold">
+                          <span>Progresso</span>
+                          <span>{progressPercent}%</span>
+                      </div>
+                      <div className="h-1.5 bg-black/40 rounded-full overflow-hidden">
+                          <div 
+                              className="h-full bg-gradient-to-r from-sacred-gold to-yellow-600 transition-all duration-700"
+                              style={{ width: `${progressPercent}%` }}
+                          />
+                      </div>
+                  </div>
+
+                  <div className="flex justify-between items-center mt-3 pt-3 border-t border-white/5">
+                    <div className="flex items-center gap-4 text-xs">
+                        <span className="text-green-400 flex items-center gap-1 font-bold">
+                            <CheckCircle2 size={14} /> {daysDone} feitos
+                        </span>
+                        <span className="text-gray-400 flex items-center gap-1">
+                            <Clock size={14} /> {daysLeft} faltam
+                        </span>
+                    </div>
                     {plan.spiritualDirector && (
-                      <p className="text-xs text-sacred-gold/80 flex items-center gap-2 font-serif italic">
-                        <User size={12} />
+                      <p className="text-[10px] text-sacred-gold/60 font-serif italic truncate max-w-[100px]">
                         com {plan.spiritualDirector}
                       </p>
                     )}
                   </div>
                 </div>
               </div>
-              <div className="mt-4 flex gap-2">
-                {plan.schedule?.morning?.length > 0 && <span className="text-[10px] bg-yellow-100/10 text-yellow-200 px-2 py-1 rounded border border-yellow-500/20">Manhã</span>}
-                {plan.schedule?.afternoon?.length > 0 && <span className="text-[10px] bg-orange-100/10 text-orange-200 px-2 py-1 rounded border border-orange-500/20">Tarde</span>}
-                {plan.schedule?.night?.length > 0 && <span className="text-[10px] bg-indigo-100/10 text-indigo-200 px-2 py-1 rounded border border-indigo-500/20">Noite</span>}
-              </div>
             </div>
-          ))}
+          )})}
         </div>
       )}
 

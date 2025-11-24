@@ -5,8 +5,9 @@ import { getPlanById, updatePlan } from '../services/storage';
 import { SpiritualPlan, PlanItem } from '../types';
 import { Button } from '../ui/UIComponents';
 import { PRAYERS, DEVOTIONAL_ROSARIES, NOVENAS, VIA_SACRA } from '../constants';
-import { ArrowLeft, User, Sun, Moon, Sunset, CheckCircle2, Circle, Loader2, BookOpen, X, Clock, CalendarDays, ChevronRight } from 'lucide-react';
+import { ArrowLeft, User, Sun, Moon, Sunset, CheckCircle2, Circle, Loader2, BookOpen, X, Clock, CalendarDays, ChevronRight, Check } from 'lucide-react';
 import { toast } from 'sonner';
+import { playSoftBell } from '../services/audio';
 
 const PlanDetailPage: React.FC = () => {
   const { id } = useParams();
@@ -60,6 +61,28 @@ const PlanDetailPage: React.FC = () => {
       }
   };
 
+  // --- LÓGICA DE FINALIZAR O DIA ---
+  const handleFinishDay = async () => {
+      if (!plan) return;
+      
+      const completionKey = `completed_${todayStr}`;
+      if (plan.progress[completionKey]) return; // Já finalizado
+
+      const newProgress = { ...plan.progress, [completionKey]: true };
+      const updatedPlan = { ...plan, progress: newProgress, streak: (plan.streak || 0) + 1 };
+      
+      setPlan(updatedPlan);
+      await updatePlan(updatedPlan);
+      
+      playSoftBell();
+      toast.success("Dia Concluído! Deo Gratias!", {
+          description: "Seu progresso foi salvo. Volte amanhã.",
+          icon: <Check className="text-green-500" />
+      });
+      
+      if (navigator.vibrate) navigator.vibrate([50, 50, 100]);
+  };
+
   // --- LÓGICA DE CONTEÚDO ---
   const handleOpenContent = (item: PlanItem) => {
       let contentBody = "Conteúdo não disponível para leitura direta. Utilize seu livro de orações.";
@@ -90,44 +113,21 @@ const PlanDetailPage: React.FC = () => {
       setViewingContent({ title, body: contentBody, type: item.type });
   };
 
-  // --- CÁLCULO DE DIAS ---
-  const dayInfo = useMemo(() => {
-      if (!plan) return { current: 0, total: 0, label: 'Carregando...', status: 'loading', progress: 0 };
-      
-      const start = new Date(plan.startDate);
-      // Zerar horas para evitar problemas de fuso na conta de dias
-      start.setHours(0,0,0,0);
-      
-      const now = new Date();
-      now.setHours(0,0,0,0);
-      
-      const diffTime = now.getTime() - start.getTime();
-      const diffDays = Math.floor(diffTime / (1000 * 60 * 60 * 24)); 
-      
-      const currentDay = diffDays + 1;
-      const totalDays = plan.durationDays;
-      
-      let label = '';
-      let status = 'active'; // active, future, completed
-
-      if (currentDay <= 0) {
-          label = `Começa em ${Math.abs(currentDay - 1)} dias`;
-          status = 'future';
-      } else if (currentDay > totalDays) {
-          label = 'Plano Concluído';
-          status = 'completed';
-      } else {
-          label = `Dia ${currentDay} de ${totalDays}`;
-      }
-
-      return { current: currentDay, total: totalDays, label, status, progress: Math.min(100, Math.max(0, (currentDay / totalDays) * 100)) };
+  // --- CÁLCULO DE DIAS REAIS (BASEADO EM FINALIZAÇÕES) ---
+  const stats = useMemo(() => {
+      if (!plan) return { done: 0, left: 0, percent: 0 };
+      const daysDone = Object.keys(plan.progress).filter(k => k.startsWith('completed_')).length;
+      const daysLeft = Math.max(0, plan.durationDays - daysDone);
+      const percent = Math.min(100, Math.round((daysDone / plan.durationDays) * 100));
+      return { done: daysDone, left: daysLeft, percent };
   }, [plan]);
 
-  // --- CÁLCULO DE PROGRESSO HOJE ---
-  const getDailyCompletion = () => {
-      if (!plan) return 0;
+  // --- CÁLCULO DE PROGRESSO DE HOJE ---
+  const dailyStatus = useMemo(() => {
+      if (!plan) return { percent: 0, isComplete: false, isFinalized: false };
+      
       const totalItems = (plan.schedule.morning.length + plan.schedule.afternoon.length + plan.schedule.night.length);
-      if (totalItems === 0) return 0;
+      if (totalItems === 0) return { percent: 0, isComplete: true, isFinalized: false };
       
       let checkedCount = 0;
       const checkSection = (items: PlanItem[]) => {
@@ -139,8 +139,11 @@ const PlanDetailPage: React.FC = () => {
       checkSection(plan.schedule.afternoon);
       checkSection(plan.schedule.night);
       
-      return Math.round((checkedCount / totalItems) * 100);
-  };
+      const percent = Math.round((checkedCount / totalItems) * 100);
+      const isFinalized = !!plan.progress[`completed_${todayStr}`];
+      
+      return { percent, isComplete: percent === 100, isFinalized };
+  }, [plan, todayStr]);
 
   if (loading) {
       return (
@@ -152,8 +155,6 @@ const PlanDetailPage: React.FC = () => {
 
   if (!plan) return null;
 
-  const dailyPercentage = getDailyCompletion();
-
   return (
     <div className="min-h-screen bg-[#0f172a] pb-32 animate-fade-in relative">
         {/* Header Fixo */}
@@ -163,8 +164,8 @@ const PlanDetailPage: React.FC = () => {
             </Button>
             <div className="text-center">
                 <h1 className="font-serif text-white text-base max-w-[200px] truncate">{plan.title}</h1>
-                <div className="flex items-center justify-center gap-2 text-[10px] text-sacred-gold uppercase tracking-widest">
-                    <span>{dayInfo.label}</span>
+                <div className="flex items-center justify-center gap-2 text-[10px] text-gray-400 uppercase tracking-widest">
+                    <span>{stats.done} concluídos • {stats.left} restantes</span>
                 </div>
             </div>
             <div className="w-10"></div> {/* Spacer */}
@@ -172,52 +173,53 @@ const PlanDetailPage: React.FC = () => {
 
         <div className="p-6 space-y-6">
             
-            {/* Card de Progresso Geral (Dias) */}
+            {/* Card de Progresso Geral */}
             <div className="bg-white/5 border border-white/10 rounded-xl p-4">
                 <div className="flex justify-between text-xs text-gray-400 mb-2 uppercase tracking-wider font-bold">
                     <span>Jornada</span>
-                    <span>{dayInfo.progress.toFixed(0)}% Concluído</span>
+                    <span>{stats.percent}% Concluído</span>
                 </div>
                 <div className="h-2 bg-black/40 rounded-full overflow-hidden">
                     <div 
                         className="h-full bg-gradient-to-r from-sacred-gold to-yellow-600 transition-all duration-700"
-                        style={{ width: `${dayInfo.progress}%` }}
+                        style={{ width: `${stats.percent}%` }}
                     />
                 </div>
-                <p className="text-[10px] text-gray-500 mt-2 text-center italic">
-                    {dayInfo.status === 'future' 
-                        ? `Prepare-se para iniciar dia ${new Date(plan.startDate).toLocaleDateString('pt-BR')}` 
-                        : dayInfo.status === 'completed' 
-                        ? "Parabéns! Você finalizou este propósito." 
-                        : "Mantenha a constância hoje."}
-                </p>
             </div>
 
             {/* Card de Progresso do Dia (Círculo) */}
-            <div className="bg-gradient-to-r from-slate-800 to-slate-900 p-6 rounded-xl border border-white/10 flex justify-between items-center relative overflow-hidden shadow-lg">
+            <div className={`p-6 rounded-xl border flex justify-between items-center relative overflow-hidden shadow-lg transition-all
+                ${dailyStatus.isFinalized 
+                    ? 'bg-gradient-to-r from-green-900 to-green-950 border-green-500/30' 
+                    : 'bg-gradient-to-r from-slate-800 to-slate-900 border-white/10'}`}
+            >
                 <div className="absolute inset-0 bg-[url('https://www.transparenttextures.com/patterns/stardust.png')] opacity-10"></div>
                 <div className="relative z-10">
-                    <p className="text-xs text-gray-400 uppercase tracking-widest mb-1 font-bold flex items-center gap-2">
-                        <CalendarDays size={14} /> Meta de Hoje
+                    <p className={`text-xs uppercase tracking-widest mb-1 font-bold flex items-center gap-2 ${dailyStatus.isFinalized ? 'text-green-400' : 'text-gray-400'}`}>
+                        <CalendarDays size={14} /> {dailyStatus.isFinalized ? 'Dia Concluído' : 'Meta de Hoje'}
                     </p>
-                    <h2 className="text-3xl font-serif text-white">{dailyPercentage}%</h2>
-                    <p className="text-[10px] text-sacred-gold mt-1">
-                        {dailyPercentage === 100 ? "Dia Completo! Deo Gratias!" : "Complete suas orações."}
+                    <h2 className="text-3xl font-serif text-white">{dailyStatus.percent}%</h2>
+                    <p className={`text-[10px] mt-1 ${dailyStatus.isFinalized ? 'text-green-300' : 'text-sacred-gold'}`}>
+                        {dailyStatus.isFinalized 
+                            ? "Volte amanhã para continuar." 
+                            : dailyStatus.isComplete 
+                                ? "Tudo pronto! Finalize o dia." 
+                                : "Complete suas orações."}
                     </p>
                 </div>
                 <div className="w-16 h-16 relative z-10">
-                    <svg viewBox="0 0 36 36" className="w-full h-full transform -rotate-90">
-                        <path className="text-gray-700" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" fill="none" stroke="currentColor" strokeWidth="4" />
-                        <path className="text-sacred-gold transition-all duration-1000" strokeDasharray={`${dailyPercentage}, 100`} d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" fill="none" stroke="currentColor" strokeWidth="4" />
-                    </svg>
+                    {dailyStatus.isFinalized ? (
+                        <div className="w-full h-full rounded-full border-4 border-green-500 flex items-center justify-center text-green-500">
+                            <Check size={32} strokeWidth={3} />
+                        </div>
+                    ) : (
+                        <svg viewBox="0 0 36 36" className="w-full h-full transform -rotate-90">
+                            <path className="text-gray-700" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" fill="none" stroke="currentColor" strokeWidth="4" />
+                            <path className="text-sacred-gold transition-all duration-1000" strokeDasharray={`${dailyStatus.percent}, 100`} d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" fill="none" stroke="currentColor" strokeWidth="4" />
+                        </svg>
+                    )}
                 </div>
             </div>
-
-            {plan.spiritualDirector && (
-                <div className="flex items-center gap-2 text-sm text-gray-400 justify-center bg-black/20 p-2 rounded-lg border border-white/5">
-                    <User size={14} /> Direção: <span className="text-white font-serif">{plan.spiritualDirector}</span>
-                </div>
-            )}
 
             <div className="space-y-6">
                 {plan.schedule.morning.length > 0 && (
@@ -229,6 +231,7 @@ const PlanDetailPage: React.FC = () => {
                         todayStr={todayStr} 
                         onToggle={toggleItem}
                         onOpen={handleOpenContent}
+                        locked={dailyStatus.isFinalized}
                     />
                 )}
                 
@@ -241,6 +244,7 @@ const PlanDetailPage: React.FC = () => {
                         todayStr={todayStr} 
                         onToggle={toggleItem}
                         onOpen={handleOpenContent}
+                        locked={dailyStatus.isFinalized}
                     />
                 )}
 
@@ -253,9 +257,35 @@ const PlanDetailPage: React.FC = () => {
                         todayStr={todayStr} 
                         onToggle={toggleItem}
                         onOpen={handleOpenContent}
+                        locked={dailyStatus.isFinalized}
                     />
                 )}
             </div>
+
+            {/* BOTÃO DE FINALIZAR DIA */}
+            {dailyStatus.isComplete && !dailyStatus.isFinalized && (
+                <div className="pt-4 animate-slide-up">
+                    <Button 
+                        variant="sacred" 
+                        size="lg" 
+                        className="w-full h-14 text-lg shadow-[0_0_30px_rgba(34,197,94,0.3)] bg-gradient-to-r from-green-600 to-green-800 border-green-400 text-white hover:from-green-500 hover:to-green-700"
+                        onClick={handleFinishDay}
+                    >
+                        <CheckCircle2 className="mr-2" /> FINALIZAR DIA
+                    </Button>
+                    <p className="text-center text-[10px] text-gray-500 mt-2 uppercase tracking-widest">
+                        Registrar progresso e aguardar próximo dia
+                    </p>
+                </div>
+            )}
+            
+            {dailyStatus.isFinalized && (
+                <div className="pt-4 text-center animate-fade-in">
+                    <div className="inline-flex items-center gap-2 bg-green-900/20 text-green-400 px-4 py-2 rounded-full border border-green-500/30">
+                        <Clock size={14} /> <span>Volte amanhã para o próximo dia</span>
+                    </div>
+                </div>
+            )}
         </div>
 
         {/* MODAL DE LEITURA */}
@@ -310,9 +340,10 @@ const PlanSection: React.FC<{
     plan: SpiritualPlan, 
     todayStr: string, 
     onToggle: (e: React.MouseEvent, id: string) => void,
-    onOpen: (item: PlanItem) => void
-}> = ({ title, icon, items, plan, todayStr, onToggle, onOpen }) => (
-    <div className="bg-white/5 rounded-xl overflow-hidden border border-white/10 shadow-lg">
+    onOpen: (item: PlanItem) => void,
+    locked: boolean
+}> = ({ title, icon, items, plan, todayStr, onToggle, onOpen, locked }) => (
+    <div className={`bg-white/5 rounded-xl overflow-hidden border border-white/10 shadow-lg transition-opacity ${locked ? 'opacity-50 pointer-events-none' : ''}`}>
         <div className="bg-black/30 p-3 flex items-center gap-2 border-b border-white/5">
             {icon}
             <h3 className="text-white font-serif font-medium text-sm tracking-wide">{title}</h3>
