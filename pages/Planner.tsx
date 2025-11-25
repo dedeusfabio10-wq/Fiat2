@@ -2,7 +2,7 @@ import React, { useContext, useEffect, useState, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { AppContext } from '../contexts/AppContext';
 import { Button } from '../ui/UIComponents';
-import { Crown, Plus, Calendar, Lock, Trash2, User, Play, Pause, Volume2, Music, Sparkles, Loader2, CheckCircle2, Clock, Check, RotateCw } from 'lucide-react';
+import { Crown, Plus, Calendar, Lock, Trash2, User, Play, Pause, Volume2, Music, Sparkles, Loader2, CheckCircle2, Clock, Check, RotateCw, RefreshCw } from 'lucide-react';
 import { getPlans, deletePlan } from '../services/storage';
 import { SpiritualPlan } from '../types';
 import { toast } from 'sonner';
@@ -126,13 +126,12 @@ const PlannerPage: React.FC = () => {
       // Atualiza dados do servidor
       await refreshProfile();
       
-      // A lógica de atualização do App.tsx vai cuidar de atualizar o estado global 'profile'
-      // Se 'profile.is_premium' virar true, este componente vai re-renderizar e mostrar o conteúdo liberado.
-      
       if (!profile.is_premium) {
           toast.info("Verificando...", { 
               description: "Se o pagamento foi processado, seu acesso será liberado automaticamente em instantes."
           });
+      } else {
+          toast.success("Bem-vindo ao Premium! ♡");
       }
       
       setLoadingPayment(false);
@@ -216,6 +215,19 @@ const PlannerPage: React.FC = () => {
                     </span>
                     {loadingPayment ? 'Processando...' : 'R$ 39,90 - Assinatura Anual'}
                 </Button>
+                
+                {/* Botão de Recuperar/Verificar para quem já pagou mas não está pending */}
+                <div className="pt-2 border-t border-white/5">
+                    <Button 
+                        variant="ghost" 
+                        size="sm" 
+                        onClick={handleConfirmPayment}
+                        disabled={loadingPayment}
+                        className="w-full text-xs text-yellow-500/70 hover:text-yellow-400 hover:bg-yellow-900/10"
+                    >
+                        {loadingPayment ? <Loader2 className="animate-spin w-3 h-3" /> : <><RefreshCw size={12} className="mr-1" /> Verificar Assinatura Existente</>}
+                    </Button>
+                </div>
              </div>
           )}
 

@@ -4,7 +4,7 @@ import { Toaster, toast } from 'sonner';
 import Layout from './ui/Layout';
 import { UserProfile } from './types';
 import { initAudio } from './services/audio';
-import { supabase, getCurrentUser } from './services/supabase';
+import { supabase, getCurrentUser, isMockMode } from './services/supabase';
 import { AppContext } from './contexts/AppContext';
 import { RealtimeChannel } from '@supabase/supabase-js';
 
@@ -50,10 +50,11 @@ const App: React.FC = () => {
         const expirationDate = new Date(userProfile.premium_expires_at);
         const now = new Date();
         
-        // Adiciona uma margem de segurança de algumas horas para evitar bloqueio por fuso horário no dia do vencimento
-        // expirationDate.setHours(23, 59, 59, 999); 
+        // Adiciona uma margem de tolerância de 1 dia para evitar bloqueios por fuso horário
+        const toleranceDate = new Date(expirationDate);
+        toleranceDate.setDate(toleranceDate.getDate() + 1);
 
-        if (now.getTime() > expirationDate.getTime()) {
+        if (now.getTime() > toleranceDate.getTime()) {
             console.log('Plano Premium Expirado em:', expirationDate);
             toast.error("Seu tempo Premium acabou.", { description: "Renove para continuar usando os recursos." });
             // Retorna perfil sem premium, mas mantém dados
@@ -71,7 +72,6 @@ const App: React.FC = () => {
   };
 
   const fetchUserProfile = async () => {
-      // Não define loading true aqui para não piscar a tela se for um refresh silencioso
       try {
           const user = await getCurrentUser();
           if (user) {
@@ -175,7 +175,7 @@ const App: React.FC = () => {
     };
   }, []);
 
-  // Inicialização e Listener de Auth
+  // Inicialização, Listener de Auth e Visibility Listener
   useEffect(() => {
     // Busca inicial
     fetchUserProfile();
@@ -201,9 +201,28 @@ const App: React.FC = () => {
        }
     });
 
+    // Auto-refresh quando a aba ganha foco (usuário volta do pagamento)
+    const handleVisibilityChange = () => {
+        if (document.visibilityState === 'visible') {
+            console.log("App em foco: Verificando atualizações de perfil...");
+            fetchUserProfile();
+        }
+    };
+    document.addEventListener("visibilitychange", handleVisibilityChange);
+
     return () => {
         authListener.subscription.unsubscribe();
+        document.removeEventListener("visibilitychange", handleVisibilityChange);
     };
+  }, []);
+
+  // Aviso de Mock Mode (apenas para debug do desenvolvedor)
+  useEffect(() => {
+      if (isMockMode) {
+          console.warn("⚠️ FIAT MOCK MODE: Supabase não configurado corretamente nas variáveis de ambiente.");
+          // Não mostramos toast para usuário final, apenas log, 
+          // pois pode ser que o backend esteja apenas lento.
+      }
   }, []);
 
   // Persistência local redundante
