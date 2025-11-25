@@ -98,14 +98,16 @@ const App: React.FC = () => {
                 setProfile(updatedProfile);
                 localStorage.setItem('fiat-profile', JSON.stringify(updatedProfile));
             } else {
-                // IMPORTANTE: Se não houver perfil (data é null), o usuário existe no Auth mas não pagou ainda.
-                // Mantemos como "Grátis" e onboarding completed.
-                console.log("Usuário sem perfil (Ainda não pagou ou erro).");
+                // IMPORTANTE: Se data é null, o perfil NÃO existe na tabela profiles.
+                // Isso ocorre logo após o cadastro (Sign Up).
+                // Não criamos o perfil aqui. Ele será criado pelo Webhook de pagamento (Upsert).
+                // Enquanto isso, mantemos o estado local "Grátis".
+                console.log("Usuário sem perfil no DB (Aguardando pagamento ou Free).");
                 setProfile(prev => ({ 
                     ...prev, 
                     name: user.user_metadata?.name || user.email?.split('@')[0],
                     email: user.email,
-                    is_premium: false, // Garante que não é premium
+                    is_premium: false, 
                     onboarding_completed: true 
                 }));
             }
@@ -129,7 +131,7 @@ const App: React.FC = () => {
                 .on(
                     'postgres_changes',
                     {
-                        event: '*', // Ouve INSERT e UPDATE (pois profile pode ser criado no webhook)
+                        event: '*', // Ouve INSERT (novo premium) e UPDATE
                         schema: 'public',
                         table: 'profiles',
                         filter: `id=eq.${user.id}`,
@@ -225,8 +227,9 @@ const App: React.FC = () => {
       try {
           const user = await getCurrentUser();
           if (user) {
-              // Tenta update. Se falhar pq não existe, ignora (o webhook cria)
-              // Ou poderíamos usar upsert aqui também, mas para settings básicas update é mais seguro para não criar lixo
+              // Tenta update. Se falhar pq não existe (usuário novo sem pagamento),
+              // o comando .update não faz nada (retorna count 0), o que é o comportamento desejado.
+              // NÃO usamos upsert aqui para não criar perfil "lixo" antes do pagamento.
               await supabase
                   .from('profiles')
                   .update({

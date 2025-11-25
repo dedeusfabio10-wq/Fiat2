@@ -77,6 +77,7 @@ export default async function handler(req: any, res: any) {
     console.log(`📊 Status: ${status} | User: ${userId} | Plan: ${planType}`);
 
     // 7. Atualização/Criação do Perfil (UPSERT)
+    // REQUISITO: Só cria o perfil no Supabase (tabela profiles) quando o pagamento é aprovado.
     if (status === 'approved' && userId) {
       const now = new Date();
       let expiresAt = new Date();
@@ -92,7 +93,7 @@ export default async function handler(req: any, res: any) {
       const { error: dbError } = await supabase
         .from('profiles')
         .upsert({
-          id: userId, // Chave primária
+          id: userId, // Chave primária (Link com Auth)
           email: userEmail, // Garante que o email esteja salvo
           is_premium: true,
           premium_expires_at: expiresAt.toISOString(),
@@ -100,7 +101,7 @@ export default async function handler(req: any, res: any) {
           subscription_id: String(paymentId),
           subscription_method: 'mercadopago',
           updated_at: new Date().toISOString(),
-          // Valores padrão caso esteja criando agora
+          // Valores padrão caso esteja criando agora (Sign Up tardio do profile)
           streak: 0,
           rosaries_prayed: 0,
           onboarding_completed: true

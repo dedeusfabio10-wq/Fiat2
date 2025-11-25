@@ -1,9 +1,9 @@
 import React, { useContext, useState, useMemo, useEffect } from 'react';
 import { AppContext } from '../contexts/AppContext';
-import { CATECHISM_CONTENT, SAINTS, APOSTOLIC_LINE, CHURCH_HISTORY, HOLY_MASS, CHURCH_HIERARCHY, CHURCH_MINISTRIES, MARIAN_DOGMAS, THE_APOSTLES, LITURGICAL_OBJECTS } from '../constants';
+import { CATECHISM_CONTENT, MARIAN_DOGMAS } from '../constants';
 import { Button } from '../ui/UIComponents';
 import PremiumModal from '../ui/PremiumModal';
-import { Crown, Lock, ChevronDown, ChevronUp, BookOpen, Sparkles, Key, Shield, Landmark, Flame, Users, Heart, Bell, Music, Star, Grape, Circle, Cloud, Droplet, Sun, Loader2, RefreshCw } from 'lucide-react';
+import { Crown, Lock, ChevronDown, ChevronUp, BookOpen, Sparkles, Key, Users, Heart, Bell, Music, Star, Grape, Circle, Cloud, Droplet, Sun, Loader2, RefreshCw } from 'lucide-react';
 import { toast } from 'sonner';
 import { SaintIcon } from '../ui/SaintIcons';
 
@@ -22,12 +22,12 @@ const CatechismPage: React.FC = () => {
     }
   }, [profile.customTheme]);
 
-  // Polling de verificação
+  // POLLING AUTOMÁTICO
   useEffect(() => {
     if (!profile.is_premium && !isLoadingProfile) {
       const interval = setInterval(() => {
         refreshProfile();
-      }, 8000);
+      }, 8000); // 8 segundos
       return () => clearInterval(interval);
     }
   }, [profile.is_premium, isLoadingProfile]);
@@ -35,12 +35,11 @@ const CatechismPage: React.FC = () => {
   const handleManualCheck = async () => {
       setIsChecking(true);
       await refreshProfile();
-      if (profile.is_premium) {
-          toast.success("Conteúdo liberado! ♡");
-      } else {
-          toast.info("Verificando assinatura...", { description: "O sistema continua buscando seu pagamento." });
-      }
-      setIsChecking(false);
+      setTimeout(() => {
+          if (profile.is_premium) toast.success("Conteúdo liberado! ♡");
+          else toast.info("Verificando assinatura...", { description: "O sistema continua buscando seu pagamento." });
+          setIsChecking(false);
+      }, 1000);
   };
 
   if (isLoadingProfile) {
@@ -67,6 +66,7 @@ const CatechismPage: React.FC = () => {
                 <div className="pt-4 flex justify-center">
                     <button 
                         onClick={handleManualCheck}
+                        disabled={isChecking}
                         className="flex items-center gap-2 text-xs text-yellow-500/70 hover:text-yellow-400 transition-colors uppercase tracking-wider font-medium"
                     >
                         {isChecking ? <Loader2 className="animate-spin w-3 h-3" /> : <RefreshCw size={12} />}
@@ -98,7 +98,6 @@ const CatechismPage: React.FC = () => {
     }
   };
 
-  // ... Conteúdo desbloqueado da catequese ...
   return (
     <div className="p-6 pb-32 min-h-screen animate-fade-in">
        <div className="flex justify-between items-center mb-8 pt-4 border-b border-white/5 pb-4">
@@ -132,7 +131,6 @@ const CatechismPage: React.FC = () => {
                    )}
                </div>
            ))}
-           {/* ... Restante do conteúdo ... */}
            <div className={`${themeCardColor} border border-white/5 rounded-xl overflow-hidden transition-all shadow-lg`}>
                <div className="p-5 flex items-center justify-between cursor-pointer hover:bg-white/5 transition-colors" onClick={() => setExpandedSection(expandedSection === 'maria' ? null : 'maria')}>
                    <h3 className="font-serif text-white font-medium text-base uppercase tracking-wider flex items-center gap-2">
@@ -162,7 +160,6 @@ const CatechismPage: React.FC = () => {
                    </div>
                )}
            </div>
-           {/* Adicione os outros blocos aqui se necessário, mas o foco era o lock screen */}
        </div>
     </div>
   );

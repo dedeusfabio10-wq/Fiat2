@@ -2,7 +2,7 @@ import React, { useState, useEffect, useContext } from 'react';
 import { AppContext } from '../contexts/AppContext';
 import { Button } from './UIComponents';
 import { createSubscription } from '../services/mercadopago';
-import { X, Check, Crown, Loader2, CreditCard, Shield, Sparkles, ExternalLink, QrCode, AlertTriangle, ArrowLeft, RotateCw, RefreshCw } from 'lucide-react';
+import { X, Check, Crown, Loader2, CreditCard, Shield, Sparkles, ExternalLink, QrCode, ArrowLeft, RotateCw, RefreshCw } from 'lucide-react';
 import { toast } from 'sonner';
 
 interface PremiumModalProps {
@@ -30,13 +30,14 @@ const PremiumModal: React.FC<PremiumModalProps> = ({ isOpen, onClose }) => {
     if (isOpen && !profile.is_premium) {
         const interval = setInterval(() => {
             refreshProfile();
-        }, 8000);
+        }, 8000); // 8s
         return () => clearInterval(interval);
     }
   }, [isOpen, profile.is_premium]);
 
   useEffect(() => {
       if (profile.is_premium && isOpen) {
+          toast.success("Premium Detectado! Bem-vindo(a).");
           onClose();
       }
   }, [profile.is_premium, isOpen, onClose]);
@@ -54,7 +55,7 @@ const PremiumModal: React.FC<PremiumModalProps> = ({ isOpen, onClose }) => {
       if (!opened) {
           toast.error("Pop-up bloqueado", { description: "Permita pop-ups ou clique no link abaixo." });
       } else {
-          toast.success('Página de pagamento aberta!', { description: 'Após pagar, clique em Confirmar Pagamento.', duration: 5000 });
+          toast.success('Página de pagamento aberta!', { description: 'Após pagar, o app detectará automaticamente.', duration: 5000 });
       }
       setLoading(false);
   };
@@ -62,13 +63,14 @@ const PremiumModal: React.FC<PremiumModalProps> = ({ isOpen, onClose }) => {
   const handleCheckStatus = async () => {
       setCheckingStatus(true);
       await refreshProfile();
-      if (profile.is_premium) {
-          toast.success("Pagamento confirmado! Bem-vindo(a).");
-          onClose();
-      } else {
-          toast.info("Ainda verificando...", { description: "O pagamento pode levar alguns instantes para ser processado. O sistema continua tentando." });
-      }
-      setCheckingStatus(false);
+      setTimeout(() => {
+          if (profile.is_premium) {
+              onClose();
+          } else {
+              toast.info("Ainda verificando...", { description: "O sistema continua tentando detectar seu pagamento." });
+          }
+          setCheckingStatus(false);
+      }, 1000);
   };
 
   if (!isOpen) return null;
@@ -126,12 +128,19 @@ const PremiumModal: React.FC<PremiumModalProps> = ({ isOpen, onClose }) => {
                     </Button>
                     <p className="text-center text-[10px] text-gray-500 flex items-center justify-center gap-1"><Shield size={10} /> Ambiente seguro • Mercado Pago</p>
                 </div>
+                
                 {/* Botão de Verificação Discreto */}
                 <div className="pt-2 flex justify-center">
-                    <button onClick={handleCheckStatus} disabled={checkingStatus} className="flex items-center gap-2 text-xs text-yellow-500/70 hover:text-yellow-400 transition-colors uppercase tracking-wider font-medium">
-                        {checkingStatus ? <Loader2 className="animate-spin w-3 h-3" /> : <RefreshCw size={12} />} Verificar Assinatura Existente
+                    <button 
+                        onClick={handleCheckStatus}
+                        disabled={checkingStatus}
+                        className="flex items-center gap-2 text-xs text-yellow-500/70 hover:text-yellow-400 transition-colors uppercase tracking-wider font-medium"
+                    >
+                        {checkingStatus ? <Loader2 className="animate-spin w-3 h-3" /> : <RefreshCw size={12} />}
+                        Verificar Assinatura Existente
                     </button>
                 </div>
+
                 <div className="bg-white/5 rounded-xl p-4 border border-white/5 space-y-2 opacity-80">
                      <FeatureItem text="Terço com Voz Guiada" /><FeatureItem text="Planner Espiritual Ilimitado" /><FeatureItem text="Conteúdo Exclusivo de Santos" />
                 </div>

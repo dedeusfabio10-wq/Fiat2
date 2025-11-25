@@ -2,7 +2,7 @@ import React, { useContext, useEffect, useState, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { AppContext } from '../contexts/AppContext';
 import { Button } from '../ui/UIComponents';
-import { Crown, Plus, Calendar, Lock, Trash2, User, Play, Pause, Volume2, Music, Sparkles, Loader2, CheckCircle2, Clock, Check, RotateCw, RefreshCw } from 'lucide-react';
+import { Crown, Plus, Calendar, Lock, Trash2, User, Play, Pause, Volume2, Music, Sparkles, Loader2, CheckCircle2, Clock, Check, RefreshCw } from 'lucide-react';
 import { getPlans, deletePlan } from '../services/storage';
 import { SpiritualPlan } from '../types';
 import { toast } from 'sonner';
@@ -21,17 +21,17 @@ const PlannerPage: React.FC = () => {
   const [plans, setPlans] = useState<SpiritualPlan[]>([]);
   const [loadingPlans, setLoadingPlans] = useState(true);
   const [loadingPayment, setLoadingPayment] = useState(false);
-  const [paymentPending, setPaymentPending] = useState(false);
+  const [isChecking, setIsChecking] = useState(false);
   const [selectedMusic, setSelectedMusic] = useState<number | null>(null);
   const [isPlaying, setIsPlaying] = useState(false);
   const audioRef = useRef<HTMLAudioElement>(null);
 
-  // Polling para verificar premium automaticamente
+  // POLLING AUTOMÁTICO: Verifica assinatura a cada 8s se não for premium
   useEffect(() => {
     if (!profile.is_premium && !isLoadingProfile) {
       const interval = setInterval(() => {
         refreshProfile();
-      }, 8000);
+      }, 8000); // 8 segundos
       return () => clearInterval(interval);
     }
   }, [profile.is_premium, isLoadingProfile]);
@@ -86,20 +86,22 @@ const PlannerPage: React.FC = () => {
       return;
     }
     window.open(result.init_point, '_blank');
-    setPaymentPending(true);
     setLoadingPayment(false);
-    toast.success('Aba de pagamento aberta. Confirme abaixo.');
+    toast.success('Aba de pagamento aberta.');
   };
 
-  const handleCheckSubscription = async () => {
-      setLoadingPayment(true);
+  const handleManualCheck = async () => {
+      setIsChecking(true);
       await refreshProfile();
-      if (!profile.is_premium) {
-          toast.info("Verificando...", { description: "Ainda não identificamos seu pagamento. O sistema continua buscando automaticamente." });
-      } else {
-          toast.success("Bem-vindo ao Premium! ♡");
-      }
-      setLoadingPayment(false);
+      // Delay visual para feedback
+      setTimeout(() => {
+          if (profile.is_premium) {
+              toast.success("Assinatura Confirmada! ♡");
+          } else {
+              toast.info("Ainda não confirmado", { description: "O sistema continua verificando automaticamente." });
+          }
+          setIsChecking(false);
+      }, 1000);
   };
 
   if (isLoadingProfile) {
@@ -132,13 +134,13 @@ const PlannerPage: React.FC = () => {
             </Button>
             
             {/* Botão de Verificação Discreto */}
-            <div className="pt-4 flex justify-center">
+            <div className="pt-2 flex justify-center">
                 <button 
-                    onClick={handleCheckSubscription}
-                    disabled={loadingPayment}
+                    onClick={handleManualCheck}
+                    disabled={isChecking}
                     className="flex items-center gap-2 text-xs text-yellow-500/70 hover:text-yellow-400 transition-colors uppercase tracking-wider font-medium"
                 >
-                    {loadingPayment ? <Loader2 className="animate-spin w-3 h-3" /> : <RefreshCw size={12} />}
+                    {isChecking ? <Loader2 className="animate-spin w-3 h-3" /> : <RefreshCw size={12} />}
                     Verificar Assinatura Existente
                 </button>
             </div>
@@ -149,7 +151,7 @@ const PlannerPage: React.FC = () => {
     );
   }
 
-  // ... Resto do componente (Conteúdo Premium) igual ...
+  // ... Resto do componente (Conteúdo Premium) ...
   const getPlanProgressStats = (plan: SpiritualPlan) => {
     const daysDone = Object.keys(plan.progress || {}).filter(k => k.startsWith('completed_')).length;
     const daysLeft = Math.max(0, plan.durationDays - daysDone);

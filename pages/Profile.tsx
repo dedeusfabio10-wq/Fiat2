@@ -25,7 +25,7 @@ const ProfilePage: React.FC = () => {
 
   const devotionalSaint = SAINTS.find(s => s.id === profile.devotionalSaintId);
 
-  // Polling para perfil
+  // POLLING AUTOMÁTICO
   useEffect(() => {
     if (!profile.is_premium) {
       const interval = setInterval(() => {
@@ -38,9 +38,11 @@ const ProfilePage: React.FC = () => {
   const handleManualCheck = async () => {
       setIsChecking(true);
       await refreshProfile();
-      if (profile.is_premium) toast.success("Premium confirmado!");
-      else toast.info("Ainda não confirmado...");
-      setIsChecking(false);
+      setTimeout(() => {
+          if (profile.is_premium) toast.success("Premium confirmado! Atualizando tela...");
+          else toast.info("Ainda não confirmado...");
+          setIsChecking(false);
+      }, 1000);
   };
 
   const handleLogout = async () => {
@@ -126,7 +128,18 @@ const ProfilePage: React.FC = () => {
                      <p className="text-gray-300 text-sm font-serif italic leading-relaxed text-center">"Apoie o Fiat com apenas R$ 4,90 por mês (menos que um café — e ajuda a levar Jesus a milhares de lares ♡)"</p>
                      <div className="space-y-3"><FeatureRow icon={<Heart size={14} />} text="Santo de Devoção no Perfil" /><FeatureRow icon={<PenLine size={14} />} text="Frase Espiritual Favorita" /><FeatureRow icon={<Palette size={14} />} text="Temas Litúrgicos Exclusivos" /><FeatureRow icon={<Moon size={14} />} text="Modo Noturno Espiritual" /></div>
                      <Button onClick={() => setShowPremiumModal(true)} variant="sacred" className="w-full mt-4 shadow-[0_0_15px_rgba(212,175,55,0.2)]">Tornar-se Premium ♡</Button>
-                     <div className="pt-2 flex justify-center"><button onClick={handleManualCheck} className="flex items-center gap-2 text-xs text-yellow-500/70 hover:text-yellow-400 transition-colors uppercase tracking-wider font-medium">{isChecking ? <Loader2 className="animate-spin w-3 h-3" /> : <RefreshCw size={12} />} Verificar Assinatura Existente</button></div>
+                     
+                     {/* Botão de Verificação Discreto */}
+                     <div className="pt-2 flex justify-center">
+                        <button 
+                            onClick={handleManualCheck}
+                            disabled={isChecking}
+                            className="flex items-center gap-2 text-xs text-yellow-500/70 hover:text-yellow-400 transition-colors uppercase tracking-wider font-medium"
+                        >
+                            {isChecking ? <Loader2 className="animate-spin w-3 h-3" /> : <RefreshCw size={12} />}
+                            Verificar Assinatura Existente
+                        </button>
+                     </div>
                  </div>
              </div>
          )}
