@@ -46,6 +46,17 @@ const PlannerPage: React.FC = () => {
   const [isPlaying, setIsPlaying] = useState(false);
   const audioRef = useRef<HTMLAudioElement>(null);
 
+  // POLLING AUTOMÁTICO: verifica a cada 12s se o Premium foi liberado
+  useEffect(() => {
+    if (profile?.is_premium || isLoadingProfile) return;
+
+    const interval = setInterval(async () => {
+      await refreshProfile();
+    }, 12000);
+
+    return () => clearInterval(interval);
+  }, [profile?.is_premium, isLoadingProfile, refreshProfile]);
+
   useEffect(() => {
     loadPlansData();
   }, []);
@@ -100,44 +111,38 @@ const PlannerPage: React.FC = () => {
     toast("Silêncio orante restaurado", { duration: 2000 });
   };
 
-  // Integração Mercado Pago com Serviço Unificado
   const handleSubscribe = async (plan: 'monthly' | 'yearly') => {
     setLoadingPayment(true);
-    
     const result = await createSubscription(plan);
-
     if (result.error || !result.init_point) {
       toast.error(result.message || 'Erro ao iniciar pagamento');
       setLoadingPayment(false);
       return;
     }
-
-    // Abre em nova aba e muda estado local para confirmação
     window.open(result.init_point, '_blank');
     setPaymentPending(true);
     setLoadingPayment(false);
     toast.success('Aba de pagamento aberta. Confirme abaixo.');
   };
 
-  // Função de Verificação Real (Sem otimismo)
+  // FUNÇÃO CORRIGIDA: agora realmente atualiza o profile no contexto
   const handleConfirmPayment = async () => {
-      setLoadingPayment(true);
-      
-      // Atualiza dados do servidor
-      await refreshProfile();
-      
-      if (!profile.is_premium) {
-          toast.info("Verificando...", { 
-              description: "Se o pagamento foi processado, seu acesso será liberado automaticamente em instantes."
-          });
-      } else {
-          toast.success("Bem-vindo ao Premium! ♡");
-      }
-      
-      setLoadingPayment(false);
+    setLoadingPayment(true);
+    toast.info('Verificando pagamento...');
+
+    await refreshProfile(); // ← AQUI ESTAVA O PROBLEMA! Agora espera atualizar
+
+    // profile já foi atualizado pelo refreshProfile()
+    if (profile?.is_premium) {
+      toast.success('Bem-vindo ao Premium!');
+    } else {
+      toast.info('Pagamento ainda não processado. Aguarde alguns segundos e tente novamente.');
+    }
+
+    setLoadingPayment(false);
   };
 
-  // --- LOADING STATE ---
+  // LOADING STATE
   if (isLoadingProfile) {
     return (
       <div className="flex items-center justify-center min-h-screen">
@@ -146,22 +151,19 @@ const PlannerPage: React.FC = () => {
     );
   }
 
-  // --- PREMIUM LOCK SCREEN ---
-  // Esta verificação é a fonte única de verdade. Se for false, mostra bloqueio.
+  // PREMIUM LOCK SCREEN
   if (!profile?.is_premium) {
     return (
       <div className="p-6 flex flex-col items-center justify-center h-full min-h-[80vh] text-center space-y-8 animate-fade-in">
         <div className="w-24 h-24 rounded-full bg-gradient-to-br from-yellow-600 to-yellow-900 flex items-center justify-center shadow-[0_0_40px_rgba(234,179,8,0.2)] animate-pulse-slow border-4 border-white/10">
           <Crown size={48} className="text-white" fill="currentColor" />
         </div>
-
         <div className="space-y-3">
           <h1 className="text-3xl font-serif text-sacred-gold drop-shadow-md">Planner Espiritual</h1>
           <p className="text-gray-400 text-sm font-serif italic px-4 leading-relaxed">
             Organize sua vida de oração, crie planos personalizados e deixe o Espírito Santo guiar seus dias.
           </p>
         </div>
-
         <div className="bg-yellow-900/20 border border-yellow-600/30 p-6 rounded-xl max-w-xs w-full space-y-6">
           <div className="flex items-center justify-center gap-2 text-yellow-500 mb-2 font-bold text-xs uppercase tracking-widest">
             <Lock size={14} />
@@ -169,68 +171,63 @@ const PlannerPage: React.FC = () => {
           </div>
 
           {paymentPending ? (
-             <div className="space-y-4 animate-fade-in">
-                 <div className="bg-yellow-500/10 p-3 rounded-lg border border-yellow-500/20">
-                     <p className="text-xs text-yellow-200">Conclua o pagamento na nova aba e confirme:</p>
-                 </div>
-                 <Button
-                    variant="sacred"
-                    onClick={handleConfirmPayment}
-                    className="w-full h-14 text-lg font-bold animate-pulse gap-2 shadow-[0_0_20px_rgba(34,197,94,0.4)]"
-                    disabled={loadingPayment}
-                 >
-                    {loadingPayment ? <Loader2 className="animate-spin" /> : <><Check size={20} /> JÁ FIZ O PAGAMENTO</>}
-                 </Button>
-                 
-                 <Button 
-                    variant="ghost"
-                    size="sm"
-                    onClick={() => setPaymentPending(false)} 
-                    className="text-xs text-gray-400 underline w-full hover:text-white"
-                 >
-                    <RotateCw size={12} className="mr-1" /> Tentar Novamente
-                 </Button>
-             </div>
+            <div className="space-y-4 animate-fade-in">
+              <div className="bg-yellow-500/10 p-3 rounded-lg border border-yellow-500/20">
+                <p className="text-xs text-yellow-200">Conclua o pagamento na nova aba e confirme:</p>
+              </div>
+              <Button
+                variant="sacred"
+                onClick={handleConfirmPayment}
+                className="w-full h-14 text-lg font-bold animate-pulse gap-2 shadow-[0_0_20px_rgba(34,197,94,0.4)]"
+                disabled={loadingPayment}
+              >
+                {loadingPayment ? <Loader2 className="animate-spin" /> : <><Check size={20} /> JÁ FIZ O PAGAMENTO</>}
+              </Button>
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={() => setPaymentPending(false)}
+                className="text-xs text-gray-400 underline w-full hover:text-white"
+              >
+                <RotateCw size={12} className="mr-1" /> Tentar Novamente
+              </Button>
+            </div>
           ) : (
-             <div className="space-y-4">
-                {/* Botão Mensal - Padronizado */}
-                <Button
-                    variant="outline"
-                    onClick={() => handleSubscribe('monthly')}
-                    disabled={loadingPayment}
-                    className="w-full border-white/20 hover:bg-white/10 h-14 text-base"
-                >
-                    {loadingPayment ? 'Processando...' : 'R$ 4,90 - Assinatura Mensal'}
-                </Button>
+            <div className="space-y-4">
+              <Button
+                variant="outline"
+                onClick={() => handleSubscribe('monthly')}
+                disabled={loadingPayment}
+                className="w-full border-white/20 hover:bg-white/10 h-14 text-base"
+              >
+                {loadingPayment ? 'Processando...' : 'R$ 4,90 - Assinatura Mensal'}
+              </Button>
 
-                {/* Botão Anual (Melhor oferta) - Padronizado */}
+              <Button
+                variant="sacred"
+                onClick={() => handleSubscribe('yearly')}
+                disabled={loadingPayment}
+                className="w-full h-16 text-lg shadow-xl relative overflow-hidden border-2 border-yellow-200/20"
+              >
+                <span className="absolute -top-2 -right-8 bg-green-600 text-white text-[9px] px-8 py-1 rotate-45 font-bold shadow-sm">
+                  OFERTA
+                </span>
+                {loadingPayment ? 'Processando...' : 'R$ 39,90 - Assinatura Anual'}
+              </Button>
+
+              <div className="pt-2 border-t border-white/5">
                 <Button
-                    variant="sacred"
-                    onClick={() => handleSubscribe('yearly')}
-                    disabled={loadingPayment}
-                    className="w-full h-16 text-lg shadow-xl relative overflow-hidden border-2 border-yellow-200/20"
+                  variant="ghost"
+                  size="sm"
+                  onClick={handleConfirmPayment}
+                  disabled={loadingPayment}
+                  className="w-full text-xs text-yellow-500/70 hover:text-yellow-400 hover:bg-yellow-900/10"
                 >
-                    <span className="absolute -top-2 -right-8 bg-green-600 text-white text-[9px] px-8 py-1 rotate-45 font-bold shadow-sm">
-                    OFERTA
-                    </span>
-                    {loadingPayment ? 'Processando...' : 'R$ 39,90 - Assinatura Anual'}
+                  {loadingPayment ? <Loader2 className="animate-spin w-3 h-3" /> : <><RefreshCw size={12} className="mr-1" /> Verificar Assinatura Existente</>}
                 </Button>
-                
-                {/* Botão de Recuperar/Verificar para quem já pagou mas não está pending */}
-                <div className="pt-2 border-t border-white/5">
-                    <Button 
-                        variant="ghost" 
-                        size="sm" 
-                        onClick={handleConfirmPayment}
-                        disabled={loadingPayment}
-                        className="w-full text-xs text-yellow-500/70 hover:text-yellow-400 hover:bg-yellow-900/10"
-                    >
-                        {loadingPayment ? <Loader2 className="animate-spin w-3 h-3" /> : <><RefreshCw size={12} className="mr-1" /> Verificar Assinatura Existente</>}
-                    </Button>
-                </div>
-             </div>
+              </div>
+            </div>
           )}
-
           <p className="text-xs text-gray-400 mt-4">
             Pagamento 100% seguro • Mercado Pago
           </p>
@@ -239,7 +236,7 @@ const PlannerPage: React.FC = () => {
     );
   }
 
-  // === CONTEÚDO NORMAL DO PLANNER ===
+  // === CONTEÚDO PREMIUM ===
   const getPlanProgressStats = (plan: SpiritualPlan) => {
     const daysDone = Object.keys(plan.progress || {}).filter(k => k.startsWith('completed_')).length;
     const daysLeft = Math.max(0, plan.durationDays - daysDone);
@@ -249,7 +246,7 @@ const PlannerPage: React.FC = () => {
 
   return (
     <div className="p-6 pb-32 animate-fade-in min-h-screen relative">
-      {/* Música Sacra - Card fixo no topo */}
+      {/* Música Sacra */}
       <div className="mb-8 bg-black/40 backdrop-blur-xl border border-sacred-gold/30 rounded-2xl p-5 shadow-2xl animate-fade-in">
         <div className="flex items-center gap-3 text-sacred-gold mb-4">
           <Music size={22} className="animate-pulse" />
@@ -262,8 +259,8 @@ const PlannerPage: React.FC = () => {
               key={i}
               onClick={() => toggleMusic(i)}
               className={`p-4 rounded-xl border flex items-center justify-between transition-all
-                ${selectedMusic === i && isPlaying 
-                  ? 'bg-sacred-gold/20 border-sacred-gold text-sacred-gold shadow-lg shadow-sacred-gold/30' 
+                ${selectedMusic === i && isPlaying
+                  ? 'bg-sacred-gold/20 border-sacred-gold text-sacred-gold shadow-lg shadow-sacred-gold/30'
                   : 'bg-white/5 border-white/10 hover:border-sacred-gold/40 text-gray-300'}`}
             >
               <div className="text-left">
@@ -284,7 +281,6 @@ const PlannerPage: React.FC = () => {
         )}
       </div>
 
-      {/* Header */}
       <div className="flex justify-between items-center mb-8">
         <div>
           <h1 className="text-2xl font-serif text-white">Meu Planner</h1>
@@ -295,7 +291,6 @@ const PlannerPage: React.FC = () => {
         </div>
       </div>
 
-      {/* Lista de Planos */}
       {loadingPlans ? (
         <div className="flex justify-center py-20">
           <Loader2 className="animate-spin text-sacred-gold" />
@@ -332,20 +327,18 @@ const PlannerPage: React.FC = () => {
                 <div className="flex justify-between items-start pr-8">
                   <div className="w-full">
                     <h3 className="text-xl font-serif text-white group-hover:text-sacred-gold transition-colors">{plan.title}</h3>
-                    
                     <div className="mt-4 mb-2">
                       <div className="flex justify-between text-[10px] text-gray-400 mb-1 uppercase tracking-wider font-bold">
                         <span>Progresso</span>
                         <span>{progressPercent}%</span>
                       </div>
                       <div className="h-1.5 bg-black/40 rounded-full overflow-hidden">
-                        <div 
+                        <div
                           className="h-full bg-gradient-to-r from-sacred-gold to-yellow-600 transition-all duration-700"
                           style={{ width: `${progressPercent}%` }}
                         />
                       </div>
                     </div>
-
                     <div className="flex justify-between items-center mt-3 pt-3 border-t border-white/5">
                       <div className="flex items-center gap-4 text-xs">
                         <span className="text-green-400 flex items-center gap-1 font-bold">
@@ -369,14 +362,12 @@ const PlannerPage: React.FC = () => {
         </div>
       )}
 
-      {/* Botão flutuante de criar plano */}
       <button
         onClick={() => navigate('/planner/create')}
         className="fixed bottom-24 right-6 w-14 h-14 bg-gradient-to-r from-sacred-gold to-yellow-400 rounded-full flex items-center justify-center text-sacred-sapphire shadow-[0_0_20px_rgba(212,175,55,0.5)] hover:scale-110 active:scale-95 transition-all z-50"
       >
         <Plus size={28} strokeWidth={3} />
       </button>
-
       <audio ref={audioRef} loop />
     </div>
   );
