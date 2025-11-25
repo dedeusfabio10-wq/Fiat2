@@ -12,7 +12,7 @@ export default async function handler(req: any, res: any) {
   try {
     console.log('🔔 Webhook recebido. Método:', req.method);
 
-    // 2. Parse Seguro do Body (Evita crash se vier como string)
+    // 2. Parse Seguro do Body
     let payload = req.body;
     if (typeof payload === 'string') {
       try {
@@ -23,22 +23,17 @@ export default async function handler(req: any, res: any) {
       }
     }
 
-    // 3. Verificação de Variáveis de Ambiente com Logs
+    // 3. Verificação de Variáveis
     const token = process.env.MP_ACCESS_TOKEN || process.env.VITE_MP_ACCESS_TOKEN;
     const sbUrl = process.env.SUPABASE_URL || process.env.VITE_SUPABASE_URL;
     const sbKey = process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.VITE_SUPABASE_SERVICE_ROLE_KEY;
 
     if (!token || !sbUrl || !sbKey) {
       console.error('❌ ERRO CRÍTICO: Variáveis de ambiente faltando.');
-      // Retornamos 200 com erro no corpo para parar retentativas do MP em caso de erro de config
-      return res.status(200).json({ 
-        error: 'Server Misconfiguration', 
-        details: { hasToken: !!token, hasSbUrl: !!sbUrl, hasSbKey: !!sbKey } 
-      });
+      return res.status(200).json({ error: 'Server Misconfiguration' });
     }
 
-    // 4. Extração do ID do Pagamento (Robusto para v1 e v2)
-    // O MP pode enviar 'data.id' ou 'id' na raiz
+    // 4. Extração do ID do Pagamento
     const paymentId = payload?.data?.id || payload?.id;
 
     if (!paymentId) {
@@ -46,7 +41,6 @@ export default async function handler(req: any, res: any) {
         return res.status(200).json({ ignored: true, reason: 'No payment ID' });
     }
 
-    // Ignora notificações de teste padrão do painel MP (ID 123456)
     if (String(paymentId) === '123456') {
         console.log('ℹ️ Notificação de teste do MP recebida.');
         return res.status(200).json({ received: true, test: true });
@@ -65,26 +59,24 @@ export default async function handler(req: any, res: any) {
         mpResponse = await payment.get({ id: Number(paymentId) });
     } catch (mpError: any) {
         console.error(`❌ Erro ao consultar MP (ID ${paymentId}):`, mpError);
-        // Se o pagamento não existe ou erro de API, retornamos 200 para não travar a fila de webhooks
         return res.status(200).json({ error: 'Mercado Pago API Error', details: mpError.message });
     }
 
     if (!mpResponse) {
-        console.error('❌ Resposta vazia do Mercado Pago.');
         return res.status(200).json({ error: 'Empty response from MP' });
     }
 
     const status = mpResponse.status;
     const userId = mpResponse.external_reference;
     const metadata = mpResponse.metadata || {};
+    const userEmail = mpResponse.payer?.email;
     
-    // Fallback para determinar o tipo de plano se o metadata falhar
     const description = mpResponse.description || '';
     const planType = metadata.plan_type || (description.toLowerCase().includes('anual') ? 'yearly' : 'monthly');
 
     console.log(`📊 Status: ${status} | User: ${userId} | Plan: ${planType}`);
 
-    // 7. Atualização do Banco de Dados
+    // 7. Atualização/Criação do Perfil (UPSERT)
     if (status === 'approved' && userId) {
       const now = new Date();
       let expiresAt = new Date();
@@ -95,37 +87,39 @@ export default async function handler(req: any, res: any) {
         expiresAt.setDate(now.getDate() + 30);
       }
 
+      // CRUCIAL: Usamos upsert para CRIAR o perfil se ele não existir (sign up sem profile)
+      // ou ATUALIZAR se já existir.
       const { error: dbError } = await supabase
         .from('profiles')
-        .update({
+        .upsert({
+          id: userId, // Chave primária
+          email: userEmail, // Garante que o email esteja salvo
           is_premium: true,
           premium_expires_at: expiresAt.toISOString(),
           subscription_type: planType,
           subscription_id: String(paymentId),
           subscription_method: 'mercadopago',
           updated_at: new Date().toISOString(),
-        })
-        .eq('id', userId);
+          // Valores padrão caso esteja criando agora
+          streak: 0,
+          rosaries_prayed: 0,
+          onboarding_completed: true
+        }, { onConflict: 'id' }); // Garante update se ID existir
       
       if (dbError) {
           console.error('❌ Erro Supabase:', dbError);
           return res.status(200).json({ error: 'Database update failed', details: dbError });
       }
 
-      console.log(`✅ Sucesso! Usuário ${userId} ativado.`);
+      console.log(`✅ Sucesso! Usuário ${userId} ativado/criado como Premium.`);
     } else {
-        console.log(`ℹ️ Pagamento não aprovado ou sem UserID. Ação ignorada.`);
+        console.log(`ℹ️ Pagamento não aprovado ou sem UserID.`);
     }
 
-    // 8. Resposta Final de Sucesso
     return res.status(200).json({ success: true, status: status });
 
   } catch (globalError: any) {
-    // Catch-all para evitar 502
-    console.error('💥 ERRO NÃO TRATADO NO WEBHOOK:', globalError);
-    return res.status(200).json({ 
-        error: 'Internal Server Error', 
-        message: globalError.message 
-    });
+    console.error('💥 ERRO NÃO TRATADO:', globalError);
+    return res.status(200).json({ error: 'Internal Server Error', message: globalError.message });
   }
 }
