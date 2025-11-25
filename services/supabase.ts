@@ -2,7 +2,7 @@ import { createClient, SupabaseClient } from '@supabase/supabase-js';
 
 const env = (import.meta as any).env || {};
 const supabaseUrl = env.VITE_SUPABASE_URL || '';
-const supabaseAnonKey = env.VITE_SUPABASE_ANON_KEY || '';
+const supabaseAnonKey = env.SUPABASE_ANON_KEY || '';
 
 // Check if configuration is valid and NOT a placeholder
 export const isSupabaseConfigured = () => {
