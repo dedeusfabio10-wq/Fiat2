@@ -47,7 +47,6 @@ const App: React.FC = () => {
     if (userProfile.is_premium && userProfile.premium_expires_at) {
         const expirationDate = new Date(userProfile.premium_expires_at);
         const now = new Date();
-        // Adiciona uma tolerância de 1 dia para evitar problemas de fuso horário
         const toleranceDate = new Date(expirationDate);
         toleranceDate.setDate(toleranceDate.getDate() + 1);
 
@@ -72,6 +71,8 @@ const App: React.FC = () => {
                .single();
             
             if (data) {
+                console.log("Perfil carregado do Banco:", data.is_premium ? "PREMIUM" : "GRÁTIS (Legado)");
+                
                 let updatedProfile: UserProfile = { 
                     ...profile,
                     name: data.name || profile.name,
@@ -106,7 +107,6 @@ const App: React.FC = () => {
                 }));
             }
           } else {
-            // Se não há usuário, limpa o perfil
             setProfile({ name: '', email: '', is_premium: false, streak: 0, rosaries_prayed: 0, favorites: [], active_novenas: [], onboarding_completed: false });
           }
       } catch (error) {
@@ -135,7 +135,6 @@ const App: React.FC = () => {
                     },
                     (payload: any) => {
                         console.log('🔔 Realtime: Perfil atualizado no banco!', payload.new);
-                        // Força a busca dos dados mais recentes
                         fetchUserProfile();
                         if (payload.new?.is_premium && !profile.is_premium) {
                             toast.success("Assinatura confirmada!", { description: "Bem-vindo(a) ao Santuário Premium."});
@@ -153,7 +152,7 @@ const App: React.FC = () => {
             supabase.removeChannel(channel);
         }
     };
-  }, [profile.is_premium]); // Re-subscribe if needed, though user ID is main key
+  }, [profile.is_premium]);
 
   // Auth & Visibility Listener
   useEffect(() => {

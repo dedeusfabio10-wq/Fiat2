@@ -12,12 +12,11 @@ interface PremiumModalProps {
 
 const PremiumModal: React.FC<PremiumModalProps> = ({ isOpen, onClose }) => {
   const { profile, refreshProfile } = useContext(AppContext);
-  const [plan, setPlan] = useState<'monthly' | 'yearly'>('yearly'); // Default para melhor oferta
+  const [plan, setPlan] = useState<'monthly' | 'yearly'>('yearly');
   const [loading, setLoading] = useState(false);
   const [checkingStatus, setCheckingStatus] = useState(false);
   const [step, setStep] = useState<'select' | 'checkout'>('select');
 
-  // Fecha o modal automaticamente se o status premium for detectado
   useEffect(() => {
     if (profile.is_premium && isOpen) {
         onClose();
@@ -41,8 +40,6 @@ const PremiumModal: React.FC<PremiumModalProps> = ({ isOpen, onClose }) => {
   const handleCheckStatus = async () => {
       setCheckingStatus(true);
       await refreshProfile();
-      // O listener realtime no App.tsx vai pegar a mudança.
-      // Apenas damos um feedback ao usuário.
       setTimeout(() => {
           if (!profile.is_premium) {
               toast.info("Ainda não confirmado", { description: "Verificando... Se já pagou, aguarde alguns instantes." });
@@ -88,8 +85,8 @@ const PremiumModal: React.FC<PremiumModalProps> = ({ isOpen, onClose }) => {
           ) : (
             <div className="space-y-6">
                 <div className="grid grid-cols-2 gap-4">
-                    <div onClick={() => setPlan('monthly')} className={`p-4 rounded-xl border-2 cursor-pointer transition-all text-center relative flex flex-col justify-center ${plan === 'monthly' ? 'bg-sacred-gold/10 border-sacred-gold shadow-[0_0_15px_rgba(212,175,55,0.1)]' : 'bg-white/5 border-transparent hover:bg-white/10'}`}><p className="text-xs text-gray-400 uppercase font-bold mb-1">30 DIAS</p><p className="text-2xl text-white font-serif font-bold">R$ 4,90</p><p className="text-[10px] text-gray-500">Cobrança recorrente</p></div>
-                    <div onClick={() => setPlan('yearly')} className={`p-4 rounded-xl border-2 cursor-pointer transition-all text-center relative flex flex-col justify-center ${plan === 'yearly' ? 'bg-sacred-gold/10 border-sacred-gold shadow-[0_0_15px_rgba(212,175,55,0.1)]' : 'bg-white/5 border-transparent hover:bg-white/10'}`}><div className="absolute -top-3 left-1/2 -translate-x-1/2 bg-green-600 text-white text-[10px] font-bold px-3 py-1 rounded-full shadow-sm whitespace-nowrap border border-green-400">Economize 30%</div><p className="text-xs text-gray-400 uppercase font-bold mb-1">1 ANO</p><p className="text-2xl text-white font-serif font-bold">R$ 39,90</p><p className="text-[10px] text-gray-500">Acesso por 12 meses</p></div>
+                    <div onClick={() => setPlan('monthly')} className={`p-4 rounded-xl border-2 cursor-pointer transition-all text-center relative flex flex-col justify-center ${plan === 'monthly' ? 'bg-sacred-gold/10 border-sacred-gold shadow-[0_0_15px_rgba(212,175,55,0.1)]' : 'bg-white/5 border-transparent hover:bg-white/10'}`}><p className="text-xs text-gray-400 uppercase font-bold mb-1">30 DIAS</p><p className="text-2xl text-white font-serif font-bold">R$ 4,90</p><p className="text-[10px] text-gray-500">Acesso por 1 mês</p></div>
+                    <div onClick={() => setPlan('yearly')} className={`p-4 rounded-xl border-2 cursor-pointer transition-all text-center relative flex flex-col justify-center ${plan === 'yearly' ? 'bg-sacred-gold/10 border-sacred-gold shadow-[0_0_15px_rgba(212,175,55,0.1)]' : 'bg-white/5 border-transparent hover:bg-white/10'}`}><div className="absolute -top-3 left-1/2 -translate-x-1/2 bg-green-600 text-white text-[10px] font-bold px-3 py-1 rounded-full shadow-sm whitespace-nowrap border border-green-400">Melhor Oferta</div><p className="text-xs text-gray-400 uppercase font-bold mb-1">1 ANO</p><p className="text-2xl text-white font-serif font-bold">R$ 39,90</p><p className="text-[10px] text-gray-500">Acesso por 12 meses</p></div>
                 </div>
                 <div className="bg-green-900/20 border border-green-500/20 p-3 rounded-lg flex gap-3 items-center justify-center"><QrCode className="text-green-400 shrink-0" size={16} /><p className="text-[11px] text-gray-300 leading-tight"><strong>Pagamento Único:</strong> Aceitamos Pix e Cartão.<br/> Sem assinaturas recorrentes.</p></div>
                 <div className="space-y-3 pt-2">
