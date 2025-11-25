@@ -47,6 +47,7 @@ const App: React.FC = () => {
     if (userProfile.is_premium && userProfile.premium_expires_at) {
         const expirationDate = new Date(userProfile.premium_expires_at);
         const now = new Date();
+        // Adiciona uma tolerância de 1 dia para evitar problemas de fuso horário
         const toleranceDate = new Date(expirationDate);
         toleranceDate.setDate(toleranceDate.getDate() + 1);
 
@@ -60,10 +61,10 @@ const App: React.FC = () => {
   };
 
   const fetchUserProfile = async () => {
+      !isLoadingProfile && setIsLoadingProfile(true);
       try {
           const user = await getCurrentUser();
           if (user) {
-            // Busca perfil no Supabase
             const { data, error } = await supabase
                .from('profiles')
                .select('*')
@@ -71,8 +72,6 @@ const App: React.FC = () => {
                .single();
             
             if (data) {
-                console.log("Perfil carregado do Banco:", data.is_premium ? "PREMIUM" : "GRÁTIS (Legado)");
-                
                 let updatedProfile: UserProfile = { 
                     ...profile,
                     name: data.name || profile.name,
@@ -82,8 +81,8 @@ const App: React.FC = () => {
                     premium_expires_at: data.premium_expires_at,
                     streak: data.streak || 0,
                     rosaries_prayed: data.rosaries_prayed || 0,
-                    active_novenas: data.active_novenas || profile.active_novenas || [],
-                    favorites: data.favorites || profile.favorites || [],
+                    active_novenas: data.active_novenas || [],
+                    favorites: data.favorites || [],
                     devotionalSaintId: data.devotional_saint_id,
                     customTheme: data.custom_theme,
                     favoriteQuote: data.favorite_quote,
@@ -96,10 +95,7 @@ const App: React.FC = () => {
                 
                 updatedProfile = checkExpiration(updatedProfile);
                 setProfile(updatedProfile);
-                localStorage.setItem('fiat-profile', JSON.stringify(updatedProfile));
             } else {
-                // USUÁRIO NOVO OU FREE: Não existe na tabela profiles.
-                // Mantemos apenas no Auth e LocalStorage.
                 console.log("Usuário sem perfil no DB (Aguardando pagamento).");
                 setProfile(prev => ({ 
                     ...prev, 
@@ -109,6 +105,9 @@ const App: React.FC = () => {
                     onboarding_completed: true 
                 }));
             }
+          } else {
+            // Se não há usuário, limpa o perfil
+            setProfile({ name: '', email: '', is_premium: false, streak: 0, rosaries_prayed: 0, favorites: [], active_novenas: [], onboarding_completed: false });
           }
       } catch (error) {
           console.error('Erro ao sincronizar perfil:', error);
@@ -117,29 +116,29 @@ const App: React.FC = () => {
       }
   };
 
-  // Realtime Subscription
+  // Realtime Subscription para atualização automática do Premium
   useEffect(() => {
-    let channel: RealtimeChannel;
+    let channel: RealtimeChannel | undefined;
 
     const setupRealtime = async () => {
         const user = await getCurrentUser();
         if (user) {
             channel = supabase
-                .channel('profile_updates')
+                .channel('profile-changes')
                 .on(
                     'postgres_changes',
                     {
-                        event: '*', // Ouve INSERT (quando o webhook cria o perfil premium)
+                        event: '*',
                         schema: 'public',
                         table: 'profiles',
                         filter: `id=eq.${user.id}`,
                     },
                     (payload: any) => {
-                        console.log('🔔 Atualização Realtime (Premium Ativado):', payload);
+                        console.log('🔔 Realtime: Perfil atualizado no banco!', payload.new);
+                        // Força a busca dos dados mais recentes
                         fetchUserProfile();
-                        
-                        if (payload.new && payload.new.is_premium) {
-                            toast.success("Assinatura Confirmada! Bem-vindo ao Santuário.");
+                        if (payload.new?.is_premium && !profile.is_premium) {
+                            toast.success("Assinatura confirmada!", { description: "Bem-vindo(a) ao Santuário Premium."});
                         }
                     }
                 )
@@ -150,36 +149,30 @@ const App: React.FC = () => {
     setupRealtime();
 
     return () => {
-        if (channel) supabase.removeChannel(channel);
+        if (channel) {
+            supabase.removeChannel(channel);
+        }
     };
-  }, []);
+  }, [profile.is_premium]); // Re-subscribe if needed, though user ID is main key
 
   // Auth & Visibility Listener
   useEffect(() => {
     fetchUserProfile();
 
     const { data: authListener } = supabase.auth.onAuthStateChange((event: any, session: any) => {
-       if (event === 'SIGNED_IN' || event === 'TOKEN_REFRESHED') {
+       if (event === 'SIGNED_IN' || event === 'INITIAL_SESSION') {
            fetchUserProfile();
        }
        if (event === 'SIGNED_OUT') {
-           setProfile({
-              name: '',
-              email: '',
-              is_premium: false,
-              streak: 0,
-              rosaries_prayed: 0,
-              favorites: [],
-              active_novenas: [],
-              onboarding_completed: false
-           });
-           localStorage.removeItem('fiat-profile');
+           setProfile({ name: '', email: '', is_premium: false, streak: 0, rosaries_prayed: 0, favorites: [], active_novenas: [], onboarding_completed: false });
+           localStorage.clear();
            setIsLoadingProfile(false);
        }
     });
 
     const handleVisibilityChange = () => {
         if (document.visibilityState === 'visible') {
+            console.log("App voltou a ser visível, buscando perfil...");
             fetchUserProfile();
         }
     };
@@ -191,65 +184,34 @@ const App: React.FC = () => {
     };
   }, []);
 
-  useEffect(() => {
-      if (isMockMode) {
-          console.warn("⚠️ FIAT MOCK MODE: Supabase desconectado.");
-      }
-  }, []);
-
   // Persistência Local
   useEffect(() => {
     localStorage.setItem('fiat-profile', JSON.stringify(profile));
   }, [profile]);
-
+  
   // Áudio Unlock
   useEffect(() => {
     const unlockAudio = () => {
         initAudio();
         window.removeEventListener('click', unlockAudio);
-        window.removeEventListener('touchstart', unlockAudio);
-        window.removeEventListener('keydown', unlockAudio);
     };
     window.addEventListener('click', unlockAudio);
-    window.addEventListener('touchstart', unlockAudio);
-    window.addEventListener('keydown', unlockAudio);
     return () => {
       window.removeEventListener('click', unlockAudio);
-      window.removeEventListener('touchstart', unlockAudio);
-      window.removeEventListener('keydown', unlockAudio);
     };
   }, []);
 
   const updateProfile = async (p: UserProfile) => {
       setProfile(p);
-      
-      // BLOQUEIO CRÍTICO:
-      // Se o usuário NÃO for premium, NÃO salvamos nada no banco de dados 'profiles'.
-      // Isso garante que a tabela profiles só tenha usuários pagantes.
       if (!p.is_premium) return;
-
       try {
           const user = await getCurrentUser();
           if (user) {
-              await supabase
-                  .from('profiles')
-                  .update({
-                      name: p.name,
-                      photo: p.photo,
-                      streak: p.streak,
-                      rosaries_prayed: p.rosaries_prayed,
-                      favorites: p.favorites,
-                      active_novenas: p.active_novenas,
-                      devotional_saint_id: p.devotionalSaintId,
-                      custom_theme: p.customTheme,
-                      favorite_quote: p.favoriteQuote,
-                      night_mode_spiritual: p.nightModeSpiritual
-                  })
-                  .eq('id', user.id);
+              await supabase.from('profiles').update({
+                  name: p.name, photo: p.photo, favorites: p.favorites, active_novenas: p.active_novenas, devotional_saint_id: p.devotionalSaintId, custom_theme: p.customTheme, favorite_quote: p.favoriteQuote, night_mode_spiritual: p.nightModeSpiritual
+              }).eq('id', user.id);
           }
-      } catch (e) {
-          console.error('Erro ao atualizar perfil:', e);
-      }
+      } catch (e) { console.error('Erro ao atualizar perfil:', e); }
   };
 
   return (

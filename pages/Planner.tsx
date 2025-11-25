@@ -2,11 +2,11 @@ import React, { useContext, useEffect, useState, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { AppContext } from '../contexts/AppContext';
 import { Button } from '../ui/UIComponents';
-import { Crown, Plus, Calendar, Lock, Trash2, User, Play, Pause, Volume2, Music, Sparkles, Loader2, CheckCircle2, Clock, Check, RefreshCw } from 'lucide-react';
+import { Crown, Plus, Calendar, Lock, Trash2, User, Play, Pause, Volume2, Music, Sparkles, Loader2, CheckCircle2, Clock } from 'lucide-react';
 import { getPlans, deletePlan } from '../services/storage';
 import { SpiritualPlan } from '../types';
 import { toast } from 'sonner';
-import { createSubscription } from '../services/mercadopago';
+import PremiumModal from '../ui/PremiumModal';
 
 const SACRED_MUSIC = [
   { name: "Noite Feliz (Instrumental)", url: "https://cdn.pixabay.com/download/audio/2021/11/25/audio_9467727198.mp3?filename=silent-night-piano-version-11532.mp3", desc: "Especial de Natal", special: true },
@@ -16,28 +16,19 @@ const SACRED_MUSIC = [
 ];
 
 const PlannerPage: React.FC = () => {
-  const { profile, isLoadingProfile, refreshProfile } = useContext(AppContext);
+  const { profile, isLoadingProfile } = useContext(AppContext);
   const navigate = useNavigate();
   const [plans, setPlans] = useState<SpiritualPlan[]>([]);
   const [loadingPlans, setLoadingPlans] = useState(true);
-  const [loadingPayment, setLoadingPayment] = useState(false);
-  const [isChecking, setIsChecking] = useState(false);
+  const [showPremiumModal, setShowPremiumModal] = useState(false);
   const [selectedMusic, setSelectedMusic] = useState<number | null>(null);
   const [isPlaying, setIsPlaying] = useState(false);
   const audioRef = useRef<HTMLAudioElement>(null);
 
-  // POLLING AUTOMÁTICO: Verifica assinatura a cada 8s se não for premium
   useEffect(() => {
-    if (!profile.is_premium && !isLoadingProfile) {
-      const interval = setInterval(() => {
-        refreshProfile();
-      }, 8000); // 8 segundos
-      return () => clearInterval(interval);
+    if (profile.is_premium) {
+      loadPlansData();
     }
-  }, [profile.is_premium, isLoadingProfile]);
-
-  useEffect(() => {
-    if(profile.is_premium) loadPlansData();
   }, [profile.is_premium]);
 
   const loadPlansData = async () => {
@@ -50,12 +41,8 @@ const PlannerPage: React.FC = () => {
   const handleDelete = async (id: string) => {
     if (confirm('Excluir este plano?')) {
       const success = await deletePlan(id);
-      if (success) {
-        toast.success('Plano excluído.');
-        loadPlansData();
-      } else {
-        toast.error('Erro ao excluir.');
-      }
+      if (success) { toast.success('Plano excluído.'); loadPlansData(); } 
+      else { toast.error('Erro ao excluir.'); }
     }
   };
 
@@ -64,7 +51,7 @@ const PlannerPage: React.FC = () => {
       audioRef.current.volume = 0.25;
       if (selectedMusic !== null && isPlaying) {
         audioRef.current.src = SACRED_MUSIC[selectedMusic].url;
-        audioRef.current.play().catch((e) => { console.error(e); setIsPlaying(false); });
+        audioRef.current.play().catch(e => { console.error(e); setIsPlaying(false); });
       } else {
         audioRef.current.pause();
       }
@@ -72,86 +59,36 @@ const PlannerPage: React.FC = () => {
   }, [selectedMusic, isPlaying]);
 
   const toggleMusic = (index: number) => {
-    if (selectedMusic === index) { setIsPlaying(!isPlaying); } else { setSelectedMusic(index); setIsPlaying(true); toast.success(`${SACRED_MUSIC[index].name}`, { duration: 3000 }); }
+    if (selectedMusic === index) { setIsPlaying(!isPlaying); } 
+    else { setSelectedMusic(index); setIsPlaying(true); toast.success(`${SACRED_MUSIC[index].name}`, { duration: 3000 }); }
   };
 
   const stopMusic = () => { setIsPlaying(false); setSelectedMusic(null); toast("Silêncio orante restaurado", { duration: 2000 }); };
-
-  const handleSubscribe = async (plan: 'monthly' | 'yearly') => {
-    setLoadingPayment(true);
-    const result = await createSubscription(plan);
-    if (result.error || !result.init_point) {
-      toast.error(result.message || 'Erro ao iniciar pagamento');
-      setLoadingPayment(false);
-      return;
-    }
-    window.open(result.init_point, '_blank');
-    setLoadingPayment(false);
-    toast.success('Aba de pagamento aberta.');
-  };
-
-  const handleManualCheck = async () => {
-      setIsChecking(true);
-      await refreshProfile();
-      // Delay visual para feedback
-      setTimeout(() => {
-          if (profile.is_premium) {
-              toast.success("Assinatura Confirmada! ♡");
-          } else {
-              toast.info("Ainda não confirmado", { description: "O sistema continua verificando automaticamente." });
-          }
-          setIsChecking(false);
-      }, 1000);
-  };
 
   if (isLoadingProfile) {
     return <div className="flex items-center justify-center min-h-screen"><Loader2 className="animate-spin text-sacred-gold w-8 h-8" /></div>;
   }
 
-  // --- PREMIUM LOCK SCREEN ---
   if (!profile?.is_premium) {
     return (
-      <div className="p-6 flex flex-col items-center justify-center h-full min-h-[80vh] text-center space-y-8 animate-fade-in">
-        <div className="w-24 h-24 rounded-full bg-gradient-to-br from-yellow-600 to-yellow-900 flex items-center justify-center shadow-[0_0_40px_rgba(234,179,8,0.2)] animate-pulse-slow border-4 border-white/10">
-          <Crown size={48} className="text-white" fill="currentColor" />
-        </div>
-
-        <div className="space-y-3">
-          <h1 className="text-3xl font-serif text-sacred-gold drop-shadow-md">Planner Espiritual</h1>
-          <p className="text-gray-400 text-sm font-serif italic px-4 leading-relaxed">Organize sua vida de oração, crie planos personalizados e deixe o Espírito Santo guiar seus dias.</p>
-        </div>
-
-        <div className="bg-yellow-900/20 border border-yellow-600/30 p-6 rounded-xl max-w-xs w-full space-y-6">
-          <div className="flex items-center justify-center gap-2 text-yellow-500 mb-2 font-bold text-xs uppercase tracking-widest"><Lock size={14} /> Recurso Exclusivo Premium</div>
-
-          <div className="space-y-4">
-            <Button variant="outline" onClick={() => handleSubscribe('monthly')} disabled={loadingPayment} className="w-full border-white/20 hover:bg-white/10 h-14 text-base">
-                {loadingPayment ? 'Processando...' : 'R$ 4,90 - Assinatura Mensal'}
-            </Button>
-            <Button variant="sacred" onClick={() => handleSubscribe('yearly')} disabled={loadingPayment} className="w-full h-16 text-lg shadow-xl relative overflow-hidden border-2 border-yellow-200/20">
-                <span className="absolute -top-2 -right-8 bg-green-600 text-white text-[9px] px-8 py-1 rotate-45 font-bold shadow-sm">OFERTA</span>
-                {loadingPayment ? 'Processando...' : 'R$ 39,90 - Assinatura Anual'}
-            </Button>
-            
-            {/* Botão de Verificação Discreto */}
-            <div className="pt-2 flex justify-center">
-                <button 
-                    onClick={handleManualCheck}
-                    disabled={isChecking}
-                    className="flex items-center gap-2 text-xs text-yellow-500/70 hover:text-yellow-400 transition-colors uppercase tracking-wider font-medium"
-                >
-                    {isChecking ? <Loader2 className="animate-spin w-3 h-3" /> : <RefreshCw size={12} />}
-                    Verificar Assinatura Existente
-                </button>
-            </div>
+      <>
+        <PremiumModal isOpen={showPremiumModal} onClose={() => setShowPremiumModal(false)} />
+        <div className="p-6 flex flex-col items-center justify-center h-full min-h-[80vh] text-center space-y-8 animate-fade-in">
+          <div className="w-24 h-24 rounded-full bg-gradient-to-br from-yellow-600 to-yellow-900 flex items-center justify-center shadow-[0_0_40px_rgba(234,179,8,0.2)] animate-pulse-slow border-4 border-white/10"><Crown size={48} className="text-white" fill="currentColor" /></div>
+          <div className="space-y-3">
+            <h1 className="text-3xl font-serif text-sacred-gold drop-shadow-md">Planner Espiritual</h1>
+            <p className="text-gray-400 text-sm font-serif italic px-4 leading-relaxed">Organize sua vida de oração, crie planos personalizados e deixe o Espírito Santo guiar seus dias.</p>
           </div>
-          <p className="text-[10px] text-gray-500 mt-4">Pagamento 100% seguro • Mercado Pago</p>
+          <div className="bg-yellow-900/20 border border-yellow-600/30 p-6 rounded-xl max-w-xs w-full">
+            <div className="flex items-center justify-center gap-2 text-yellow-500 mb-4 font-bold text-xs uppercase tracking-widest"><Lock size={14} /> Conteúdo Premium</div>
+            <p className="text-sm text-gray-300 mb-6">Desbloqueie a Catequese, Planner e Voz Guiada.</p>
+            <Button variant="sacred" className="w-full shadow-[0_0_20px_rgba(212,175,55,0.4)]" onClick={() => setShowPremiumModal(true)}>Obter Premium</Button>
+          </div>
         </div>
-      </div>
+      </>
     );
   }
 
-  // ... Resto do componente (Conteúdo Premium) ...
   const getPlanProgressStats = (plan: SpiritualPlan) => {
     const daysDone = Object.keys(plan.progress || {}).filter(k => k.startsWith('completed_')).length;
     const daysLeft = Math.max(0, plan.durationDays - daysDone);
@@ -173,12 +110,10 @@ const PlannerPage: React.FC = () => {
         </div>
         {isPlaying && <Button variant="ghost" size="sm" onClick={stopMusic} className="w-full mt-4 text-gray-400 hover:text-white text-xs">Silêncio orante</Button>}
       </div>
-
       <div className="flex justify-between items-center mb-8">
         <div><h1 className="text-2xl font-serif text-white">Meu Planner</h1><p className="text-xs text-gray-400 uppercase tracking-widest">Direção Espiritual</p></div>
         <div className="w-10 h-10 rounded-full bg-sacred-gold/10 flex items-center justify-center border border-sacred-gold/20"><Crown size={20} className="text-sacred-gold" /></div>
       </div>
-
       {loadingPlans ? (
         <div className="flex justify-center py-20"><Loader2 className="animate-spin text-sacred-gold" /></div>
       ) : plans.length === 0 ? (
@@ -190,16 +125,7 @@ const PlannerPage: React.FC = () => {
             return (
               <div key={plan.id} onClick={() => navigate(`/planner/${plan.id}`)} className="relative group bg-gradient-to-r from-slate-800 to-slate-900 border border-white/10 p-5 rounded-xl cursor-pointer hover:border-sacred-gold/40 transition-all shadow-lg hover:shadow-[0_0_20px_rgba(0,0,0,0.5)]">
                 <div className="absolute top-2 right-2"><Button variant="ghost" className="text-gray-500 hover:text-red-400 hover:bg-white/5 h-8 w-8 p-0" onClick={(e) => { e.stopPropagation(); handleDelete(plan.id); }}><Trash2 size={16} /></Button></div>
-                <div className="flex justify-between items-start pr-8">
-                  <div className="w-full">
-                    <h3 className="text-xl font-serif text-white group-hover:text-sacred-gold transition-colors">{plan.title}</h3>
-                    <div className="mt-4 mb-2"><div className="flex justify-between text-[10px] text-gray-400 mb-1 uppercase tracking-wider font-bold"><span>Progresso</span><span>{progressPercent}%</span></div><div className="h-1.5 bg-black/40 rounded-full overflow-hidden"><div className="h-full bg-gradient-to-r from-sacred-gold to-yellow-600 transition-all duration-700" style={{ width: `${progressPercent}%` }} /></div></div>
-                    <div className="flex justify-between items-center mt-3 pt-3 border-t border-white/5">
-                      <div className="flex items-center gap-4 text-xs"><span className="text-green-400 flex items-center gap-1 font-bold"><CheckCircle2 size={14} /> {daysDone} feitos</span><span className="text-gray-400 flex items-center gap-1"><Clock size={14} /> {daysLeft} faltam</span></div>
-                      {plan.spiritualDirector && <p className="text-[10px] text-sacred-gold/60 font-serif italic truncate max-w-[100px]">com {plan.spiritualDirector}</p>}
-                    </div>
-                  </div>
-                </div>
+                <div className="flex justify-between items-start pr-8"><div className="w-full"><h3 className="text-xl font-serif text-white group-hover:text-sacred-gold transition-colors">{plan.title}</h3><div className="mt-4 mb-2"><div className="flex justify-between text-[10px] text-gray-400 mb-1 uppercase tracking-wider font-bold"><span>Progresso</span><span>{progressPercent}%</span></div><div className="h-1.5 bg-black/40 rounded-full overflow-hidden"><div className="h-full bg-gradient-to-r from-sacred-gold to-yellow-600 transition-all duration-700" style={{ width: `${progressPercent}%` }} /></div></div><div className="flex justify-between items-center mt-3 pt-3 border-t border-white/5"><div className="flex items-center gap-4 text-xs"><span className="text-green-400 flex items-center gap-1 font-bold"><CheckCircle2 size={14} /> {daysDone} feitos</span><span className="text-gray-400 flex items-center gap-1"><Clock size={14} /> {daysLeft} faltam</span></div>{plan.spiritualDirector && <p className="text-[10px] text-sacred-gold/60 font-serif italic truncate max-w-[100px]">com {plan.spiritualDirector}</p>}</div></div></div>
               </div>
             );
           })}
