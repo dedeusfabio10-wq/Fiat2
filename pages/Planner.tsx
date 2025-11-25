@@ -1,21 +1,3 @@
-// Adiciona no topo do return do PlannerPage, antes do if (isLoadingProfile)
-<button
-  onClick={async () => {
-    const { data: { user } } = await supabase.auth.getUser();
-    if (user) {
-      const { data } = await supabase.from('profiles').select('is_premium').eq('id', user.id).single();
-      if (data && data.is_premium) {
-        toast.success('Premium ativado! Recarregando app...');
-        window.location.reload(); // Recarrega pra pegar o novo status
-      } else {
-        toast.error('Premium ainda não liberado. Aguarde 10s e tente de novo.');
-      }
-    }
-  }}
-  className="fixed top-4 right-4 z-50 bg-blue-600 text-white px-4 py-2 rounded-lg text-sm hover:bg-blue-700"
->
-  Verificar Premium
-</button>
 import React, { useContext, useEffect, useState, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { AppContext } from '../contexts/AppContext';
