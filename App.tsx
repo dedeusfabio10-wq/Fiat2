@@ -71,7 +71,7 @@ const App: React.FC = () => {
                .single();
             
             if (data) {
-                console.log("Perfil carregado:", data.is_premium ? "PREMIUM" : "GRÁTIS");
+                console.log("Perfil carregado do Banco:", data.is_premium ? "PREMIUM" : "GRÁTIS (Legado)");
                 
                 let updatedProfile: UserProfile = { 
                     ...profile,
@@ -98,11 +98,9 @@ const App: React.FC = () => {
                 setProfile(updatedProfile);
                 localStorage.setItem('fiat-profile', JSON.stringify(updatedProfile));
             } else {
-                // IMPORTANTE: Se data é null, o perfil NÃO existe na tabela profiles.
-                // Isso ocorre logo após o cadastro (Sign Up).
-                // Não criamos o perfil aqui. Ele será criado pelo Webhook de pagamento (Upsert).
-                // Enquanto isso, mantemos o estado local "Grátis".
-                console.log("Usuário sem perfil no DB (Aguardando pagamento ou Free).");
+                // USUÁRIO NOVO OU FREE: Não existe na tabela profiles.
+                // Mantemos apenas no Auth e LocalStorage.
+                console.log("Usuário sem perfil no DB (Aguardando pagamento).");
                 setProfile(prev => ({ 
                     ...prev, 
                     name: user.user_metadata?.name || user.email?.split('@')[0],
@@ -131,17 +129,17 @@ const App: React.FC = () => {
                 .on(
                     'postgres_changes',
                     {
-                        event: '*', // Ouve INSERT (novo premium) e UPDATE
+                        event: '*', // Ouve INSERT (quando o webhook cria o perfil premium)
                         schema: 'public',
                         table: 'profiles',
                         filter: `id=eq.${user.id}`,
                     },
                     (payload: any) => {
-                        console.log('🔔 Atualização Realtime:', payload);
+                        console.log('🔔 Atualização Realtime (Premium Ativado):', payload);
                         fetchUserProfile();
                         
                         if (payload.new && payload.new.is_premium) {
-                            toast.success("Premium Ativado! ♡");
+                            toast.success("Assinatura Confirmada! Bem-vindo ao Santuário.");
                         }
                     }
                 )
@@ -224,12 +222,15 @@ const App: React.FC = () => {
 
   const updateProfile = async (p: UserProfile) => {
       setProfile(p);
+      
+      // BLOQUEIO CRÍTICO:
+      // Se o usuário NÃO for premium, NÃO salvamos nada no banco de dados 'profiles'.
+      // Isso garante que a tabela profiles só tenha usuários pagantes.
+      if (!p.is_premium) return;
+
       try {
           const user = await getCurrentUser();
           if (user) {
-              // Tenta update. Se falhar pq não existe (usuário novo sem pagamento),
-              // o comando .update não faz nada (retorna count 0), o que é o comportamento desejado.
-              // NÃO usamos upsert aqui para não criar perfil "lixo" antes do pagamento.
               await supabase
                   .from('profiles')
                   .update({

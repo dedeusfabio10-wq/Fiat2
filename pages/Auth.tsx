@@ -4,7 +4,7 @@ import { Input, Button } from '../ui/UIComponents';
 import { toast } from 'sonner';
 import { AppContext } from '../contexts/AppContext';
 import { supabase } from '../services/supabase';
-import { Chrome, Mail, Sparkles } from 'lucide-react';
+import { Chrome, Mail, Sparkles, AlertCircle } from 'lucide-react';
 
 const AuthPage: React.FC = () => {
   const { updateProfile, profile } = useContext(AppContext);
@@ -31,7 +31,6 @@ const AuthPage: React.FC = () => {
     const adminEmail = (import.meta as any).env.VITE_ADMIN_EMAIL;
     const adminPass = (import.meta as any).env.VITE_ADMIN_PASSWORD;
 
-    // Verifica se as variáveis existem e se correspondem
     if (adminEmail && adminPass && email === adminEmail && password === adminPass) {
       setTimeout(() => {
         setLoading(false);
@@ -42,12 +41,60 @@ const AuthPage: React.FC = () => {
     }
 
     try {
-      const { data, error } = await supabase.auth.signInWithPassword({ email, password });
-      if (error) {
-        const { data: signUpData, error: signUpError } = await supabase.auth.signUp({ email, password });
-        if (signUpError) throw signUpError;
-        toast.success('Conta criada!', { description: 'Verifique seu e-mail para confirmar.' });
+      // 1. Tenta Login (Sign In)
+      const { data: signInData, error: signInError } = await supabase.auth.signInWithPassword({ email, password });
+
+      if (signInError) {
+        // Se login falhar, assume que pode ser um novo usuário e tenta Cadastro (Sign Up)
+        console.log("Login falhou, tentando cadastro...", signInError.message);
+
+        const { data: signUpData, error: signUpError } = await supabase.auth.signUp({ 
+            email, 
+            password,
+            options: { 
+                emailRedirectTo: window.location.origin 
+            }
+        });
+
+        if (signUpError) {
+            // Se falhar o cadastro também, verifica se é usuário existente com senha errada ou outro erro
+            if (signUpError.message.includes("already registered") || signUpError.message.includes("already exists")) {
+                 toast.error('Erro de acesso', { description: 'Senha incorreta ou usuário já cadastrado.' });
+            } else {
+                 toast.error('Erro', { description: signUpError.message });
+            }
+            setLoading(false);
+            return;
+        }
+
+        // 2. Verifica se precisa confirmar E-mail
+        // Se user existe mas session é null, o Supabase está aguardando confirmação de e-mail
+        if (signUpData.user && !signUpData.session) {
+            toast("Confirme seu E-mail", { 
+                description: 'Enviamos um link para o seu e-mail. Confirme para acessar.',
+                icon: <Mail className="text-yellow-400" />,
+                duration: 8000,
+                style: { background: '#0f172a', borderColor: '#d4af37', color: 'white' }
+            });
+            setLoading(false);
+            return; // PÁRA AQUI. Não deixa entrar.
+        }
+
+        // Se passar direto (Login automático após cadastro se confirmação estiver desligada)
+        if (signUpData.session) {
+            toast.success('Conta criada com sucesso!');
+            // Atualiza estado local apenas, NÃO grava no banco ainda
+            updateProfile({
+                ...profile,
+                name: email.split('@')[0],
+                email: email,
+                onboarding_completed: true
+            });
+            navigate('/');
+        }
+
       } else {
+        // LOGIN SUCESSO
         updateProfile({
           ...profile,
           name: email.split('@')[0],
@@ -56,8 +103,10 @@ const AuthPage: React.FC = () => {
         });
         navigate('/');
       }
+
     } catch (error: any) {
-      toast.error('Erro de autenticação', { description: error.message || 'Verifique seus dados.' });
+      console.error(error);
+      toast.error('Erro de autenticação', { description: 'Tente novamente mais tarde.' });
     } finally {
       setLoading(false);
     }
