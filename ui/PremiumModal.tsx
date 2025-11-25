@@ -93,7 +93,6 @@ const PremiumModal: React.FC<PremiumModalProps> = ({ isOpen, onClose }) => {
                 </div>
                 <div className="bg-green-900/20 border border-green-500/20 p-3 rounded-lg flex gap-3 items-center justify-center"><QrCode className="text-green-400 shrink-0" size={16} /><p className="text-[11px] text-gray-300 leading-tight"><strong>Pagamento Único:</strong> Aceitamos Pix e Cartão.<br/> Sem assinaturas recorrentes.</p></div>
                 <div className="space-y-3 pt-2">
-                    {/* FIX: Removed unexpected Russian text that was causing a JSX parsing error. */}
                     <Button variant="sacred" className="w-full h-14 text-lg font-bold shadow-[0_0_20px_rgba(212,175,55,0.3)] flex items-center justify-center gap-3" onClick={handleSubscribe} disabled={loading}>{loading ? <Loader2 className="animate-spin" /> : <><CreditCard size={20} /> Pagar e Liberar</>}</Button>
                     <p className="text-center text-[10px] text-gray-500 flex items-center justify-center gap-1"><Shield size={10} /> Ambiente seguro • Mercado Pago</p>
                 </div>
