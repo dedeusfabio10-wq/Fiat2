@@ -123,44 +123,61 @@ export const CATECHISM_CONTENT = [
   {
     id: 'credo',
     title: 'O Credo',
+    icon: '✝',
     items: [
       { id: 'creio-deus', title: 'Creio em Deus Pai', content: 'Deus é o Pai Todo-Poderoso, Criador do céu e da terra...' },
       { id: 'creio-jesus', title: 'Creio em Jesus Cristo', content: 'Jesus é o Filho único de Deus, nosso Senhor...' },
-      { id: 'creio-espirito', title: 'Creio no Espírito Santo', content: 'Senhor que dá a vida, e procede do Pai e do Filho...' }
+      { id: 'creio-espirito', title: 'Creio no Espírito Santo', content: 'Senhor que dá a vida, e procede do Pai e do Filho...' },
+      { id: 'creio-igreja', title: 'Creio na Santa Igreja Católica', content: 'Una, Santa, Católica e Apostólica...' }
     ]
   },
   {
     id: 'sacramentos',
-    title: 'Os Sacramentos',
+    title: 'Os 7 Sacramentos',
+    icon: '✝',
     items: [
       { id: 'batismo', title: 'Batismo', content: 'O fundamento de toda a vida cristã, a porta da vida no Espírito.' },
-      { id: 'eucaristia', title: 'Eucaristia', content: 'Fonte e ápice da vida cristã. O próprio Cristo.' },
       { id: 'confissao', title: 'Penitência', content: 'O sacramento da cura e do perdão dos pecados.' },
-      { id: 'crisma', title: 'Crisma', content: 'Confirmação do Batismo e efusão do Espírito Santo.' },
-      { id: 'matrimonio', title: 'Matrimônio', content: 'Aliança de amor entre homem e mulher, imagem do amor de Cristo pela Igreja.' },
+      { id: 'eucaristia', title: 'Eucaristia', content: 'Fonte e ápice da vida cristã. O próprio Cristo.' },
+      { id: 'crisma', title: 'Confirmação', content: 'Confirmação do Batismo e efusão do Espírito Santo.' },
       { id: 'ordem', title: 'Ordem', content: 'Sacramento do serviço apostólico.' },
+      { id: 'matrimonio', title: 'Matrimônio', content: 'Aliança de amor entre homem e mulher, imagem do amor de Cristo pela Igreja.' },
       { id: 'uncao', title: 'Unção dos Enfermos', content: 'Conforto e cura para os doentes.' }
     ]
   },
   {
     id: 'mandamentos',
     title: 'Os 10 Mandamentos',
+    icon: 'Tablets',
     items: [
-      { id: 'mand-1', title: '1º Mandamento', content: 'Amar a Deus sobre todas as coisas.' },
-      { id: 'mand-2', title: '2º Mandamento', content: 'Não tomar seu santo nome em vão.' },
-      { id: 'mand-3', title: '3º Mandamento', content: 'Guardar domingos e festas.' },
-      { id: 'mand-4', title: '4º Mandamento', content: 'Honrar pai e mãe.' },
-      { id: 'mand-5', title: '5º Mandamento', content: 'Não matar.' },
-      { id: 'mand-6', title: '6º Mandamento', content: 'Não pecar contra a castidade.' },
-      { id: 'mand-7', title: '7º Mandamento', content: 'Não furtar.' },
-      { id: 'mand-8', title: '8º Mandamento', content: 'Não levantar falso testemunho.' },
-      { id: 'mand-9', title: '9º Mandamento', content: 'Não desejar a mulher do próximo.' },
-      { id: 'mand-10', title: '10º Mandamento', content: 'Não cobiçar as coisas alheias.' }
+      { id: '1', title: '1º Amar a Deus sobre todas as coisas', content: 'Não terás outros deuses diante de mim.' },
+      { id: '2', title: '2º Não tomar seu santo nome em vão', content: 'Não jurarás o nome de Deus em falso.' },
+      { id: '3', title: '3º Guardar domingos e festas', content: 'Santificarás o dia do Senhor.' },
+      { id: '4', title: '4º Honrar pai e mãe', content: 'Para que tenhas longa vida na terra.' },
+      { id: '5', title: '5º Não matar', content: 'Respeitar a vida desde a concepção até a morte natural.' },
+      { id: '6', title: '6º Não pecar contra a castidade', content: 'Viver a pureza de coração, corpo e mente.' },
+      { id: '7', title: '7º Não furtar', content: 'Respeitar os bens alheios.' },
+      { id: '8', title: '8º Não levantar falso testemunho', content: 'Dizer sempre a verdade com caridade.' },
+      { id: '9', title: '9º Não desejar a mulher do próximo', content: 'Pureza nos pensamentos e desejos.' },
+      { id: '10', title: '10º Não cobiçar as coisas alheias', content: 'Desapego e confiança na Providência.' }
     ]
-  }
-];
-
-  export const VIA_SACRA = [
+  },
+  {
+    id: 'maria',
+    title: 'A Virgem Maria',
+    icon: 'Crown',
+    items: [
+      { id: 'maternidade', title: 'Maternidade Divina', desc: 'Maria é verdadeiramente Mãe de Deus (Theotokos).', icon: 'Crown' },
+      { id: 'virgindade', title: 'Virgindade Perpétua', desc: 'Maria foi Virgem antes, durante e depois do parto.', icon: 'Star' },
+      { id: 'imaculada', title: 'Imaculada Conceição', desc: 'Preservada do pecado original desde a concepção.', icon: 'Sparkles' },
+      { id: 'assuncao', title: 'Assunção', desc: 'Elevada em corpo e alma à glória celeste.', icon: 'Cloud' }
+    ]
+  },
+  {
+    id: 'via-sacra',
+    title: 'Via Sacra',
+    icon: 'Cross',
+    items: [
       { id: 'I', title: '1ª Estação', meditation: 'Jesus é condenado à morte' },
       { id: 'II', title: '2ª Estação', meditation: 'Jesus carrega a Cruz' },
       { id: 'III', title: '3ª Estação', meditation: 'Jesus cai pela primeira vez' },
@@ -176,95 +193,79 @@ export const CATECHISM_CONTENT = [
       { id: 'XIII', title: '13ª Estação', meditation: 'Jesus é descido da Cruz' },
       { id: 'XIV', title: '14ª Estação', meditation: 'Jesus é sepultado' },
       { id: 'XV', title: '15ª Estação', meditation: 'A Ressurreição do Senhor' }
-];
-
-export const MARIAN_DOGMAS = [
-  { id: 'maternidade', title: 'Maternidade Divina', desc: 'Maria é verdadeiramente Mãe de Deus (Theotokos).', icon: 'Crown' },
-  { id: 'virgindade', title: 'Virgindade Perpétua', desc: 'Maria foi Virgem antes, durante e depois do parto.', icon: 'Star' },
-  { id: 'imaculada', title: 'Imaculada Conceição', desc: 'Preservada do pecado original desde a concepção.', icon: 'Sparkles' },
-  { id: 'assuncao', title: 'Assunção', desc: 'Elevada em corpo e alma à glória celeste.', icon: 'Cloud' }
-];
-
-export const THE_APOSTLES = [
-  { id: 'pedro', name: 'São Pedro', symbol: 'Chaves', title: 'O Príncipe dos Apóstolos', desc: 'Primeiro Papa, recebeu as chaves do Reino e a missão de apascentar as ovelhas.' },
-  { id: 'andre', name: 'São André', symbol: 'Cruz em X', title: 'O Protocleto', desc: 'Irmão de Pedro, o primeiro a ser chamado. Morreu em uma cruz em forma de X.' },
-  { id: 'tiago-maior', name: 'São Tiago Maior', symbol: 'Concha', title: 'Filho do Trovão', desc: 'Primeiro apóstolo a ser martirizado. Padroeiro dos peregrinos (Caminho de Santiago).' },
-  { id: 'joao', name: 'São João', symbol: 'Águia', title: 'O Discípulo Amado', desc: 'Evangelista, teólogo e autor do Apocalipse. Único a não morrer mártir, cuidou de Maria.' },
-  { id: 'filipe', name: 'São Filipe', symbol: 'Cruz/Pão', title: 'O Evangelizador', desc: 'Pregou na Frígia e morreu crucificado de cabeça para baixo.' },
-  { id: 'bartolomeu', name: 'São Bartolomeu', symbol: 'Faca', title: 'O Israelita sem falsidade', desc: 'Também chamado Natanael. Morreu esfolado vivo por amor a Cristo.' },
-  { id: 'tome', name: 'São Tomé', symbol: 'Lança', title: 'O Dídimo', desc: 'Levou o Evangelho até a Índia. Reconheceu a divindade de Jesus: "Meu Senhor e meu Deus".' },
-  { id: 'mateus', name: 'São Mateus', symbol: 'Livro/Anjo', title: 'O Cobrador de Impostos', desc: 'Deixou tudo para seguir Jesus. Escreveu o primeiro Evangelho.' },
-  { id: 'tiago-menor', name: 'São Tiago Menor', symbol: 'Maça de Pisoeiro', title: 'O Justo', desc: 'Primo de Jesus e primeiro Bispo de Jerusalém. Autor de uma epístola.' },
-  { id: 'judas-tadeu', name: 'São Judas Tadeu', symbol: 'Machado', title: 'O Santo das Causas Impossíveis', desc: 'Primo de Jesus, escreveu uma epístola. Martirizado na Pérsia.' },
-  { id: 'simao', name: 'São Simão', symbol: 'Serra', title: 'O Zelote', desc: 'Pregou no Egito e na Pérsia. Foi martirizado sendo serrado ao meio.' },
-  { id: 'matias', name: 'São Matias', symbol: 'Machado', title: 'O Escolhido', desc: 'Eleito para substituir Judas Iscariotes e completar os doze.' },
-  { id: 'paulo', name: 'São Paulo', symbol: 'Espada', title: 'Apóstolo dos Gentios', desc: 'Embora não seja dos doze originais, é a coluna da Igreja junto com Pedro. Grande missionário.' }
-];
-
-export const LITURGICAL_OBJECTS = [
-  { id: 'calice', title: 'Cálice', desc: 'Taça onde se consagra o vinho no Sangue de Cristo.', icon: 'Grape' },
-  { id: 'patena', title: 'Patena', desc: 'Prato onde se coloca a hóstia a ser consagrada.', icon: 'Circle' },
-  { id: 'ostensorio', title: 'Ostensório', desc: 'Objeto para expor o Santíssimo Sacramento à adoração.', icon: 'Sun' },
-  { id: 'ciborio', title: 'Cibório', desc: 'Recipiente com tampa para guardar as hóstias consagradas no sacrário.', icon: 'Circle' },
-  { id: 'corporal', title: 'Corporal', desc: 'Pano quadrado onde se colocam o cálice e a patena. Representa o sudário.', icon: 'BookOpen' },
-  { id: 'purificatorio', title: 'Sanguíneo', desc: 'Pano utilizado para purificar o cálice e os dedos do sacerdote.', icon: 'Droplet' }
-];
-
-export const APOSTOLIC_LINE = [
-  { id: 'leao14', name: 'Papa Leão XIV', period: '2025 - Atual', title: 'Robert Francis Prevost (OSA)', bio: 'Primeiro Papa da América do Norte e da Ordem de Santo Agostinho. Inspirado por Leão XIII, enfrenta os desafios da Inteligência Artificial e da Quarta Revolução Industrial na defesa da dignidade humana.', highlight: true },
-  { id: 'francisco', name: 'Papa Francisco', period: '2013 - 2025', title: 'Jorge Mario Bergoglio', bio: 'O Papa da misericórdia e dos pobres. Primeiro Papa das Américas.', highlight: false },
-  { id: 'bento', name: 'Bento XVI', period: '2005 - 2013', title: 'Joseph Ratzinger', bio: 'Grande teólogo, lutou contra o relativismo.', highlight: false },
-  { id: 'jp2', name: 'São João Paulo II', period: '1978 - 2005', title: 'Karol Wojtyla', bio: 'O Papa da família e da juventude.', highlight: false },
-  { id: 'jp1', name: 'João Paulo I', period: '1978', title: 'Albino Luciani', bio: 'O Papa do Sorriso.', highlight: false },
-  { id: 'paulo6', name: 'São Paulo VI', period: '1963 - 1978', title: 'Giovanni B. Montini', bio: 'Concluiu o Vaticano II.', highlight: false },
-  { id: 'joao23', name: 'São João XXIII', period: '1958 - 1963', title: 'Angelo Roncalli', bio: 'O Papa Bom, convocou o Concílio.', highlight: false },
-  { id: 'pio12', name: 'Pio XII', period: '1939 - 1958', title: 'Eugenio Pacelli', bio: 'Pastor Angelicus, guiou a Igreja na Guerra.', highlight: false },
-  { id: 'pio11', name: 'Pio XI', period: '1922 - 1939', title: 'Achille Ratti', bio: 'Instituiu a festa de Cristo Rei.', highlight: false },
-  { id: 'bento15', name: 'Bento XV', period: '1914 - 1922', title: 'Giacomo della Chiesa', bio: 'Papa da Paz durante a 1ª Guerra.', highlight: false },
-  { id: 'pio10', name: 'São Pio X', period: '1903 - 1914', title: 'Giuseppe Sarto', bio: 'Papa da Eucaristia, combateu o modernismo.', highlight: false },
-  { id: 'leao13', name: 'Leão XIII', period: '1878 - 1903', title: 'Vincenzo Pecci', bio: 'Autor da Rerum Novarum e grande devoto de São José.', highlight: false },
-  { id: 'pio9', name: 'Beato Pio IX', period: '1846 - 1878', title: 'Giovanni M. Mastai-Ferretti', bio: 'Proclamou o dogma da Imaculada Conceição.', highlight: false },
-  { id: 'gregorio16', name: 'Gregório XVI', period: '1831 - 1846', title: 'Bartolomeo Cappellari', bio: 'Grande missionário.', highlight: false },
-  { id: 'pedro', name: 'São Pedro', period: '30 - 67', title: 'Simão Pedro', bio: 'O primeiro Papa, escolhido por Cristo. A Pedra.', highlight: true }
-];
-
-export const CHURCH_HISTORY = [
-  { id: 'era-apostolica', title: 'Era Apostólica', period: '33 - 100 d.C.', desc: 'O início da Igreja com os Apóstolos.', events: ['Pentecostes', 'Conversão de São Paulo', 'Martírio de Pedro e Paulo em Roma', 'São João escreve o Apocalipse'] },
-  { id: 'patristica', title: 'Era Patrística', period: '100 - 800 d.C.', desc: 'Tempo dos Padres da Igreja, mártires e definição dos dogmas.', events: ['Perseguições Romanas', 'Édito de Milão (Liberdade de Culto)', 'Concílio de Niceia (Credo)', 'Santo Agostinho e São Jerônimo'] },
-  { id: 'idade-media', title: 'Idade Média', period: '800 - 1500', desc: 'A Cristandade, as Catedrais e a Escolástica.', events: ['Cisma do Oriente (1054)', 'São Francisco e São Domingos', 'São Tomás de Aquino (Suma Teológica)', 'Construção das Catedrais Góticas'] },
-  { id: 'idade-moderna', title: 'Idade Moderna', period: '1500 - 1900', desc: 'Reforma, Contrarreforma e Expansão Missionária.', events: ['Concílio de Trento', 'Evangelização das Américas (Brasil)', 'Aparição de Guadalupe e Lourdes', 'Concílio Vaticano I'] },
-  { id: 'idade-contemp', title: 'Idade Contemporânea', period: '1900 - Hoje', desc: 'A Igreja no mundo atual.', events: ['Aparições de Fátima', 'Concílio Vaticano II', 'São João Paulo II', 'Papa Francisco'] }
-];
-
-export const HOLY_MASS = {
-  intro: { title: 'O Mistério da Fé', text: 'A Santa Missa não é apenas uma lembrança da Ceia do Senhor. É o mesmo sacrifício da Cruz, tornado presente (re-apresentado) no altar de forma incruenta. O céu se une à terra, e Cristo se oferece ao Pai por nós.' },
-  rites: [
-    { part: 'Ritos Iniciais', desc: 'Reunidos em nome do Senhor', highlight: false, actions: [{name: 'Sinal da Cruz', meaning: 'Início em nome da Trindade'}, {name: 'Ato Penitencial', meaning: 'Reconhecemos nossos pecados (Kyrie)'}, {name: 'Glória', meaning: 'Louvor à Santíssima Trindade'}] },
-    { part: 'Liturgia da Palavra', desc: 'Deus fala ao seu povo', highlight: false, actions: [{name: 'Leituras', meaning: 'Antigo Testamento, Salmo e Epístolas'}, {name: 'Evangelho', meaning: 'O próprio Cristo fala (ficamos de pé)'}, {name: 'Homilia', meaning: 'Atualização da Palavra'}] },
-    { part: 'Liturgia Eucarística', desc: 'O Coração da Missa', highlight: true, actions: [{name: 'Ofertório', meaning: 'Entregamos nossa vida com o pão e vinho'}, {name: 'Consagração', meaning: 'O pão e vinho tornam-se Corpo e Sangue de Cristo (Transubstanciação)'}, {name: 'Doxologia', meaning: 'Por Cristo, com Cristo e em Cristo...'}]},
-    { part: 'Rito da Comunhão', desc: 'União com Cristo', highlight: false, actions: [{name: 'Pai Nosso', meaning: 'Oração dos filhos de Deus'}, {name: 'Cordeiro de Deus', meaning: 'Aquele que tira o pecado do mundo'}, {name: 'Comunhão', meaning: 'Receber o próprio Deus'}]},
-    { part: 'Ritos Finais', desc: 'Envio', highlight: false, actions: [{name: 'Bênção', meaning: 'A graça de Deus nos acompanha'}, {name: 'Ide em paz', meaning: 'Missão de levar Cristo ao mundo'}]}
-  ],
-  spiritual: { title: 'Mundo Invisível', desc: 'O que acontece espiritualmente', points: ['O céu se abre sobre o altar', 'Milhares de anjos adoram o Santíssimo', 'As almas do purgatório recebem alívio pelo Preciosíssimo Sangue', 'Nossa Senhora está presente ao pé da Cruz (Altar)'] },
-  etiquette: ['Chegar cedo para preparação', 'Vestir-se com modéstia e respeito', 'Fazer jejum eucarístico de 1 hora', 'Participar ativamente das respostas', 'Desligar o celular', 'Fazer a genuflexão ao entrar e sair']
-};
-
-export const CHURCH_HIERARCHY = [
-  { id: 'papa', role: 'Papa', color: 'text-white', symbol: 'Chaves', title: 'Sumo Pontífice', desc: 'Sucessor de Pedro, Vigário de Cristo na Terra e Pastor da Igreja Universal.' },
-  { id: 'cardeal', role: 'Cardeal', color: 'text-red-500', symbol: 'Barrete', title: 'Príncipe da Igreja', desc: 'Conselheiro direto do Papa e eleitor no conclave. A cor vermelha simboliza a disposição para o martírio.' },
-  { id: 'bispo', role: 'Bispo', color: 'text-purple-500', symbol: 'Mitra', title: 'Sucessor dos Apóstolos', desc: 'Possui a plenitude do sacramento da Ordem. Pastor de uma diocese, responsável por ensinar, santificar e governar.' },
-  { id: 'padre', role: 'Padre', color: 'text-black', symbol: 'Estola', title: 'Presbítero', desc: 'Colaborador do Bispo, age "in persona Christi" para celebrar a Eucaristia e perdoar os pecados.' },
-  { id: 'diacono', role: 'Diácono', color: 'text-gray-500', symbol: 'Dalmática', title: 'Servo', desc: 'Ordenado para o serviço da caridade, da Palavra e da Liturgia. Pode batizar e assistir matrimônios.' }
-];
-
-export const CHURCH_MINISTRIES = [
-  { id: 'catequista', title: 'Catequista', desc: 'Tem a nobre missão de ecoar a Palavra de Deus. Ensina a fé católica e prepara crianças e adultos para receberem os sacramentos.', icon: 'BookOpen' },
-  { id: 'ministro', title: 'Ministro da Eucaristia', desc: 'Ministro Extraordinário da Sagrada Comunhão (MESC). Auxilia os padres na distribuição da Eucaristia na Missa e leva Jesus aos doentes em suas casas.', icon: 'Grape' },
-  { id: 'leitor', title: 'Leitor', desc: 'Proclama a Palavra de Deus na liturgia. Não é apenas ler, é emprestar a voz para que Deus fale ao seu povo.', icon: 'BookOpen' },
-  { id: 'acolyto', title: 'Acólito / Coroinha', desc: 'Serve ao altar, auxiliando o sacerdote e o diácono nas celebrações litúrgicas.', icon: 'Bell' },
-  { id: 'musica', title: 'Músico Sacro', desc: 'Serve a Deus através da arte. A música sacra eleva a alma e ajuda a assembleia a rezar. "Quem canta reza duas vezes".', icon: 'Music' },
-  { id: 'pascom', title: 'Pascom', desc: 'Pastoral da Comunicação. Evangeliza através dos meios de comunicação e redes sociais.', icon: 'Users' },
-  { id: 'caridade', title: 'Vicentinos / Caridade', desc: 'Serviço aos pobres e necessitados, vendo neles a face de Cristo sofredor.', icon: 'Heart' }
+    ]
+  },
+  {
+    id: 'apostolos',
+    title: 'Os 12 Apóstolos + São Paulo',
+    icon: 'Keys',
+    items: [
+      { id: 'pedro', title: 'São Pedro', desc: 'O Príncipe dos Apóstolos – Primeiro Papa' },
+      { id: 'andre', title: 'São André', desc: 'O Protocleto – Crucificado em X' },
+      { id: 'tiago-maior', title: 'São Tiago Maior', desc: 'Filho do Trovão – Padroeiro de Santiago' },
+      { id: 'joao', title: 'São João Evangelista', desc: 'O Discípulo Amado – Cuidou de Maria' },
+      { id: 'filipe', title: 'São Filipe', desc: 'O Evangelizador' },
+      { id: 'bartolomeu', title: 'São Bartolomeu', desc: 'O Israelita sem falsidade' },
+      { id: 'tome', title: 'São Tomé', desc: 'Meu Senhor e meu Deus!' },
+      { id: 'mateus', title: 'São Mateus', desc: 'Deixou tudo para seguir Jesus' },
+      { id: 'tiago-menor', title: 'São Tiago Menor', desc: 'O Justo – Bispo de Jerusalém' },
+      { id: 'judas-tadeu', title: 'São Judas Tadeu', desc: 'Das causas impossíveis' },
+      { id: 'simao', title: 'São Simão Zelote', desc: 'Serrado ao meio' },
+      { id: 'matias', title: 'São Matias', desc: 'Substituiu Judas Iscariotes' },
+      { id: 'paulo', title: 'São Paulo', desc: 'Apóstolo dos Gentios – Não dos 12, mas coluna da Igreja' }
+    ]
+  },
+  {
+    id: 'objetos',
+    title: 'Objetos Litúrgicos',
+    icon: 'Chalice',
+    items: [
+      { id: 'calice', title: 'Cálice', desc: 'Onde o vinho se torna Sangue de Cristo', icon: 'Grape' },
+      { id: 'patena', title: 'Patena', desc: 'Prato da Hóstia consagrada', icon: 'Circle' },
+      { id: 'ostensorio', title: 'Ostensório', desc: 'Para adoração do Santíssimo', icon: 'Sun' },
+      { id: 'ciborio', title: 'Cibório', desc: 'Guarda as hóstias no sacrário', icon: 'Circle' },
+      { id: 'corporal', title: 'Corporal', desc: 'Pano que representa o sudário', icon: 'BookOpen' },
+      { id: 'purificatorio', title: 'Purificatório', desc: 'Para purificar o cálice', icon: 'Droplet' }
+    ]
+  },
+  {
+    id: 'hierarquia',
+    title: 'Hierarquia da Igreja',
+    icon: 'Mitra',
+    items: [
+      { id: 'papa', title: 'Papa', desc: 'Sucessor de Pedro, Vigário de Cristo' },
+      { id: 'cardeal', title: 'Cardeal', desc: 'Conselheiro do Papa, veste vermelho por martírio' },
+      { id: 'bispo', title: 'Bispo', desc: 'Sucessor dos Apóstolos, pastor da diocese' },
+      { id: 'padre', title: 'Padre', desc: 'Age in persona Christi na Missa e Confissão' },
+      { id: 'diacono', title: 'Diácono', desc: 'Servo da caridade, Palavra e Liturgia' }
+    ]
+  },
+  {
+    id: 'ministerios',
+    title: 'Ministérios Leigos',
+    icon: 'Heart',
+    items: [
+      { id: 'catequista', title: 'Catequista', desc: 'Ensina a fé e prepara para os sacramentos', icon: 'BookOpen' },
+      { id: 'ministro', title: 'Ministro da Eucaristia', desc: 'Leva Jesus aos doentes', icon: 'Grape' },
+      { id: 'leitor', title: 'Leitor', desc: 'Proclama a Palavra de Deus', icon: 'BookOpen' },
+      { id: 'acolyto', title: 'Coroinha', desc: 'Serve ao altar', icon: 'Bell' },
+      { id: 'musica', title: 'Músico Sacro', desc: '"Quem canta reza duas vezes"', icon: 'Music' },
+      { id: 'pascom', title: 'Pascom', desc: 'Evangeliza nas redes sociais', icon: 'Users' },
+      { id: 'caridade', title: 'Vicentinos', desc: 'Serve aos pobres vendo neles a face de Cristo', icon: 'Heart' }
+    ]
+  },
+  {
+    id: 'historia',
+    title: 'História da Igreja',
+    icon: 'Scroll',
+    items: [
+      { id: 'apostolica', title: 'Era Apostólica (33-100)', desc: 'Pentecostes, martírio de Pedro e Paulo' },
+      { id: 'patristica', title: 'Era Patrística (100-800)', desc: 'Padres da Igreja, Concílio de Niceia' },
+      { id: 'media', title: 'Idade Média (800-1500)', desc: 'Catedrais góticas, São Tomás de Aquino' },
+      { id: 'moderna', title: 'Idade Moderna (1500-1900)', desc: 'Concílio de Trento, missões no Brasil' },
+      { id: 'contemporanea', title: 'Idade Contemporânea (1900-hoje)', desc: 'Fátima, Vaticano II, João Paulo II, Francisco' }
+    ]
+  }
 ];
 
 export const PRAYERS: Prayer[] = [
