@@ -119,9 +119,46 @@ export const SAINTS: Saint[] = [
   { id: 'joao-paulo-ii', name: 'São João Paulo II', title: 'O Papa da Família', date: '22 de Outubro', bio: 'Papa peregrino que guiou a Igreja no terceiro milênio.', prayer: 'Não tenhais medo! Abri as portas a Cristo!' }
 ];
 
-// === CATECISMO PRINCIPAL REMOVIDO (agora vem 100% do Supabase) ===
-// Tabela: app_content → category: 'credo', 'sacramentos', 'mandamentos'
-// export const CATECHISM_CONTENT = [ ... ]  ← DELETADO AQUI
+export const CATECHISM_CONTENT = [
+  {
+    id: 'credo',
+    title: 'O Credo',
+    items: [
+      { id: 'creio-deus', title: 'Creio em Deus Pai', content: 'Deus é o Pai Todo-Poderoso, Criador do céu e da terra...' },
+      { id: 'creio-jesus', title: 'Creio em Jesus Cristo', content: 'Jesus é o Filho único de Deus, nosso Senhor...' },
+      { id: 'creio-espirito', title: 'Creio no Espírito Santo', content: 'Senhor que dá a vida, e procede do Pai e do Filho...' }
+    ]
+  },
+  {
+    id: 'sacramentos',
+    title: 'Os Sacramentos',
+    items: [
+      { id: 'batismo', title: 'Batismo', content: 'O fundamento de toda a vida cristã, a porta da vida no Espírito.' },
+      { id: 'eucaristia', title: 'Eucaristia', content: 'Fonte e ápice da vida cristã. O próprio Cristo.' },
+      { id: 'confissao', title: 'Penitência', content: 'O sacramento da cura e do perdão dos pecados.' },
+      { id: 'crisma', title: 'Crisma', content: 'Confirmação do Batismo e efusão do Espírito Santo.' },
+      { id: 'matrimonio', title: 'Matrimônio', content: 'Aliança de amor entre homem e mulher, imagem do amor de Cristo pela Igreja.' },
+      { id: 'ordem', title: 'Ordem', content: 'Sacramento do serviço apostólico.' },
+      { id: 'uncao', title: 'Unção dos Enfermos', content: 'Conforto e cura para os doentes.' }
+    ]
+  },
+  {
+    id: 'mandamentos',
+    title: 'Os 10 Mandamentos',
+    items: [
+      { id: 'mand-1', title: '1º Mandamento', content: 'Amar a Deus sobre todas as coisas.' },
+      { id: 'mand-2', title: '2º Mandamento', content: 'Não tomar seu santo nome em vão.' },
+      { id: 'mand-3', title: '3º Mandamento', content: 'Guardar domingos e festas.' },
+      { id: 'mand-4', title: '4º Mandamento', content: 'Honrar pai e mãe.' },
+      { id: 'mand-5', title: '5º Mandamento', content: 'Não matar.' },
+      { id: 'mand-6', title: '6º Mandamento', content: 'Não pecar contra a castidade.' },
+      { id: 'mand-7', title: '7º Mandamento', content: 'Não furtar.' },
+      { id: 'mand-8', title: '8º Mandamento', content: 'Não levantar falso testemunho.' },
+      { id: 'mand-9', title: '9º Mandamento', content: 'Não desejar a mulher do próximo.' },
+      { id: 'mand-10', title: '10º Mandamento', content: 'Não cobiçar as coisas alheias.' }
+    ]
+  }
+];
 
 export const VIA_SACRA = [
   { id: 'I', title: '1ª Estação', meditation: 'Jesus é condenado à morte' },
