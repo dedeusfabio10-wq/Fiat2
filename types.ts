@@ -90,14 +90,14 @@ export interface UserProfile {
   email?: string;
   photo?: string;
   is_premium: boolean;
-  premium_expires_at?: string;
+  premium_expires_at?: string; // Novo campo para controle de vencimento
   streak: number;
   rosaries_prayed: number;
   favorites: string[];
   active_novenas: {
     novenaId: string;
     currentDay: number;
-    lastDate: string | null;
+    lastDate: string | null; // Pode ser null se acabou de se inscrever
     startDate: string;
   }[];
   devotionalSaintId?: string;
@@ -119,23 +119,3 @@ export enum AppRoute {
   CATECHISM = 'CATECHISM',
   PROFILE = 'PROFILE'
 }
-
-// ========= TIPOS NOVOS PARA O CATECISMO FUNCIONAR 100% =========
-
-export type CatechismSection = {
-  id: string;
-  title: string;
-  items: CatechismItem[];
-};
-
-export type CatechismItem =
-  | { id: string; title: string; content: string }
-  | { id: string; title: string; meditation: string }
-  | { id: string; title: string; desc: string }
-  | { id: string; title: string; bio: string }
-  | { id: string; title: string; text?: string }; // fallback para casos futuros
-
-// Opcional – se quiser tipar ainda mais os objetos grandes:
-export type ViaSacraStation = { id: string; title: string; meditation: string };
-export type MarianDogma = { id: string; title: string; desc: string; icon?: string };
-export type Apostle = { id: string; name: string; title: string; symbol?: string; desc: string; bio?: string };

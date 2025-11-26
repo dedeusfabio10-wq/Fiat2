@@ -1,6 +1,6 @@
 import React, { useContext, useState, useMemo, useEffect } from 'react';
 import { AppContext } from '../contexts/AppContext';
-import { MARIAN_DOGMAS, CATECHISM_CONTENT } from '../constants';
+import { CATECHISM_CONTENT, MARIAN_DOGMAS } from '../constants';
 import { Button } from '../ui/UIComponents';
 import PremiumModal from '../ui/PremiumModal';
 import { Crown, Lock, ChevronDown, ChevronUp, BookOpen, Sparkles, Key, Users, Heart, Bell, Music, Star, Grape, Circle, Cloud, Droplet, Sun, Loader2, RefreshCw } from 'lucide-react';
@@ -112,7 +112,7 @@ const CatechismPage: React.FC = () => {
        <div className="space-y-4">
            {CATECHISM_CONTENT.map(section => (
                <div key={section.id} className={`${themeCardColor} border border-white/5 rounded-xl overflow-hidden transition-all shadow-lg`}>
-       <div className="p-5 flex items-center justify-between cursor-pointer hover:bg-white/5 transition-colors" onClick={() => setExpandedSection(expandedSection === section.id ? null : section.id)}>
+                   <div className="p-5 flex items-center justify-between cursor-pointer hover:bg-white/5 transition-colors" onClick={() => setExpandedSection(expandedSection === section.id ? null : section.id)}>
                        <h3 className="font-serif text-white font-medium text-base uppercase tracking-wider">{section.title}</h3>
                        {expandedSection === section.id ? <ChevronUp size={20} className="text-fiat-gold" /> : <ChevronDown size={20} className="text-gray-500" />}
                    </div>
