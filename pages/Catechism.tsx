@@ -275,7 +275,7 @@ const CatechismPage: React.FC = () => {
         )}
       </div>
 
-            {/* OBJETOS LITÚRGICOS */}
+      {/* OBJETOS LITÚRGICOS */}
       <div className={`${themeCardColor} border border-white/5 rounded-xl overflow-hidden transition-all shadow-lg`}>
         <div className="p-5 flex items-center justify-between cursor-pointer hover:bg-white/5 transition-colors" onClick={() => setExpandedSection(expandedSection === 'objetos' ? null : 'objetos')}>
           <h3 className="font-serif text-white font-medium text-base uppercase tracking-widest flex items-center gap-2">
@@ -298,8 +298,8 @@ const CatechismPage: React.FC = () => {
         )}
       </div>
 
-    </div> {/* ← fecha o div com className="space-y-4" (o principal) */}
-  </div> {/* ← fecha o container maior da página */}
+    </div> {/* fecha o space-y-4 principal */}
+  </div> {/* fecha o container da página */}
 
   );
 };
