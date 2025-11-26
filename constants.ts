@@ -545,6 +545,5 @@ export const NOVENAS: Novena[] = [
     month: 99, // Special ID for "Anytime"
     startDateDisplay: 'Qualquer época',
     days: createGenericDays(9, 'Maria, Desatadora dos Nós, rogai por mim.')
-  }
-]
-  ];
+  }
+];
