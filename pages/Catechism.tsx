@@ -111,7 +111,11 @@ const CatechismPage: React.FC = () => {
        </div>
        <div className="space-y-4">
            {CATECHISM_CONTENT.map(section => (
-               <div key={section.id} className={`${themeCardColor} border border-white/5 rounded-xl overflow-hidden transition-all shadow-lg`}>
+               <div key={section.id} className={`${themeCardColor} border border-white/5 rounded-xl overflow-hidden transition-all shadow-lg`}>{expandedSection === section.id && (() => {
+  console.log("Renderizando items da seção:", section.id, section.items);
+  return (
+    <div className="p-5 pt-0 bg-black/10"> ...  
+
                    <div className="p-5 flex items-center justify-between cursor-pointer hover:bg-white/5 transition-colors" onClick={() => setExpandedSection(expandedSection === section.id ? null : section.id)}>
                        <h3 className="font-serif text-white font-medium text-base uppercase tracking-wider">{section.title}</h3>
                        {expandedSection === section.id ? <ChevronUp size={20} className="text-fiat-gold" /> : <ChevronDown size={20} className="text-gray-500" />}
