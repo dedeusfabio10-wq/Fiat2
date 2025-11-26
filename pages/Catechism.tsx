@@ -115,7 +115,6 @@ const CatechismPage: React.FC = () => {
           >
             Obter Premium (R$ 4,90)
           </Button>
-
           <div className="pt-4 flex justify-center">
             <button
               onClick={handleManualCheck}
@@ -338,7 +337,7 @@ const CatechismPage: React.FC = () => {
                   <div
                     key={pope.id}
                     className={`p-5 rounded-xl border ${
-                      pope.current
+                      pope.highlight
                         ? 'bg-fiat-gold/20 border-fiat-gold/60 shadow-lg shadow-fiat-gold/20'
                         : 'bg-white/5 border-white/10'
                     }`}
@@ -349,7 +348,7 @@ const CatechismPage: React.FC = () => {
                         {pope.period}
                       </span>
                     </div>
-                    {pope.current && (
+                    {pope.highlight && (
                       <span className="text-fiat-gold text-xs uppercase tracking-widest font-bold">
                         • Papa Atual •
                       </span>
@@ -421,13 +420,13 @@ const CatechismPage: React.FC = () => {
           {expandedSection === 'missa' && (
             <div className="p-6 pt-2 bg-black/20">
               <div className="space-y-4">
-                {HOLY_MASS.map((part) => (
+                {HOLY_MASS.rites.map((part: any) => (
                   <div
-                    key={part.id}
+                    key={part.part}
                     className="bg-white/5 p-5 rounded-xl border border-white/10"
                   >
                     <h4 className="text-fiat-gold font-bold text-sm uppercase tracking-wider mb-3">
-                      {part.title}
+                      {part.part}
                     </h4>
                     <p className="text-sm text-gray-300 font-serif italic leading-relaxed">
                       {part.desc}
@@ -465,7 +464,7 @@ const CatechismPage: React.FC = () => {
                     className="bg-white/5 p-5 rounded-xl border border-white/10 flex items-start gap-4"
                   >
                     <div className="w-12 h-12 rounded-full bg-fiat-gold/10 flex items-center justify-center">
-                      {getMinistryIcon(role.icon || 'Sparkles')}
+                      {getMinistryIcon(role.symbol || 'Sparkles')}
                     </div>
                     <div>
                       <h4 className="font-bold text-white text-base">{role.role}</h4>
@@ -546,8 +545,8 @@ const CatechismPage: React.FC = () => {
                     key={obj.id}
                     className="bg-white/5 p-6 rounded-xl border border-white/10 text-center hover:bg-white/10 transition-all"
                   >
-                    <div className="text-5xl mb-4">{obj.emoji}</div>
-                    <h4 className="font-bold text-white text-sm">{obj.name}</h4>
+                    <div className="text-5xl mb-4">{obj.icon}</div>
+                    <h4 className="font-bold text-white text-sm">{obj.title}</h4>
                     <p className="text-xs text-gray-400 mt-2 font-serif italic leading-tight">
                       {obj.desc}
                     </p>
