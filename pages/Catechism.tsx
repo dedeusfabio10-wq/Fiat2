@@ -298,11 +298,11 @@ const CatechismPage: React.FC = () => {
       )}
     </div>
 
-  </div> {/* fecha o space-y-4 principal */}
+   </div> {/* fecha o space-y-4 principal */}
 </div>   {/* fecha o container da página */}
 
-);   // ← ESSE PARÊNTESE QUE ESTAVA FALTANDO!!!
+);   // fecha o return do JSX
 
-};
+};   // fecha a função CatechismPage
 
 export default CatechismPage;
