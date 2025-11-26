@@ -1,10 +1,12 @@
 import { Prayer, Novena, Saint, Mystery, DevotionalRosary } from './types';
 // Helper to create generic days
-const createGenericDays = (duration: number, prayer?: string) => Array.from({ length: duration }, (_, i) => ({
-    title: Dia ${i + 1},
-    reflection: 'Medite hoje sobre a virtude deste santo e seu amor a Deus. Entregue suas intenções com fé.',
-    prayer: prayer || 'Rogai por nós, para que sejamos dignos das promessas de Cristo.'
-}));
+const createGenericDays = (duration: number, prayer?: string) =>
+  Array.from({ length: duration }, (_, i) => ({
+    title: `Dia ${i + 1}`,                     // ← aqui era o erro!
+    reflection:
+      'Medite hoje sobre a virtude deste santo e seu amor a Deus. Entregue suas intenções com fé.',
+    prayer: prayer || 'Rogai por nós, para que sejamos dignos das promessas de Cristo.',
+  }));
 export const CENACULO_CONSAGRACAO = {
   title: "Consagração ao Imaculado Coração de Maria",
   content: "Virgem de Fátima, Mãe de Misericórdia, Rainha do Céu e da Terra, refúgio dos pecadores, nós nos consagramos ao Vosso Imaculado Coração. Consagramos-Vos o nosso coração, a nossa alma, a nossa família e tudo o que somos. E para que esta consagração seja verdadeiramente eficaz e duradoura, renovamos hoje as promessas do nosso Batismo e da nossa Crisma. Comprometemo-nos a viver como bons cristãos, fiéis a Deus, à Igreja e ao Santo Padre. Queremos rezar o Santo Terço todos os dias, participar da Eucaristia e viver na vossa presença, ó Mãe, para que, por meio de Vós, cheguemos mais perfeitamente a Jesus."
