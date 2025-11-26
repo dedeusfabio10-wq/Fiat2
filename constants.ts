@@ -157,11 +157,10 @@ export const CATECHISM_CONTENT = [
       { id: 'mand-9', title: '9º Mandamento', content: 'Não desejar a mulher do próximo.' },
       { id: 'mand-10', title: '10º Mandamento', content: 'Não cobiçar as coisas alheias.' }
     ]
-  },
-  {
-    id: 'Via Sacra',
-    title: 'Via sacra',
-    items: [
+  }
+];
+
+  export const VIA_SACRA = [
       { id: 'I', title: '1ª Estação', meditation: 'Jesus é condenado à morte' },
       { id: 'II', title: '2ª Estação', meditation: 'Jesus carrega a Cruz' },
       { id: 'III', title: '3ª Estação', meditation: 'Jesus cai pela primeira vez' },
@@ -177,8 +176,6 @@ export const CATECHISM_CONTENT = [
       { id: 'XIII', title: '13ª Estação', meditation: 'Jesus é descido da Cruz' },
       { id: 'XIV', title: '14ª Estação', meditation: 'Jesus é sepultado' },
       { id: 'XV', title: '15ª Estação', meditation: 'A Ressurreição do Senhor' }
-    ]
-  }
 ];
 
 export const MARIAN_DOGMAS = [
