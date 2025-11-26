@@ -157,9 +157,8 @@ export const CATECHISM_CONTENT = [
       { id: 'mand-9', title: '9º Mandamento', content: 'Não desejar a mulher do próximo.' },
       { id: 'mand-10', title: '10º Mandamento', content: 'Não cobiçar as coisas alheias.' }
     ]
-  }
-];
-
+  },
+  {
 id: 'Via Sacra',
 title: 'Via sacra',
 items: [
