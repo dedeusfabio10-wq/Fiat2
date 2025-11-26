@@ -42,6 +42,17 @@ export interface DevotionalRosary {
   content: string;
 }
 
+// FIX: Added missing CatechismSection interface based on its usage in constants.ts
+export interface CatechismSection {
+  id: string;
+  title: string;
+  items: {
+    id: string;
+    title: string;
+    content: string;
+  }[];
+}
+
 export interface PlanItem {
   id: string;
   referenceId?: string;

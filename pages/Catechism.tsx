@@ -1,9 +1,9 @@
 import React, { useContext, useState, useMemo, useEffect } from 'react';
 import { AppContext } from '../contexts/AppContext';
-import { CATECHISM_CONTENT, MARIAN_DOGMAS } from '../constants';
+import { CATECHISM_CONTENT, SAINTS, APOSTOLIC_LINE, CHURCH_HISTORY, HOLY_MASS, CHURCH_HIERARCHY, CHURCH_MINISTRIES, MARIAN_DOGMAS, THE_APOSTLES, LITURGICAL_OBJECTS } from '../constants';
 import { Button } from '../ui/UIComponents';
 import PremiumModal from '../ui/PremiumModal';
-import { Crown, Lock, ChevronDown, ChevronUp, BookOpen, Sparkles, Key, Users, Heart, Bell, Music, Star, Grape, Circle, Cloud, Droplet, Sun, Loader2, RefreshCw } from 'lucide-react';
+import { Crown, Lock, ChevronDown, ChevronUp, BookOpen, Sparkles, Key, Shield, Landmark, Flame, Users, Heart, Bell, Music, Star, Grape, Circle, Cloud, Droplet, Sun, Loader2, RefreshCw } from 'lucide-react';
 import { toast } from 'sonner';
 import { SaintIcon } from '../ui/SaintIcons';
 
@@ -22,12 +22,11 @@ const CatechismPage: React.FC = () => {
     }
   }, [profile.customTheme]);
 
-  // POLLING AUTOMÁTICO
   useEffect(() => {
     if (!profile.is_premium && !isLoadingProfile) {
       const interval = setInterval(() => {
         refreshProfile();
-      }, 8000); // 8 segundos
+      }, 8000);
       return () => clearInterval(interval);
     }
   }, [profile.is_premium, isLoadingProfile]);
@@ -62,7 +61,6 @@ const CatechismPage: React.FC = () => {
                 <p className="text-sm text-gray-300 mb-6">Desbloqueie a Catequese, Planner e Voz Guiada.</p>
                 <Button variant="sacred" className="w-full shadow-[0_0_20px_rgba(212,175,55,0.4)]" onClick={() => setShowPremiumModal(true)}>Obter Premium (R$ 4,90)</Button>
                 
-                {/* Botão de Verificação Discreto */}
                 <div className="pt-4 flex justify-center">
                     <button 
                         onClick={handleManualCheck}
@@ -131,35 +129,27 @@ const CatechismPage: React.FC = () => {
                    )}
                </div>
            ))}
+           
            <div className={`${themeCardColor} border border-white/5 rounded-xl overflow-hidden transition-all shadow-lg`}>
                <div className="p-5 flex items-center justify-between cursor-pointer hover:bg-white/5 transition-colors" onClick={() => setExpandedSection(expandedSection === 'maria' ? null : 'maria')}>
-                   <h3 className="font-serif text-white font-medium text-base uppercase tracking-wider flex items-center gap-2">
-                       <Crown size={18} className="text-fiat-gold" /> A Virgem Maria
-                   </h3>
+                   <h3 className="font-serif text-white font-medium text-base uppercase tracking-wider flex items-center gap-2"><Crown size={18} className="text-fiat-gold" /> A Virgem Maria</h3>
                    {expandedSection === 'maria' ? <ChevronUp size={20} className="text-fiat-gold" /> : <ChevronDown size={20} className="text-gray-500" />}
                </div>
                {expandedSection === 'maria' && (
-                   <div className="p-6 pt-2 bg-black/20 relative">
-                       <div className="h-px w-full bg-white/5 mb-6"></div>
-                       <div className="mb-6 text-center px-4">
-                            <p className="text-sm text-gray-300 italic font-serif">"Deus quis servir-se de Maria na Encarnação e quer servir-se dela na santificação das almas." (São Luís Maria de Montfort)</p>
-                       </div>
-                       <div className="space-y-6 relative z-10">
-                           {MARIAN_DOGMAS.map((dogma) => (
-                               <div key={dogma.id} className="bg-white/5 p-4 rounded-xl border border-white/5 hover:border-fiat-gold/30 transition-colors">
-                                   <div className="flex items-center gap-3 mb-3">
-                                       <div className="w-10 h-10 bg-fiat-gold/10 rounded-full flex items-center justify-center text-fiat-gold border border-fiat-gold/20 shadow-[0_0_10px_rgba(212,175,55,0.15)]">
-                                           {getMinistryIcon(dogma.icon)}
-                                       </div>
-                                       <h4 className="font-serif font-bold text-white text-lg leading-tight">{dogma.title}</h4>
-                                   </div>
-                                   <p className="text-sm text-gray-300 font-serif leading-relaxed pl-13 border-l-2 border-white/10 pl-4">{dogma.desc}</p>
-                               </div>
-                           ))}
-                       </div>
-                   </div>
+                   <div className="p-6 pt-2 bg-black/20 relative"><div className="space-y-6 relative z-10">{MARIAN_DOGMAS.map((dogma) => (<div key={dogma.id} className="bg-white/5 p-4 rounded-xl border border-white/5"><div className="flex items-center gap-3 mb-3"><div className="w-10 h-10 bg-fiat-gold/10 rounded-full flex items-center justify-center text-fiat-gold border border-fiat-gold/20">{getMinistryIcon(dogma.icon)}</div><h4 className="font-serif font-bold text-white text-lg">{dogma.title}</h4></div><p className="text-sm text-gray-300 font-serif leading-relaxed pl-4 border-l-2 border-white/10">{dogma.desc}</p></div>))}</div></div>
                )}
            </div>
+
+           <div className={`${themeCardColor} border border-white/5 rounded-xl overflow-hidden transition-all shadow-lg`}>
+               <div className="p-5 flex items-center justify-between cursor-pointer hover:bg-white/5 transition-colors" onClick={() => setExpandedSection(expandedSection === 'apostolos' ? null : 'apostolos')}>
+                   <h3 className="font-serif text-white font-medium text-base uppercase tracking-wider flex items-center gap-2"><Users size={18} className="text-fiat-gold" /> Os Santos Apóstolos</h3>
+                   {expandedSection === 'apostolos' ? <ChevronUp size={20} className="text-fiat-gold" /> : <ChevronDown size={20} className="text-gray-500" />}
+               </div>
+               {expandedSection === 'apostolos' && (
+                   <div className="p-6 pt-2 bg-black/20 relative"><div className="absolute left-[34px] top-10 bottom-10 w-0.5 bg-gradient-to-b from-fiat-gold via-white/20 to-transparent opacity-30"></div><div className="space-y-6 relative z-10">{THE_APOSTLES.map((apostle) => (<div key={apostle.id} className="flex gap-4 items-start group"><div className="shrink-0 w-12 h-12 rounded-full flex items-center justify-center bg-black border-2 border-white/20 text-gray-500 z-10 relative mt-1 group-hover:border-fiat-gold"><SaintIcon id={apostle.id} className="w-6 h-6 group-hover:text-fiat-gold" /></div><div className="flex-1 p-4 rounded-xl border bg-white/5 border-white/5"><div className="flex justify-between items-start mb-1"><h4 className="font-serif font-bold text-white text-lg">{apostle.name}</h4><span className="text-[10px] uppercase tracking-widest text-fiat-gold font-bold border border-fiat-gold/20 px-2 py-0.5 rounded">{apostle.symbol}</span></div><p className="text-xs text-gray-400 font-bold uppercase tracking-wider mb-2">{apostle.title}</p><p className="text-sm text-gray-300 font-serif leading-relaxed italic border-t border-white/5 pt-2 mt-2">"{apostle.bio}"</p></div></div>))}</div></div>
+               )}
+           </div>
+           
        </div>
     </div>
   );
