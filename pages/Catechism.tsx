@@ -298,8 +298,8 @@ const CatechismPage: React.FC = () => {
         )}
       </div>
 
-    </div> {/* fecha o space-y-4 principal */}
-  </div> {/* fecha o container da página */}
+    </div> {/* fecha o space-y-4 principal (todas as seções) */}
+  </div>   {/* fecha o container maior da página */}
 
   );
 };
