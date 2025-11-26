@@ -292,16 +292,12 @@ const CatechismPage: React.FC = () => {
                   <h4 className="font-bold text-white text-sm">{obj.name}</h4>
                   <p className="text-xs text-gray-400 mt-2 font-serif italic leading-tight">{obj.desc}</p>
          </div>
-            ))}
-          </div>
-        </div>
-      )}
+          )}
+           </div>
+           
+       </div>
     </div>
-    </div> {/* fecha o space-y-4 principal */}
-  </div>   {/* fecha o container da página */}
-
-);
-
-}
+  );
+};
 
 export default CatechismPage;
