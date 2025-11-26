@@ -291,17 +291,18 @@ const CatechismPage: React.FC = () => {
                   <div className="text-5xl mb-4">{obj.emoji}</div>
                   <h4 className="font-bold text-white text-sm">{obj.name}</h4>
                   <p className="text-xs text-gray-400 mt-2 font-serif italic leading-tight">{obj.desc}</p>
-                </div>
-              ))}
-            </div>
+         </div>
+            ))}
           </div>
-        )}
-      </div>
+        </div>
+      )}
+    </div>
 
-    </div> {/* fecha o space-y-4 principal (todas as seções) */}
-  </div>   {/* fecha o container maior da página */}
+  </div> {/* fecha o space-y-4 principal */}
+</div>   {/* fecha o container da página */}
 
-  );
+);   // ← ESSE PARÊNTESE QUE ESTAVA FALTANDO!!!
+
 };
 
 export default CatechismPage;
