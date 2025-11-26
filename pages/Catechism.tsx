@@ -1,6 +1,6 @@
 import React, { useContext, useState, useMemo, useEffect } from 'react';
 import { AppContext } from '../contexts/AppContext';
-import { CATECHISM_CONTENT, MARIAN_DOGMAS } from '../constants';
+import { MARIAN_DOGMAS, CATECHISM_CONTENT } from '../constants';
 import { Button } from '../ui/UIComponents';
 import PremiumModal from '../ui/PremiumModal';
 import { Crown, Lock, ChevronDown, ChevronUp, BookOpen, Sparkles, Key, Users, Heart, Bell, Music, Star, Grape, Circle, Cloud, Droplet, Sun, Loader2, RefreshCw } from 'lucide-react';
