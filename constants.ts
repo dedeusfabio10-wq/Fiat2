@@ -159,24 +159,24 @@ export const CATECHISM_CONTENT = [
     ]
   },
   {
-id: 'Via Sacra',
-title: 'Via sacra',
-items: [
-  { id: 'I', title: '1ª Estação', meditation: 'Jesus é condenado à morte' },
-  { id: 'II', title: '2ª Estação', meditation: 'Jesus carrega a Cruz' },
-  { id: 'III', title: '3ª Estação', meditation: 'Jesus cai pela primeira vez' },
-  { id: 'IV', title: '4ª Estação', meditation: 'Jesus encontra sua Mãe' },
-  { id: 'V', title: '5ª Estação', meditation: 'Simão Cirineu ajuda a Jesus' },
-  { id: 'VI', title: '6ª Estação', meditation: 'Verônica enxuga o rosto de Jesus' },
-  { id: 'VII', title: '7ª Estação', meditation: 'Jesus cai pela segunda vez' },
-  { id: 'VIII', title: '8ª Estação', meditation: 'Jesus consola as mulheres de Jerusalém' },
-  { id: 'IX', title: '9ª Estação', meditation: 'Jesus cai pela terceira vez' },
-  { id: 'X', title: '10ª Estação', meditation: 'Jesus é despojado de suas vestes' },
-  { id: 'XI', title: '11ª Estação', meditation: 'Jesus é pregado na Cruz' },
-  { id: 'XII', title: '12ª Estação', meditation: 'Jesus morre na Cruz' },
-  { id: 'XIII', title: '13ª Estação', meditation: 'Jesus é descido da Cruz' },
-  { id: 'XIV', title: '14ª Estação', meditation: 'Jesus é sepultado' },
-  { id: 'XV', title: '15ª Estação', meditation: 'A Ressurreição do Senhor' }
+    id: 'Via Sacra',
+    title: 'Via sacra',
+    items: [
+      { id: 'I', title: '1ª Estação', meditation: 'Jesus é condenado à morte' },
+      { id: 'II', title: '2ª Estação', meditation: 'Jesus carrega a Cruz' },
+      { id: 'III', title: '3ª Estação', meditation: 'Jesus cai pela primeira vez' },
+      { id: 'IV', title: '4ª Estação', meditation: 'Jesus encontra sua Mãe' },
+      { id: 'V', title: '5ª Estação', meditation: 'Simão Cirineu ajuda a Jesus' },
+      { id: 'VI', title: '6ª Estação', meditation: 'Verônica enxuga o rosto de Jesus' },
+      { id: 'VII', title: '7ª Estação', meditation: 'Jesus cai pela segunda vez' },
+      { id: 'VIII', title: '8ª Estação', meditation: 'Jesus consola as mulheres de Jerusalém' },
+      { id: 'IX', title: '9ª Estação', meditation: 'Jesus cai pela terceira vez' },
+      { id: 'X', title: '10ª Estação', meditation: 'Jesus é despojado de suas vestes' },
+      { id: 'XI', title: '11ª Estação', meditation: 'Jesus é pregado na Cruz' },
+      { id: 'XII', title: '12ª Estação', meditation: 'Jesus morre na Cruz' },
+      { id: 'XIII', title: '13ª Estação', meditation: 'Jesus é descido da Cruz' },
+      { id: 'XIV', title: '14ª Estação', meditation: 'Jesus é sepultado' },
+      { id: 'XV', title: '15ª Estação', meditation: 'A Ressurreição do Senhor' }
     ]
   }
 ];
