@@ -151,7 +151,153 @@ const CatechismPage: React.FC = () => {
            </div>
            
        </div>
-    </div>
+    </div>            {/* APOSTOLIC LINE - LINHA DOS PAPAS */}
+           <div className={`${themeCardColor} border border-white/5 rounded-xl overflow-hidden transition-all shadow-lg`}>
+               <div className="p-5 flex items-center justify-between cursor-pointer hover:bg-white/5 transition-colors" onClick={() => setExpandedSection(expandedSection === 'papas' ? null : 'papas')}>
+                   <h3 className="font-serif text-white font-medium text-base uppercase tracking-widest flex items-center gap-2">
+                       <Key size={18} className="text-fiat-gold" /> Linha dos Papas
+                   </h3>
+                   {expandedSection === 'papas' ? <ChevronUp size={20} className="text-fiat-gold" /> : <ChevronDown size={20} className="text-gray-500" />}
+               </div>
+               {expandedSection === 'papas' && (
+                   <div className="p-6 pt-2 bg-black/20">
+                       <div className="space-y-4">
+                           {APOSTOLIC_LINE.map((pope) => (
+                               <div key={pope.id} className={`p-5 rounded-xl border ${pope.current ? 'bg-fiat-gold/20 border-fiat-gold/60 shadow-lg shadow-fiat-gold/20' : 'bg-white/5 border-white/10'}`}>
+                                   <div className="flex justify-between items-start mb-2">
+                                       <h4 className="font-serif font-bold text-white text-lg">{pope.name}</h4>
+                                       <span className="text-xs text-fiat-gold uppercase tracking-wider font-bold">{pope.period}</span>
+                                   </div>
+                                   {pope.current && <span className="text-fiat-gold text-xs uppercase tracking-widest font-bold">• Papa Atual •</span>}
+                                   <p className="text-sm text-gray-300 font-serif italic mt-2 leading-relaxed">{pope.bio}</p>
+                               </div>
+                           ))}
+                       </div>
+                   </div>
+               )}
+           </div>
+
+           {/* HISTÓRIA DA IGREJA */}
+           <div className={`${themeCardColor} border border-white/5 rounded-xl overflow-hidden transition-all shadow-lg`}>
+               <div className="p-5 flex items-center justify-between cursor-pointer hover:bg-white/5 transition-colors" onClick={() => setExpandedSection(expandedSection === 'historia' ? null : 'historia')}>
+                   <h3 className="font-serif text-white font-medium text-base uppercase tracking-widest flex items-center gap-2">
+                       <Landmark size={18} className="text-fiat-gold" /> História da Igreja
+                   </h3>
+                   {expandedSection === 'historia' ? <ChevronUp size={20} className="text-fiat-gold" /> : <ChevronDown size={20} className="text-gray-500" />}
+               </div>
+               {expandedSection === 'historia' && (
+                   <div className="p-6 pt-2 bg-black/20">
+                       <div className="space-y-4">
+                           {CHURCH_HISTORY.map((era) => (
+                               <div key={era.id} className="bg-white/5 p-5 rounded-xl border border-white/10">
+                                   <h4 className="text-fiat-gold font-bold text-sm uppercase tracking-wider mb-2">{era.title}</h4>
+                                   <p className="text-xs text-fiat-gold/80 font-bold mb-3">{era.period}</p>
+                                   <p className="text-sm text-gray-300 font-serif italic leading-relaxed">{era.desc}</p>
+                               </div>
+                           ))}
+                       </div>
+                   </div>
+               )}
+           </div>
+
+           {/* PARTES DA SANTA MISSA */}
+           <div className={`${themeCardColor} border border-white/5 rounded-xl overflow-hidden transition-all shadow-lg`}>
+               <div className="p-5 flex items-center justify-between cursor-pointer hover:bg-white/5 transition-colors" onClick={() => setExpandedSection(expandedSection === 'missa' ? null : 'missa')}>
+                   <h3 className="font-serif text-white font-medium text-base uppercase tracking-widest flex items-center gap-2">
+                       <Bell size={18} className="text-fiat-gold" /> Partes da Santa Missa
+                   </h3>
+                   {expandedSection === 'missa' ? <ChevronUp size={20} className="text-fiat-gold" /> : <ChevronDown size={20} className="text-gray-500" />}
+               </div>
+               {expandedSection === 'missa' && (
+                   <div className="p-6 pt-2 bg-black/20">
+                       <div className="space-y-4">
+                           {HOLY_MASS.map((part) => (
+                               <div key={part.id} className="bg-white/5 p-5 rounded-xl border border-white/10">
+                                   <h4 className="text-fiat-gold font-bold text-sm uppercase tracking-wider mb-3">{part.title}</h4>
+                                   <p className="text-sm text-gray-300 font-serif italic leading-relaxed">{part.desc}</p>
+                               </div>
+                           ))}
+                       </div>
+                   </div>
+               )}
+           </div>
+
+           {/* HIERARQUIA DA IGREJA */}
+           <div className={`${themeCardColor} border border-white/5 rounded-xl overflow-hidden transition-all shadow-lg`}>
+               <div className="p-5 flex items-center justify-between cursor-pointer hover:bg-white/5 transition-colors" onClick={() => setExpandedSection(expandedSection === 'hierarquia' ? null : 'hierarquia')}>
+                   <h3 className="font-serif text-white font-medium text-base uppercase tracking-widest flex items-center gap-2">
+                       <Shield size={18} className="text-fiat-gold" /> Hierarquia da Igreja
+                   </h3>
+                   {expandedSection === 'hierarquia' ? <ChevronUp size={20} className="text-fiat-gold" /> : <ChevronDown size={20} className="text-gray-500" />}
+               </div>
+               {expandedSection === 'hierarquia' && (
+                   <div className="p-6 pt-2 bg-black/20">
+                       <div className="space-y-4">
+                           {CHURCH_HIERARCHY.map((role) => (
+                               <div key={role.id} className="bg-white/5 p-5 rounded-xl border border-white/10 flex items-start gap-4">
+                                   <div className="w-12 h-12 rounded-full bg-fiat-gold/10 flex items-center justify-center flex-shrink-0">
+                                       {getMinistryIcon(role.icon || 'Sparkles')}
+                                   </div>
+                                   <div>
+                                       <h4 className="font-bold text-white text-base">{role.role}</h4>
+                                       <p className="text-sm text-gray-300 font-serif italic mt-1 leading-relaxed">{role.desc}</p>
+                                   </div>
+                               </div>
+                           ))}
+                       </div>
+                   </div>
+               )}
+           </div>
+
+           {/* MINISTÉRIOS LEIGOS */}
+           <div className={`${themeCardColor} border border-white/5 rounded-xl overflow-hidden transition-all shadow-lg`}>
+               <div className="p-5 flex items-center justify-between cursor-pointer hover:bg-white/5 transition-colors" onClick={() => setExpandedSection(expandedSection === 'ministerios' ? null : 'ministerios')}>
+                   <h3 className="font-serif text-white font-medium text-base uppercase tracking-widest flex items-center gap-2">
+                       <Users size={18} className="text-fiat-gold" /> Ministérios Leigos
+                   </h3>
+                   {expandedSection === 'ministerios' ? <ChevronUp size={20} className="text-fiat-gold" /> : <ChevronDown size={20} className="text-gray-500" />}
+               </div>
+               {expandedSection === 'ministerios' && (
+                   <div className="p-6 pt-2 bg-black/20">
+                       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                           {CHURCH_MINISTRIES.map((min) => (
+                               <div key={min.id} className="bg-white/5 p-5 rounded-xl border border-white/10 flex items-start gap-4">
+                                   <div className="w-12 h-12 rounded-full bg-fiat-gold/10 flex items-center justify-center flex-shrink-0">
+                                       {getMinistryIcon(min.icon)}
+                                   </div>
+                                   <div>
+                                       <h4 className="font-bold text-white text-base">{min.title}</h4>
+                                       <p className="text-sm text-gray-300 font-serif italic mt-1 leading-relaxed">{min.desc}</p>
+                                   </div>
+                               </div>
+                           ))}
+                       </div>
+                   </div>
+               )}
+           </div>
+
+           {/* OBJETOS LITÚRGICOS */}
+           <div className={`${themeCardColor} border border-white/5 rounded-xl overflow-hidden transition-all shadow-lg`}>
+               <div className="p-5 flex items-center justify-between cursor-pointer hover:bg-white/5 transition-colors" onClick={() => setExpandedSection(expandedSection === 'objetos' ? null : 'objetos')}>
+                   <h3 className="font-serif text-white font-medium text-base uppercase tracking-widest flex items-center gap-2">
+                       <Sparkles size={18} className="text-fiat-gold" /> Objetos Litúrgicos
+                   </h3>
+                   {expandedSection === 'objetos' ? <ChevronUp size={20} className="text-fiat-gold" /> : <ChevronDown size={20} className="text-gray-500" />}
+               </div>
+               {expandedSection === 'objetos' && (
+                   <div className="p-6 pt-2 bg-black/20">
+                       <div className="grid grid-cols-2 gap-4">
+                           {LITURGICAL_OBJECTS.map((obj) => (
+                               <div key={obj.id} className="bg-white/5 p-6 rounded-xl border border-white/10 text-center hover:bg-white/10 transition-all">
+                                   <div className="text-5xl mb-4">{obj.emoji}</div>
+                                   <h4 className="font-bold text-white text-sm">{obj.name}</h4>
+                                   <p className="text-xs text-gray-400 mt-2 font-serif italic leading-tight">{obj.desc}</p>
+                               </div>
+                           ))}
+                       </div>
+                   </div>
+               )}
+           </div>
   );
 };
 
