@@ -150,14 +150,7 @@ const CatechismPage: React.FC = () => {
                )}
            </div>
            
-            </div>
-          </div>
-        )}
-      </div>
-
-      {/* === TODAS AS SEÇÕES QUE FALTAVAM === */}
-
-      {/* LINHA DOS PAPAS */}
+                 {/* LINHA DOS PAPAS */}
       <div className={`${themeCardColor} border border-white/5 rounded-xl overflow-hidden transition-all shadow-lg`}>
         <div className="p-5 flex items-center justify-between cursor-pointer hover:bg-white/5 transition-colors" onClick={() => setExpandedSection(expandedSection === 'papas' ? null : 'papas')}>
           <h3 className="font-serif text-white font-medium text-base uppercase tracking-widest flex items-center gap-2">
@@ -241,7 +234,7 @@ const CatechismPage: React.FC = () => {
             <div className="space-y-4">
               {CHURCH_HIERARCHY.map((role) => (
                 <div key={role.id} className="bg-white/5 p-5 rounded-xl border border-white/10 flex items-start gap-4">
-                  <div className="w-12 h-12 rounded-full bg-fiat-gold/10 flex items-center justify-center flex-shrink-0">
+                  <div className="w-12 h-12 rounded-full bg-fiat-gold/10 flex items-center justify-center">
                     {getMinistryIcon(role.icon || 'Sparkles')}
                   </div>
                   <div>
@@ -268,7 +261,7 @@ const CatechismPage: React.FC = () => {
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               {CHURCH_MINISTRIES.map((min) => (
                 <div key={min.id} className="bg-white/5 p-5 rounded-xl border border-white/10 flex items-start gap-4">
-                  <div className="w-12 h-12 rounded-full bg-fiat-gold/10 flex items-center justify-center flex-shrink-0">
+                  <div className="w-12 h-12 rounded-full bg-fiat-gold/10 flex items-center justify-center">
                     {getMinistryIcon(min.icon)}
                   </div>
                   <div>
@@ -305,13 +298,10 @@ const CatechismPage: React.FC = () => {
         )}
       </div>
 
-    </div> {/* ← fecha o div principal com className="space-y-4" */}
-  </div>
+    </div> {/* fecha o space-y-4 principal */}
+  </div> {/* fecha o container da página */}
 
-);
-
-return <CatechismPage />; // ou como estiver no seu arquivo
-
+  );
 };
 
 export default CatechismPage;
