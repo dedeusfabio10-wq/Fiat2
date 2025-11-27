@@ -193,7 +193,7 @@ export const SAINTS: Saint[] = [
   { id: 'sao-paulo-miki', name: 'São Paulo Miki e companheiros', title: 'Mártires do Japão', date: '06 de Fevereiro', bio: '26 mártires crucificados em Nagasaki.' },
   { id: 'sao-ignacio-antioquia', name: 'Santo Inácio de Antioquia', title: 'Mártir do século II', date: '17 de Outubro', bio: 'Discípulo de São João, escreveu belas cartas.' },
   { id: 'santa-perpetua', name: 'Santa Perpétua', title: 'Mártir mãe', date: '07 de Março', bio: 'Deixou diário do seu martírio.' },
-  { id: 'joao-paulo-ii', name: 'São João Paulo II', title: 'O Papa da Família', date: '22 de Outubro', bio: 'Papa peregrino que guiou a Igreja no terceiro milênio.', prayer: 'Não tenhais medo! Abri as portas a Cristo!' },
+  { id: 'joao-paulo-ii', name: 'São João Paulo II', title: 'O Papa da Família', date: '22 de Outubro', bio: 'Papa peregrino que guiou a Igreja no terceiro milênio.', prayer: 'Não tenhais medo! Abri as portas a Cristo!' }
   ];
 
   
