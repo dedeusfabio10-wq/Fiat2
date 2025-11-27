@@ -402,41 +402,91 @@ const CatechismPage: React.FC = () => {
           )}
         </div>
 
-        {/* PARTES DA SANTA MISSA */}
-        <div className={`${themeCardColor} border border-white/5 rounded-xl overflow-hidden transition-all shadow-lg`}>
-          <div
-            className="p-5 flex items-center justify-between cursor-pointer hover:bg-white/5 transition-colors"
-            onClick={() => setExpandedSection(expandedSection === 'missa' ? null : 'missa')}
-          >
-            <h3 className="font-serif text-white font-medium text-base uppercase tracking-widest flex items-center gap-2">
-              <Bell size={18} className="text-fiat-gold" /> Partes da Santa Missa
-            </h3>
-            {expandedSection === 'missa' ? (
-              <ChevronUp size={20} className="text-fiat-gold" />
-            ) : (
-              <ChevronDown size={20} className="text-gray-500" />
-            )}
+        {/* PARTES DA SANTA MISSA – VERSÃO MÍSTICA TURBINADA */}
+<div className={`${themeCardColor} border border-white/5 rounded-xl overflow-hidden transition-all shadow-2xl`}>
+  <div
+    className="p-5 flex items-center justify-between cursor-pointer hover:bg-white/5 transition-colors"
+    onClick={() => setExpandedSection(expandedSection === 'missa' ? null : 'missa')}
+  >
+    <h3 className="font-serif text-white font-medium text-base uppercase tracking-widest flex items-center gap-3">
+      <Bell size={20} className="text-fiat-gold" />
+      Partes da Santa Missa – O Céu Desce à Terra
+    </h3>
+    {expandedSection === 'missa' ? (
+      <ChevronUp size={24} className="text-fiat-gold" />
+    ) : (
+      <ChevronDown size={24} className="text-gray-400" />
+    )}
+  </div>
+
+  {expandedSection === 'missa' && (
+    <div className="p-6 pt-0 space-y-7 bg-black/30">
+      {/* Cada parte da Missa com cor própria */}
+      {HOLY_MASS.rites.map((rite: any) => (
+        <div
+          key={rite.part}
+          className={`rounded-2xl p-6 text-white shadow-2xl bg-gradient-to-br ${rite.color} border border-white/10 transform transition-all hover:scale-[1.015] hover:shadow-3xl`}
+        >
+          <h4 className="text-2xl font-bold mb-2 text-fiat-gold drop-shadow-md">
+            {rite.part}
+          </h4>
+          <p className="text-lg italic mb-5 opacity-95">{rite.desc}</p>
+
+          <div className="space-y-5 text-lg leading-relaxed">
+            <p>
+              <span className="font-bold text-yellow-300">Na terra:</span>{' '}
+              {rite.explanation}
+            </p>
+            <p>
+              <span className="font-bold text-cyan-300">No céu:</span>{' '}
+              {rite.heaven}
+            </p>
           </div>
-          {expandedSection === 'missa' && (
-            <div className="p-6 pt-2 bg-black/20">
-              <div className="space-y-4">
-                {HOLY_MASS.rites.map((part: any) => (
-                  <div
-                    key={part.part}
-                    className="bg-white/5 p-5 rounded-xl border border-white/10"
-                  >
-                    <h4 className="text-fiat-gold font-bold text-sm uppercase tracking-wider mb-3">
-                      {part.part}
-                    </h4>
-                    <p className="text-sm text-gray-300 font-serif italic leading-relaxed">
-                      {part.desc}
-                    </p>
-                  </div>
-                ))}
+
+          {/* Ações detalhadas */}
+          <div className="mt-6 grid grid-cols-1 sm:grid-cols-2 gap-4">
+            {rite.actions.map((action: any) => (
+              <div
+                key={action.name}
+                className="bg-white/15 backdrop-blur-sm rounded-xl p-4 border border-white/20"
+              >
+                <p className="font-semibold text-fiat-gold">{action.name}</p>
+                <p className="text-sm opacity-90">{action.meaning}</p>
               </div>
-            </div>
-          )}
+            ))}
+          </div>
         </div>
+      ))}
+
+      {/* BLOCO ESPECIAL: O QUE ACONTECE NO MUNDO INVISÍVEL */}
+      <div className={`rounded-3xl p-8 text-white shadow-3xl bg-gradient-to-br ${HOLY_MASS.spiritual.color} border border-cyan-500/30`}>
+        <h3 className="text-3xl font-bold text-center mb-8 text-cyan-200 tracking-wider">
+          {HOLY_MASS.spiritual.title}
+        </h3>
+        <ul className="space-y-5 text-lg">
+          {HOLY_MASS.spiritual.points.map((point: string, i: number) => (
+            <li key={i} className="flex items-start gap-4">
+              <span className="text-3xl mt-1">{i % 2 === 0 ? 'Sparkles' : 'Cross'}</span>
+              <span>{point}</span>
+            </li>
+          ))}
+        </ul>
+      </div>
+
+      {/* Dicas de etiqueta (opcional, fica lindo no final) */}
+      <div className="bg-white/5 rounded-2xl p-6 border border-white/10">
+        <h4 className="text-xl font-bold text-fiat-gold mb-4">Como participar bem da Missa</h4>
+        <ul className="space-y-2 text-gray-200">
+          {HOLY_MASS.etiquette.map((tip, i) => (
+            <li key={i} className="flex items-start gap-3">
+              <span className="text-fiat-gold mt-1">•</span> {tip}
+            </li>
+          ))}
+        </ul>
+      </div>
+    </div>
+  )}
+</div>
 
         {/* HIERARQUIA DA IGREJA */}
         <div className={`${themeCardColor} border border-white/5 rounded-xl overflow-hidden transition-all shadow-lg`}>
