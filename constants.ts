@@ -111,7 +111,6 @@ export const SAINTS: Saint[] = [
   { id: 'sao-judas', name: 'São Judas Tadeu', title: 'Das Causas Desesperadas', date: '28 de Outubro', bio: 'Apóstolo e mártir, primo de Jesus.', prayer: 'São Judas Tadeu, glorioso apóstolo...' },
   { id: 'santa-faustina', name: 'Santa Faustina', title: 'Apóstola da Misericórdia', date: '05 de Outubro', bio: 'Recebeu as revelações de Jesus Misericordioso.', prayer: 'Jesus, eu confio em vós.' },
   { id: 'carlo-acutis', name: 'Beato Carlo Acutis', title: 'Apóstolo da Internet', date: '12 de Outubro', bio: 'Jovem que usou a tecnologia para evangelizar e amava a Eucaristia.', prayer: 'A Eucaristia é a minha autoestrada para o céu.' },
-    // NOVOS SANTOS — só colar depois dos que você já tem
   { id: 'nossa-senhora-aparecida', name: 'Nossa Senhora Aparecida', title: 'Padroeira do Brasil', date: '12 de Outubro', bio: 'Rainha e Padroeira do Brasil. Imagem encontrada no rio Paraíba em 1717.' },
   { id: 'nossa-senhora-fatima', name: 'Nossa Senhora de Fátima', title: 'Rainha do Rosário', date: '13 de Maio', bio: 'Apareceu a três pastorinhos em 1917 pedindo oração e penitência.' },
   { id: 'nossa-senhora-guadalupe', name: 'Nossa Senhora de Guadalupe', title: 'Imperatriz da América', date: '12 de Dezembro', bio: 'Apareceu a São Juan Diego em 1531 no México.' },
@@ -197,6 +196,7 @@ export const SAINTS: Saint[] = [
   { id: 'joao-paulo-ii', name: 'São João Paulo II', title: 'O Papa da Família', date: '22 de Outubro', bio: 'Papa peregrino que guiou a Igreja no terceiro milênio.', prayer: 'Não tenhais medo! Abri as portas a Cristo!' },
   ];
 
+  
 export const CATECHISM_CONTENT = [
   {
     id: 'credo',
