@@ -268,16 +268,104 @@ export const CHURCH_HISTORY = [
   { id: 'idade-contemp', title: 'Idade Contemporânea', period: '1900 - Hoje', desc: 'A Igreja no mundo atual.', events: ['Aparições de Fátima', 'Concílio Vaticano II', 'São João Paulo II', 'Papa Francisco'] }
 ];
 export const HOLY_MASS = {
-  intro: { title: 'O Mistério da Fé', text: 'A Santa Missa não é apenas uma lembrança da Ceia do Senhor. É o mesmo sacrifício da Cruz, tornado presente (re-apresentado) no altar de forma incruenta. O céu se une à terra, e Cristo se oferece ao Pai por nós.' },
-  rites: [
-    { part: 'Ritos Iniciais', desc: 'Reunidos em nome do Senhor', highlight: false, actions: [{name: 'Sinal da Cruz', meaning: 'Início em nome da Trindade'}, {name: 'Ato Penitencial', meaning: 'Reconhecemos nossos pecados (Kyrie)'}, {name: 'Glória', meaning: 'Louvor à Santíssima Trindade'}] },
-    { part: 'Liturgia da Palavra', desc: 'Deus fala ao seu povo', highlight: false, actions: [{name: 'Leituras', meaning: 'Antigo Testamento, Salmo e Epístolas'}, {name: 'Evangelho', meaning: 'O próprio Cristo fala (ficamos de pé)'}, {name: 'Homilia', meaning: 'Atualização da Palavra'}] },
-    { part: 'Liturgia Eucarística', desc: 'O Coração da Missa', highlight: true, actions: [{name: 'Ofertório', meaning: 'Entregamos nossa vida com o pão e vinho'}, {name: 'Consagração', meaning: 'O pão e vinho tornam-se Corpo e Sangue de Cristo (Transubstanciação)'}, {name: 'Doxologia', meaning: 'Por Cristo, com Cristo e em Cristo...'}]},
-    { part: 'Rito da Comunhão', desc: 'União com Cristo', highlight: false, actions: [{name: 'Pai Nosso', meaning: 'Oração dos filhos de Deus'}, {name: 'Cordeiro de Deus', meaning: 'Aquele que tira o pecado do mundo'}, {name: 'Comunhão', meaning: 'Receber o próprio Deus'}]},
-    { part: 'Ritos Finais', desc: 'Envio', highlight: false, actions: [{name: 'Bênção', meaning: 'A graça de Deus nos acompanha'}, {name: 'Ide em paz', meaning: 'Missão de levar Cristo ao mundo'}]}
-  ],
-  spiritual: { title: 'Mundo Invisível', desc: 'O que acontece espiritualmente', points: ['O céu se abre sobre o altar', 'Milhares de anjos adoram o Santíssimo', 'As almas do purgatório recebem alívio pelo Preciosíssimo Sangue', 'Nossa Senhora está presente ao pé da Cruz (Altar)'] },
-  etiquette: ['Chegar cedo para preparação', 'Vestir-se com modéstia e respeito', 'Fazer jejum eucarístico de 1 hora', 'Participar ativamente das respostas', 'Desligar o celular', 'Fazer a genuflexão ao entrar e sair']
+  intro: {
+    title: 'O Mistério da Fé',
+    text: 'A Santa Missa é o próprio Sacrifício do Calvário tornado presente hoje, aqui, agora. Não é teatro, não é símbolo. É o Cordeiro de Deus imolado desde a fundação do mundo que se oferece novamente ao Pai por nós. O céu desce à terra e a terra sobe ao céu.',
+  },
+
+  rites: [
+    {
+      part: 'RITOS INICIAIS',
+      desc: 'Reunidos em nome do Senhor',
+      color: 'from-purple-900 to-purple-700',
+      highlight: false,
+      explanation: 'O sino toca, o sacerdote beija o altar, o povo faz silêncio. Começa a grande assembleia da Igreja militante, padecente e triunfante.',
+      heaven: 'Os anjos e santos se reúnem ao redor do trono do Cordeiro. Cristo, Sumo Sacerdote, inicia o Santo Sacrifício.',
+      actions: [
+        { name: 'Sinal da Cruz', meaning: 'Nos colocamos sob o poder da Santíssima Trindade' },
+        { name: 'Ato Penitencial', meaning: 'Batemos no peito como o publicano: “Senhor, tem piedade de mim, pecador”' },
+        { name: 'Glória', meaning: 'O mesmo hino que os anjos cantaram em Belém agora ressoa na terra' },
+      ],
+    },
+    {
+      part: 'LITURGIA DA PALAVRA',
+      desc: 'Deus fala ao seu povo',
+      color: 'from-blue-900 to-indigo-800',
+      highlight: false,
+      explanation: 'Deus mesmo fala através das Escrituras. Quando ouvimos o Evangelho, é o próprio Cristo que nos ensina com sua voz viva.',
+      heaven: 'Os profetas e apóstolos se alegram ao ver suas palavras sendo proclamadas novamente. Os santos escutam com reverência.',
+      actions: [
+        { name: '1ª Leitura + Salmo', meaning: 'Deus fala pela história da salvação' },
+        { name: '2ª Leitura', meaning: 'Os apóstolos continuam ensinando a Igreja' },
+        { name: 'Evangelho', meaning: 'Cristo em pessoa fala – por meio do sacerdote/diácono – ficamos de pé!' },
+        { name: 'Homilia', meaning: 'A Palavra é mastigada e aplicada à nossa vida hoje' },
+        { name: 'Creio', meaning: 'Professamos juntos a fé da Igreja de todos os tempos' },
+      ],
+    },
+    {
+      part: 'LITURGIA EUCARÍSTICA',
+      desc: 'O Coração da Missa – o Calvário se faz presente',
+      color: 'from-red-950 to-red-800',
+      highlight: true,
+      explanation: 'Aqui acontece o milagre dos milagres: pão e vinho se tornam o Corpo, Sangue, Alma e Divindade de Jesus Cristo. É o mesmo sacrifício da Cruz, incruento, oferecido agora.',
+      heaven: 'Silêncio total no céu. Os serafins cobrem o rosto. Maria está de pé junto ao altar como no Gólgota. Os mártires mostram suas chagas em adoração.',
+      actions: [
+        { name: 'Ofertório', meaning: 'Oferecemos nossa vida junto com o pão e o vinho' },
+        { name: 'Prefácio + Santo', meaning: 'A Igreja inteira canta o hino dos anjos' },
+        { name: 'CONSAGRAÇÃO', meaning: '“Isto é o MEU CORPO... Isto é o MEU SANGUE” – Transubstanciação real' },
+        { name: 'Grande Amém', meaning: 'A Igreja grita seu SIM total ao sacrifício' },
+      ],
+    },
+    {
+      part: 'RITO DA COMUNHÃO',
+      desc: 'União íntima com Jesus e com os irmãos',
+      color: 'from-amber-700 to-yellow-600',
+      highlight: false,
+      explanation: '“Senhor, eu não sou digno...” mas Ele vem habitar em nós. Nos tornamos tabernáculos vivos do Deus vivo.',
+      heaven: 'Alegria imensa no céu! Cada comunhão faz os anjos cantarem. As almas do purgatório recebem alívio. Nossa Senhora sorri vendo seu Filho entrar em mais um coração.',
+      actions: [
+        { name: 'Pai Nosso', meaning: 'Oração que Jesus nos ensinou – somos filhos no Filho' },
+        { name: 'Cordeiro de Deus', meaning: 'Reconhecemos o Cordeiro imolado que tira o pecado do mundo' },
+        { name: '“Felizes os convidados...”', meaning: 'Convite para as Bodas do Cordeiro' },
+        { name: 'Comunhão', meaning: 'Recebemos o próprio Jesus vivo e ressuscitado' },
+      ],
+    },
+    {
+      part: 'RITOS FINAIS',
+      desc: 'Ide em paz – a Missa terminou, a missão começou',
+      color: 'from-emerald-900 to-teal-800',
+      highlight: false,
+      explanation: 'Somos enviados como outros Cristos ao mundo. A graça recebida não é para guardar, é para derramar.',
+      heaven: 'Os anjos nos acompanham de volta à vida cotidiana levando a luz que acabamos de receber. A Igreja continua sua missão no mundo.',
+      actions: [
+        { name: 'Oração pós-comunhão', meaning: 'Pedimos frutos eternos' }, { name: 'Bênção final', meaning: 'A Trindade nos abençoa e envia' }, { name: 'Ide em paz', meaning: 'Levai Cristo a todos!' }],
+    },
+  ],
+
+  spiritual: {
+    title: 'O QUE ACONTECE NO MUNDO INVISÍVEL DURANTE A MISSA',
+    color: 'from-cyan-950 to-cyan-800',
+    points: [
+      'O céu literalmente se abre sobre o altar',
+      'Milhares de anjos adoram em silêncio o Santíssimo Sacramento',
+      'Maria Santíssima está presente ao pé da Cruz (que é o altar)',
+      'As almas do Purgatório recebem alívio a cada Missa',
+      'Os santos intercedem com mais força por nós',
+      'Jesus oferece novamente seu Sacrifício ao Pai por cada pessoa presente',
+      'Todo demônio foge aterrorizado diante da presença real de Cristo',
+    ],
+  },
+
+  etiquette: [
+    'Chegar 10–15 min antes para se preparar interiormente',
+    'Vestir-se com dignidade (nada de regata, short, chinelo)',
+    'Jejum eucarístico de pelo menos 1 hora',
+    'Desligar o celular completamente',
+    'Fazer genuflexão ao entrar e sair (joelho direito no chão)',
+    'Responder em voz alta as partes do povo',
+    'Ajoelhar-se na Consagração (se puder)',
+    'Comungar de joelhos e na boca (se possível) – maior reverência',
+  ],
 };
 export const CHURCH_HIERARCHY = [
   { id: 'papa', role: 'Papa', color: 'text-white', symbol: 'Chaves', title: 'Sumo Pontífice', desc: 'Sucessor de Pedro, Vigário de Cristo na Terra e Pastor da Igreja Universal.' },
