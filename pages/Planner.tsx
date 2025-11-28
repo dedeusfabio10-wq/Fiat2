@@ -11,7 +11,7 @@ import { supabase } from '../services/supabase';
 const SACRED_MUSIC = [
   {
     name: "Noite Feliz (Instrumental)",
-    url: "file:///C:/Users/fabiofelipe/Downloads/silent-night-christmas-piano-cover-441733.mp3",
+    url: "https://pixabay.com/pt/music/natal-silent-night-christmas-piano-cover-441733/",
     desc: "Especial de Natal",
     special: true
   },
