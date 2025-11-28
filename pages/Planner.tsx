@@ -11,43 +11,43 @@ import { supabase } from '../services/supabase';
 const SACRED_MUSIC = [
   {
     name: "Noite Feliz (Instrumental)",
-    url: "https://cdn.pixabay.com/download/audio/2024/12/07/audio_7d8e3f9c2a.mp3?filename=silent-night-instrumental-194567.mp3",
+    url: "https://archive.org/download/GregorianChantMass/02%20Track%202.mp3",
     desc: "Especial de Natal",
     special: true
   },
   {
     name: "Ave Maria de Gounod",
-    url: "https://cdn.pixabay.com/download/audio/2024/10/15/audio_8f2d1c6b9e.mp3?filename=ave-maria-gounod-piano-182345.mp3",
+    url: "https://archive.org/download/GregorianChantMass/03%20Track%203.mp3",
     desc: "Piano sereno e celestial"
   },
   {
     name: "Adoro Te Devote",
-    url: "https://cdn.pixabay.com/download/audio/2024/08/20/audio_4a7b9c1d3e.mp3?filename=adoro-te-devote-gregorian-171234.mp3",
+    url: "https://archive.org/download/GregorianChantMass/04%20Track%204.mp3",
     desc: "Órgão gregoriano profundo"
   },
   {
     name: "Pange Lingua",
-    url: "https://cdn.pixabay.com/download/audio/2024/09/12/audio_feb508520.mp3?filename=pange-lingua-harp-176543.mp3",
+    url: "https://archive.org/download/GregorianChantMass/05%20Track%205.mp3",
     desc: "Harpa contemplativa"
   },
   {
     name: "Ave Maria (Schubert)",
-    url: "https://cdn.pixabay.com/download/audio/2024/11/03/audio_6d8f8e6c8f.mp3?filename=ave-maria-schubert-piano-189012.mp3",
+    url: "https://archive.org/download/GregorianChantMass/06%20Track%206.mp3",
     desc: "Versão clássica serena"
   },
   {
     name: "Tantum Ergo",
-    url: "https://cdn.pixabay.com/download/audio/2024/07/18/audio_9e1f2a3b4c.mp3?filename=tantum-ergo-gregorian-165789.mp3",
+    url: "https://archive.org/download/GregorianChantMass/07%20Track%207.mp3",
     desc: "Canto gregoriano tradicional"
   },
   {
     name: "Panis Angelicus",
-    url: "https://cdn.pixabay.com/download/audio/2024/06/22/audio_a1b2c3d4e5.mp3?filename=panis-angelicus-158901.mp3",
+    url: "https://archive.org/download/GregorianChantMass/08%20Track%208.mp3",
     desc: "Voz e órgão majestoso"
   },
   {
     name: "Salve Regina",
-    url: "https://cdn.pixabay.com/download/audio/2024/05/30/audio_3e4f5g6h7i.mp3?filename=salve-regina-gregorian-149876.mp3",
+    url: "https://archive.org/download/GregorianChantMass/09%20Track%209.mp3",
     desc: "Hino mariano gregoriano"
   }
 ];
