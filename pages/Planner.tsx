@@ -17,7 +17,7 @@ const SACRED_MUSIC = [
   },
   {
     name: "Ave Maria de Gounod",
-    url: "https://archive.org/download/GregorianChantMass/03%20Track%203.mp3",
+    url: "https://www.youtube.com/watch?v=7VNIDsEqtmE",
     desc: "Piano sereno e celestial"
   },
   {
