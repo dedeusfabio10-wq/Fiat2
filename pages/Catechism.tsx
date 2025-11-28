@@ -459,19 +459,25 @@ const CatechismPage: React.FC = () => {
       ))}
 
       {/* BLOCO ESPECIAL: O QUE ACONTECE NO MUNDO INVISÍVEL */}
-      <div className={`rounded-3xl p-8 text-white shadow-3xl bg-gradient-to-br ${HOLY_MASS.spiritual.color} border border-cyan-500/30`}>
-        <h3 className="text-3xl font-bold text-center mb-8 text-cyan-200 tracking-wider">
-          {HOLY_MASS.spiritual.title}
-        </h3>
-        <ul className="space-y-5 text-lg">
-          {HOLY_MASS.spiritual.points.map((point: string, i: number) => (
-            <li key={i} className="flex items-start gap-4">
-              <span className="text-3xl mt-1">{i % 2 === 0 ? 'Sparkles' : 'Cross'}</span>
-              <span>{point}</span>
-            </li>
-          ))}
-        </ul>
-      </div>
+<div className={`rounded-3xl p-8 text-white shadow-3xl bg-gradient-to-br ${HOLY_MASS.spiritual.color} border border-cyan-500/40`}>
+  <h3 className="text-4xl font-bold text-center mb-10 text-cyan-200 tracking-wider drop-shadow-lg">
+    {HOLY_MASS.spiritual.title}
+  </h3>
+
+  <ul className="space-y-6 text-lg leading-relaxed">
+    {HOLY_MASS.spiritual.points.map((point: string, i: number) => (
+      <li key={i} className="flex items-start gap-5">
+        {/* Alterna entre brilho e cruz */}
+        {i % 2 === 0 ? (
+          <Sparkles className="w-9 h-9 text-cyan-300 flex-shrink-0 mt-0.5" />
+        ) : (
+          <Cross className="w-8 h-8 text-cyan-300 flex-shrink-0 mt-1" />
+        )}
+        <span className="text-cyan-50">{point}</span>
+      </li>
+    ))}
+  </ul>
+</div>
 
       {/* Dicas de etiqueta (opcional, fica lindo no final) */}
       <div className="bg-white/5 rounded-2xl p-6 border border-white/10">
