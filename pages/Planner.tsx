@@ -22,32 +22,32 @@ const SACRED_MUSIC = [
   },
   {
     name: "Adoro Te Devote",
-    url: "https://archive.org/download/78_ave-maria_gounod_gbia0017982b/04%203.3%20CT%20flat.mp3",
+    url: "https://orangefreesounds.com/wp-content/uploads/2017/12/Adoro-Te-Devote-Gregorian-Chant.mp3",
     desc: "Órgão gregoriano profundo"
   },
   {
     name: "Pange Lingua",
-    url: "https://archive.org/download/78_ave-maria_gounod_gbia0017982b/04%203.3%20CT%20flat.mp3",
+    url: "https://orangefreesounds.com/wp-content/uploads/2017/12/Pange-Lingua-Gregorian-Chant.mp3",
     desc: "Harpa contemplativa"
   },
   {
     name: "Ave Maria (Schubert)",
-    url: "https://archive.org/download/78_ave-maria_gounod_gbia0017982b/04%203.3%20CT%20flat.mp3",
+    url: "https://orangefreesounds.com/wp-content/uploads/2017/12/Ave-Maria-Schubert-Piano.mp3",
     desc: "Versão clássica serena"
   },
   {
     name: "Tantum Ergo",
-    url: "https://archive.org/download/78_ave-maria_gounod_gbia0017982b/04%203.3%20CT%20flat.mp3",
+    url: "https://orangefreesounds.com/wp-content/uploads/2017/12/Tantum-Ergo-Gregorian-Chant.mp3",
     desc: "Canto gregoriano tradicional"
   },
   {
     name: "Panis Angelicus",
-    url: "https://archive.org/download/78_ave-maria_gounod_gbia0017982b/04%203.3%20CT%20flat.mp3",
+    url: "https://orangefreesounds.com/wp-content/uploads/2017/12/Panis-Angelicus-Organ.mp3",
     desc: "Voz e órgão majestoso"
   },
   {
     name: "Salve Regina",
-    url: "https://archive.org/download/78_ave-maria_gounod_gbia0017982b/04%203.3%20CT%20flat.mp3",
+    url: "https://orangefreesounds.com/wp-content/uploads/2017/12/Salve-Regina-Gregorian-Chant.mp3",
     desc: "Hino mariano gregoriano"
   }
 ];
