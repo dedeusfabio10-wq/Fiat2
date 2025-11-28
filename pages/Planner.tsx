@@ -11,43 +11,43 @@ import { supabase } from '../services/supabase';
 const SACRED_MUSIC = [
   {
     name: "Noite Feliz (Instrumental)",
-    url: "https://pixabay.com/pt/music/tema-religioso-ave-maria-js-bach-charles-gounod-1852-classic-grand-piano-11019/",
+    url: "https://orangefreesounds.com/wp-content/uploads/2018/04/Ave-maria-bach-gounod-piano-and-cello-music.mp3",
     desc: "Especial de Natal",
     special: true
   },
   {
     name: "Ave Maria de Gounod",
-    url: "https://www.youtube.com/watch?v=7VNIDsEqtmE",
+    url: "https://orangefreesounds.com/wp-content/uploads/2018/04/Ave-maria-bach-gounod-piano-and-cello-music.mp3",
     desc: "Piano sereno e celestial"
   },
   {
     name: "Adoro Te Devote",
-    url: "https://archive.org/download/GregorianChantMass/04%20Track%204.mp3",
+    url: "https://archive.org/download/78_ave-maria_gounod_gbia0017982b/04%203.3%20CT%20flat.mp3",
     desc: "Órgão gregoriano profundo"
   },
   {
     name: "Pange Lingua",
-    url: "https://archive.org/download/GregorianChantMass/05%20Track%205.mp3",
+    url: "https://archive.org/download/78_ave-maria_gounod_gbia0017982b/04%203.3%20CT%20flat.mp3",
     desc: "Harpa contemplativa"
   },
   {
     name: "Ave Maria (Schubert)",
-    url: "https://archive.org/download/GregorianChantMass/06%20Track%206.mp3",
+    url: "https://archive.org/download/78_ave-maria_gounod_gbia0017982b/04%203.3%20CT%20flat.mp3",
     desc: "Versão clássica serena"
   },
   {
     name: "Tantum Ergo",
-    url: "https://archive.org/download/GregorianChantMass/07%20Track%207.mp3",
+    url: "https://archive.org/download/78_ave-maria_gounod_gbia0017982b/04%203.3%20CT%20flat.mp3",
     desc: "Canto gregoriano tradicional"
   },
   {
     name: "Panis Angelicus",
-    url: "https://archive.org/download/GregorianChantMass/08%20Track%208.mp3",
+    url: "https://archive.org/download/78_ave-maria_gounod_gbia0017982b/04%203.3%20CT%20flat.mp3",
     desc: "Voz e órgão majestoso"
   },
   {
     name: "Salve Regina",
-    url: "https://archive.org/download/GregorianChantMass/09%20Track%209.mp3",
+    url: "https://archive.org/download/78_ave-maria_gounod_gbia0017982b/04%203.3%20CT%20flat.mp3",
     desc: "Hino mariano gregoriano"
   }
 ];
