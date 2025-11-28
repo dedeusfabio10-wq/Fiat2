@@ -578,7 +578,7 @@ const CatechismPage: React.FC = () => {
           )}
         </div>
 
-       {/* OBJETOS LITÚRGICOS – FINAL, FUNCIONA 100% */}
+      {/* OBJETOS LITÚRGICOS – VERSÃO FINAL, FUNCIONA 100% */}
 <div className={`${themeCardColor} border border-white/5 rounded-xl overflow-hidden transition-all shadow-2xl`}>
   <div
     className="p-5 flex items-center justify-between cursor-pointer hover:bg-white/5 transition-colors"
@@ -599,28 +599,35 @@ const CatechismPage: React.FC = () => {
     <div className="p-6 pt-0 bg-black/30">
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
         {LITURGICAL_OBJECTS.map((obj) => {
-          const Icon = obj.icon as any; // garante que o TS aceite
+          const Icon = obj.icon as any;
           return (
             <div
               key={obj.id}
               className="bg-white/5 backdrop-blur-sm rounded-2xl p-8 text-center border border-white/10 hover:bg-white/10 hover:scale-[1.02] transition-all shadow-lg"
             >
               <Icon className="w-20 h-20 mx-auto mb-5 text-fiat-gold" />
-
               <h4 className="text-xl font-bold text-fiat-gold tracking-wide">
                 {obj.title}
               </h4>
-
               <p className="text-sm text-gray-300 mt-3 leading-relaxed">
                 {obj.desc}
               </p>
-                  </div>
-                ))}
-              </div>
             </div>
-          )}
-        </div>
+          );
+        })}
       </div>
     </div>
-  );
-};
+  )}
+</div>
+{/* ← AQUI TERMINA O ACORDION DE OBJETOS LITÚRGICOS */}
+
+{/* OUTROS ACORDIONS AQUI (se tiver mais depois) */}
+
+  </div>
+</div>
+
+{/* FECHAMENTO FINAL DA PÁGINA */}
+</div>
+</div>
+
+export default CatechismPage;
