@@ -21,6 +21,7 @@ import {
   ChevronUp,
   BookOpen,
   Sparkles,
+  Cross,
   Key,
   Shield,
   Landmark,
