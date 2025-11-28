@@ -619,15 +619,12 @@ const CatechismPage: React.FC = () => {
     </div>
   )}
 </div>
-{/* ← AQUI TERMINA O ACORDION DE OBJETOS LITÚRGICOS */}
 
-{/* OUTROS ACORDIONS AQUI (se tiver mais depois) */}
-
+{/* ==================== FIM DOS ACORDIONS ==================== */}
+        </div>
+      </div>
+    </div>
   </div>
-</div>
-
-{/* FECHAMENTO FINAL DA PÁGINA */}
-</div>
 </div>
 
 export default CatechismPage;
