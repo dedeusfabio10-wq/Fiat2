@@ -11,7 +11,7 @@ import { supabase } from '../services/supabase';
 const SACRED_MUSIC = [
   {
     name: "Noite Feliz (Instrumental)",
-    url: "https://orangefreesounds.com/wp-content/uploads/2018/04/Ave-maria-bach-gounod-piano-and-cello-music.mp3",
+    url: "https://archive.org/download/GregorianChantMass/02%20Track%202.mp3",
     desc: "Especial de Natal",
     special: true
   },
