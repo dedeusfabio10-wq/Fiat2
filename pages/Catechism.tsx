@@ -578,53 +578,45 @@ const CatechismPage: React.FC = () => {
           )}
         </div>
 
-      {/* OBJETOS LITÚRGICOS – VERSÃO FINAL, FUNCIONA 100% */}
-<div className={`${themeCardColor} border border-white/5 rounded-xl overflow-hidden transition-all shadow-2xl`}>
-  <div
-    className="p-5 flex items-center justify-between cursor-pointer hover:bg-white/5 transition-colors"
-    onClick={() => setExpandedSection(expandedSection === 'objetos' ? null : 'objetos')}
-  >
-    <h3 className="font-serif text-white font-medium text-base uppercase tracking-widest flex items-center gap-3">
-      <Sparkles size={20} className="text-fiat-gold" />
-      Objetos Litúrgicos
-    </h3>
-    {expandedSection === 'objetos' ? (
-      <ChevronUp size={24} className="text-fiat-gold" />
-    ) : (
-      <ChevronDown size={24} className="text-gray-400" />
-    )}
-  </div>
-
-  {expandedSection === 'objetos' && (
-    <div className="p-6 pt-0 bg-black/30">
-      <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
-        {LITURGICAL_OBJECTS.map((obj) => {
-          const Icon = obj.icon as any;
-          return (
-            <div
-              key={obj.id}
-              className="bg-white/5 backdrop-blur-sm rounded-2xl p-8 text-center border border-white/10 hover:bg-white/10 hover:scale-[1.02] transition-all shadow-lg"
-            >
-              <Icon className="w-20 h-20 mx-auto mb-5 text-fiat-gold" />
-              <h4 className="text-xl font-bold text-fiat-gold tracking-wide">
-                {obj.title}
-              </h4>
-              <p className="text-sm text-gray-300 mt-3 leading-relaxed">
-                {obj.desc}
-              </p>
+     {/* OBJETOS LITÚRGICOS */}
+        <div className={`${themeCardColor} border border-white/5 rounded-xl overflow-hidden transition-all shadow-lg`}>
+          <div
+            className="p-5 flex items-center justify-between cursor-pointer hover:bg-white/5 transition-colors"
+            onClick={() =>
+              setExpandedSection(expandedSection === 'objetos' ? null : 'objetos')
+            }
+          >
+            <h3 className="font-serif text-white font-medium text-base uppercase tracking-widest flex items-center gap-2">
+              <Sparkles size={18} className="text-fiat-gold" /> Objetos Litúrgicos
+            </h3>
+            {expandedSection === 'objetos' ? (
+              <ChevronUp size={20} className="text-fiat-gold" />
+            ) : (
+              <ChevronDown size={20} className="text-gray-500" />
+            )}
+          </div>
+          {expandedSection === 'objetos' && (
+            <div className="p-6 pt-2 bg-black/20">
+              <div className="grid grid-cols-2 gap-4">
+                {LITURGICAL_OBJECTS.map((obj) => (
+                  <div
+                    key={obj.id}
+                    className="bg-white/5 p-6 rounded-xl border border-white/10 text-center hover:bg-white/10 transition-all"
+                  >
+                    <div className="text-5xl mb-4">{obj.icon}</div>
+                    <h4 className="font-bold text-white text-sm">{obj.title}</h4>
+                    <p className="text-xs text-gray-400 mt-2 font-serif italic leading-tight">
+                      {obj.desc}
+                    </p>
+                  </div>
+                ))}
+              </div>
             </div>
-          );
-        })}
-      </div>
-    </div>
-  )}
-</div>
-
-{/* ==================== FIM DOS ACORDIONS ==================== */}
+          )}
         </div>
       </div>
     </div>
-  </div>
-</div>
+  );
+};
 
 export default CatechismPage;
