@@ -236,12 +236,12 @@ export const THE_APOSTLES = [
   { id: 'paulo', name: 'São Paulo', symbol: 'Espada', title: 'Apóstolo dos Gentios', desc: 'Embora não seja dos doze originais, é a coluna da Igreja junto com Pedro. Grande missionário.' }
 ];
 export const LITURGICAL_OBJECTS = [
-  { id: 'calice', title: 'Cálice', desc: 'Taça onde se consagra o vinho no Sangue de Cristo.', icon: 'Grape' },
-  { id: 'patena', title: 'Patena', desc: 'Prato onde se coloca a hóstia a ser consagrada.', icon: 'Circle' },
-  { id: 'ostensorio', title: 'Ostensório', desc: 'Objeto para expor o Santíssimo Sacramento à adoração.', icon: 'Sun' },
-  { id: 'ciborio', title: 'Cibório', desc: 'Recipiente com tampa para guardar as hóstias consagradas no sacrário.', icon: 'Circle' },
-  { id: 'corporal', title: 'Corporal', desc: 'Pano quadrado onde se colocam o cálice e a patena. Representa o sudário.', icon: 'BookOpen' },
-  { id: 'purificatorio', title: 'Sanguíneo', desc: 'Pano utilizado para purificar o cálice e os dedos do sacerdote.', icon: 'Droplet' }
+  { id: 'calice',    icon: Grape,     title: 'Cálice',     desc: 'Taça onde se consagra o vinho no Sangue de Cristo.' },
+  { id: 'patena',    icon: Circle,    title: 'Patena',     desc: 'Prato onde se coloca a hóstia a ser consagrada.' },
+  { id: 'ostensorio',icon: Sun,       title: 'Ostensório', desc: 'Objeto para expor o Santíssimo Sacramento à adoração.' },
+  { id: 'ciborio',   icon: Church,    title: 'Cibório',    desc: 'Recipiente com tampa para guardar as hóstias consagradas no sacrário.' },
+  { id: 'corporal',   icon: BookOpen,  title: 'Corporal',   desc: 'Pano quadrado onde se colocam o cálice e a patena. Representa o sudário.' },
+  { id: 'sanguineo', icon: Droplet,   title: 'Sanguíneo',  desc: 'Pano utilizado para purificar o cálice e os dedos do sacerdote.' },
 ];
 export const APOSTOLIC_LINE = [
   { id: 'leao14', name: 'Papa Leão XIV', period: '2025 - Atual', title: 'Robert Francis Prevost (OSA)', bio: 'Primeiro Papa da América do Norte e da Ordem de Santo Agostinho. Inspirado por Leão XIII, enfrenta os desafios da Inteligência Artificial e da Quarta Revolução Industrial na defesa da dignidade humana.', highlight: true },
