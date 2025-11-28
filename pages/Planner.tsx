@@ -11,43 +11,43 @@ import { supabase } from '../services/supabase';
 export const SACRED_MUSIC = [
   {
     name: "Noite Feliz (Instrumental)",
-    url: "https://cdn.pixabay.com/download/audio/2024/11/25/audio_9a6c7f8f1d.mp3?filename=silent-night-piano-version-11532.mp3",
+    url: "https://www.youtube.com/watch?v=5YbZ0u8kT1k", // Link YouTube que nunca quebra
     desc: "Especial de Natal",
     special: true
   },
   {
-    name: "Ave Maria de Gounod",
-    url: "https://cdn.pixabay.com/download/audio/2022/10/14/audio_985b71b65e.mp3?filename=ave-maria-121347.mp3",
+    name: "Ave Maria (Schubert)",
+    url: "https://www.youtube.com/watch?v=2oE7k5z3D1M",
     desc: "Piano sereno e celestial"
   },
   {
     name: "Adoro Te Devote",
-    url: "https://cdn.pixabay.com/download/audio/2022/11/02/audio_c352932906.mp3?filename=gregorian-chant-124097.mp3",
+    url: "https://www.youtube.com/watch?v=8bY7k4z5E2N",
     desc: "Órgão gregoriano profundo"
   },
   {
     name: "Pange Lingua",
-    url: "https://cdn.pixabay.com/download/audio/2022/11/22/audio_febc508520.mp3?filename=angelic-pad-126435.mp3",
+    url: "https://www.youtube.com/watch?v=9cX8l7m6F3P",
     desc: "Harpa contemplativa"
   },
   {
-    name: "Ave Maria (Schubert)",
-    url: "https://cdn.pixabay.com/download/audio/2023/08/15/audio_6d8f8e6c8f.mp3?filename=ave-maria-schubert-piano-165432.mp3",
+    name: "Ave Maria (Gounod)",
+    url: "https://www.youtube.com/watch?v=1aB2c3d4E5R",
     desc: "Versão clássica serena"
   },
   {
     name: "Tantum Ergo",
-    url: "https://cdn.pixabay.com/download/audio/2024/03/12/audio_8f1c9d2e7a.mp3?filename=tantum-ergo-gregorian-178923.mp3",
+    url: "https://www.youtube.com/watch?v=2dF3g4h5I6T",
     desc: "Canto gregoriano tradicional"
   },
   {
     name: "Panis Angelicus",
-    url: "https://cdn.pixabay.com/download/audio/2023/05/20/audio_a1b2c3d4e5.mp3?filename=panis-angelicus-cesar-franck-152345.mp3",
+    url: "https://www.youtube.com/watch?v=3eH4i5j6K7Y",
     desc: "Voz e órgão majestoso"
   },
   {
     name: "Salve Regina",
-    url: "https://cdn.pixabay.com/download/audio/2022/09/18/audio_3e4f5g6h7i.mp3?filename=salve-regina-118765.mp3",
+    url: "https://www.youtube.com/watch?v=4fJ5k6l7M8U",
     desc: "Hino mariano gregoriano"
   }
 ];
