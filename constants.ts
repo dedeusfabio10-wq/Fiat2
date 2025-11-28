@@ -1,3 +1,4 @@
+import { Grape, Circle, Sun, Church, BookOpen, Droplet } from 'lucide-react';
 import { Prayer, Novena, Saint, Mystery, DevotionalRosary } from './types';
 // Helper to create generic days
 const createGenericDays = (duration: number, prayer?: string) =>
