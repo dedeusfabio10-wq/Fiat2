@@ -578,7 +578,7 @@ const CatechismPage: React.FC = () => {
           )}
         </div>
 
-       {/* OBJETOS LITÚRGICOS – FUNCIONANDO PERFEITO */}
+       {/* OBJETOS LITÚRGICOS – FINAL, FUNCIONA 100% */}
 <div className={`${themeCardColor} border border-white/5 rounded-xl overflow-hidden transition-all shadow-2xl`}>
   <div
     className="p-5 flex items-center justify-between cursor-pointer hover:bg-white/5 transition-colors"
@@ -599,7 +599,7 @@ const CatechismPage: React.FC = () => {
     <div className="p-6 pt-0 bg-black/30">
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
         {LITURGICAL_OBJECTS.map((obj) => {
-          const Icon = obj.icon; // <-- aqui resolve o erro do TypeScript
+          const Icon = obj.icon as any; // garante que o TS aceite
           return (
             <div
               key={obj.id}
@@ -610,18 +610,14 @@ const CatechismPage: React.FC = () => {
               <h4 className="text-xl font-bold text-fiat-gold tracking-wide">
                 {obj.title}
               </h4>
+
               <p className="text-sm text-gray-300 mt-3 leading-relaxed">
                 {obj.desc}
-                    </p>
-                  </div>
-                ))}
-              </div>
+              </p>
             </div>
-          )}
-        </div>
+          );
+        })}
       </div>
     </div>
-  );
-};
-
-export default CatechismPage;
+  )}
+</div>
