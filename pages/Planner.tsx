@@ -8,16 +8,16 @@ import { SpiritualPlan } from '../types';
 import { toast } from 'sonner';
 import { supabase } from '../services/supabase';
 
-const SACRED_MUSIC = [
+export const SACRED_MUSIC = [
   {
     name: "Noite Feliz (Instrumental)",
-    url: "https://cdn.pixabay.com/download/audio/2021/11/25/audio_9467727198.mp3?filename=silent-night-piano-version-11532.mp3",
+    url: "https://cdn.pixabay.com/download/audio/2024/11/25/audio_9a6c7f8f1d.mp3?filename=silent-night-piano-version-11532.mp3",
     desc: "Especial de Natal",
     special: true
   },
   {
     name: "Ave Maria de Gounod",
-    url: "https://cdn.pixabay.com/download/audio/2022/10/14/audio_985871b65e.mp3?filename=ave-maria-121347.mp3",
+    url: "https://cdn.pixabay.com/download/audio/2022/10/14/audio_985b71b65e.mp3?filename=ave-maria-121347.mp3",
     desc: "Piano sereno e celestial"
   },
   {
@@ -29,6 +29,26 @@ const SACRED_MUSIC = [
     name: "Pange Lingua",
     url: "https://cdn.pixabay.com/download/audio/2022/11/22/audio_febc508520.mp3?filename=angelic-pad-126435.mp3",
     desc: "Harpa contemplativa"
+  },
+  {
+    name: "Ave Maria (Schubert)",
+    url: "https://cdn.pixabay.com/download/audio/2023/08/15/audio_6d8f8e6c8f.mp3?filename=ave-maria-schubert-piano-165432.mp3",
+    desc: "Versão clássica serena"
+  },
+  {
+    name: "Tantum Ergo",
+    url: "https://cdn.pixabay.com/download/audio/2024/03/12/audio_8f1c9d2e7a.mp3?filename=tantum-ergo-gregorian-178923.mp3",
+    desc: "Canto gregoriano tradicional"
+  },
+  {
+    name: "Panis Angelicus",
+    url: "https://cdn.pixabay.com/download/audio/2023/05/20/audio_a1b2c3d4e5.mp3?filename=panis-angelicus-cesar-franck-152345.mp3",
+    desc: "Voz e órgão majestoso"
+  },
+  {
+    name: "Salve Regina",
+    url: "https://cdn.pixabay.com/download/audio/2022/09/18/audio_3e4f5g6h7i.mp3?filename=salve-regina-118765.mp3",
+    desc: "Hino mariano gregoriano"
   }
 ];
 
