@@ -11,7 +11,7 @@ import { supabase } from '../services/supabase';
 const SACRED_MUSIC = [
   {
     name: "Noite Feliz (Instrumental)",
-    url: https://pixabay.com/pt/music/tema-religioso-ave-maria-js-bach-charles-gounod-1852-classic-grand-piano-11019/,
+    url: "https://pixabay.com/pt/music/tema-religioso-ave-maria-js-bach-charles-gounod-1852-classic-grand-piano-11019/",
     desc: "Especial de Natal",
     special: true
   },
