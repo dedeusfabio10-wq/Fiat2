@@ -80,24 +80,66 @@ export const MYSTERIES: Mystery[] = [
   }
 ];
 export const DEVOTIONAL_ROSARIES: DevotionalRosary[] = [
-  {
-    id: 'misericordia',
-    title: 'Terço da Divina Misericórdia',
-    description: 'Revelado a Santa Faustina para aplacar a ira de Deus.',
-    content: 'Pai Eterno, eu Vos ofereço o Corpo e Sangue, Alma e Divindade de Vosso diletíssimo Filho, Nosso Senhor Jesus Cristo, em expiação dos nossos pecados e do mundo inteiro.\n\nPela Sua dolorosa Paixão, tende misericórdia de nós e do mundo inteiro.\n\nDeus Santo, Deus Forte, Deus Imortal, tende piedade de nós e do mundo inteiro.'
-  },
-  {
-    id: 'providencia',
-    title: 'Terço da Providência',
-    description: 'Para pedir o auxílio divino nas necessidades materiais e espirituais.',
-    content: 'Mãe da Divina Providência, providenciai!\n\nDeus provê, Deus proverá, Sua misericórdia não faltará.'
-  },
-  {
-    id: 'libertacao',
-    title: 'Terço da Libertação',
-    description: 'Baseado na Palavra de Deus: "Se o Filho vos libertar, sereis verdadeiramente livres".',
-    content: 'Jesus, tem piedade de mim!\nJesus, cura-me!\nJesus, salva-me!\nJesus, liberta-me!'
-  }
+  {
+    id: 'misericordia',
+    title: 'Terço da Divina Misericórdia',
+    description: 'Revelado a Santa Faustina para aplacar a ira de Deus e implorar misericórdia.',
+    content: 'Pai Eterno, eu Vos ofereço o Corpo e Sangue, Alma e Divindade de Vosso diletíssimo Filho, Nosso Senhor Jesus Cristo, em expiação dos nossos pecados e do mundo inteiro.\n\nPela Sua dolorosa Paixão, tende misericórdia de nós e do mundo inteiro.\n\nDeus Santo, Deus Forte, Deus Imortal, tende piedade de nós e do mundo inteiro.'
+  },
+  {
+    id: 'providencia',
+    title: 'Terço da Providência',
+    description: 'Para pedir o auxílio divino nas necessidades materiais e espirituais.',
+    content: 'Mãe da Divina Providência, providenciai!\n\nDeus provê, Deus proverá, Sua misericórdia não faltará.'
+  },
+  {
+    id: 'libertacao',
+    title: 'Terço da Libertação',
+    description: '"Se o Filho vos libertar, sereis verdadeiramente livres" (Jo 8,36).',
+    content: 'Jesus, tem piedade de mim!\nJesus, cura-me!\nJesus, salva-me!\nJesus, liberta-me!'
+  },
+  {
+    id: 'preciosissimo-sangue',
+    title: 'Terço do Preciosíssimo Sangue',
+    description: 'Honra o Sangue derramado por Jesus na Paixão para nossa redenção.',
+    content: 'Preciosíssimo Sangue de Jesus, salvai-nos!\n\nSangue de Cristo, único Filho do Pai Eterno, salvai-nos.\nSangue de Cristo, Verbo Encarnado, salvai-nos.\nSangue de Cristo, Nova e Eterna Aliança, salvai-nos.'
+  },
+  {
+    id: 'lagrimas-maria',
+    title: 'Terço das Lágrimas de Maria',
+    description: 'Consola o Imaculado Coração de Maria e converte os pecadores.',
+    content: 'Ó Jesus, olhai para as Lágrimas daquela que mais Vos amou na terra e mais Vos ama no Céu.\n\nÓ Maria, Mãe de amor, de dor e de misericórdia, rogai por nós.'
+  },
+  {
+    id: 'sao-jose',
+    title: 'Terço de São José',
+    description: 'Para honrar o pai adotivo de Jesus e pedir proteção às famílias.',
+    content: 'São José, pai adotivo de Jesus, rogai por nós!\n\nSão José, guarda da Sagrada Família, protegei-nos.\nSão José, terror dos demônios, afastai todo mal.\nSão José, esperança dos doentes, consolai-nos.'
+  },
+  {
+    id: 'sao-miguel',
+    title: 'Terço de São Miguel Arcanjo',
+    description: 'Invocação poderosa contra as forças do mal e pela vitória do bem.',
+    content: 'São Miguel Arcanjo, defendei-nos no combate!\n\nSeja nosso refúgio contra as ciladas do demônio.\nOrdene-lhe Deus, instantemente o pedimos.\nE vós, Príncipe da milícia celeste, pelo divino poder, precipitai no inferno a Satanás e aos outros espíritos malignos.'
+  },
+  {
+    id: 'espiritosanto',
+    title: 'Terço do Espírito Santo',
+    description: 'Para implorar os sete dons e a força do Espírito Consolador.',
+    content: 'Vinde, Espírito Santo, enchei os corações dos vossos fiéis e acendei neles o fogo do vosso amor.\n\nEnviai o vosso Espírito e tudo será criado, e renovareis a face da terra.'
+  },
+  {
+    id: 'sagrada-face',
+    title: 'Terço da Sagrada Face',
+    description: 'Reparação pelos pecados contra o Santo Rosto de Jesus.',
+    content: 'Ó Sagrada Face de Jesus, coberta de opróbrios, tende piedade de nós!\n\nQue a luz do vosso Rosto brilhe sobre nós.'
+  },
+  {
+    id: 'chagas',
+    title: 'Terço das Santas Chagas',
+    description: 'Contemplação e reparação das cinco Chagas de Nosso Senhor.',
+    content: 'Ó Jesus, pelas vossas Santas Chagas, curai-nos e salvai-nos!\n\nPelas Chagas dos pés e das mãos, perdoai-nos.\nPela Chaga do lado aberto, derramai misericórdia sobre nós.'
+  }
 ];
 export const SAINTS: Saint[] = [
   { id: 'sao-miguel', name: 'São Miguel Arcanjo', title: 'Príncipe da Milícia Celeste', date: '29 de Setembro', bio: 'Defensor da Igreja e vencedor do dragão.', prayer: 'São Miguel Arcanjo, defendei-nos no combate...' },
