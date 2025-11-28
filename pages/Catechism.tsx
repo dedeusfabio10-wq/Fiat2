@@ -614,10 +614,13 @@ const CatechismPage: React.FC = () => {
               <p className="text-sm text-gray-300 mt-3 leading-relaxed">
                 {obj.desc}
               </p>
+                  </div>
+                ))}
+              </div>
             </div>
-          );
-        })}
+          )}
+        </div>
       </div>
     </div>
-  )}
-</div>
+  );
+};
