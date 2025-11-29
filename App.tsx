@@ -8,7 +8,7 @@ import { supabase, getCurrentUser, isMockMode } from './services/supabase';
 import { AppContext } from './contexts/AppContext';
 import { RealtimeChannel } from '@supabase/supabase-js';
 
-// Pages
+// Pages existentes
 import LandingPage from './pages/Landing';
 import AuthPage from './pages/Auth';
 import HomePage from './pages/Home';
@@ -24,6 +24,10 @@ import PlanDetailPage from './pages/PlanDetail';
 import NovenaDetailPage from './pages/NovenaDetail';
 import CenaculoPage from './pages/Cenaculo';
 import AdventoPage from './pages/Advento';
+
+// NOVAS PÁGINAS DE COMUNIDADE
+import CommunitiesPage from './pages/Communities';
+import CommunityDetailPage from './pages/CommunityDetail';
 
 const AdminPage = React.lazy(() => import('./pages/Admin'));
 
@@ -45,176 +49,179 @@ const App: React.FC = () => {
 
   const checkExpiration = (userProfile: UserProfile): UserProfile => {
     if (userProfile.is_premium && userProfile.premium_expires_at) {
-        const expirationDate = new Date(userProfile.premium_expires_at);
-        const now = new Date();
-        const toleranceDate = new Date(expirationDate);
-        toleranceDate.setDate(toleranceDate.getDate() + 1);
+      const expirationDate = new Date(userProfile.premium_expires_at);
+      const now = new Date();
+      const toleranceDate = new Date(expirationDate);
+      toleranceDate.setDate(toleranceDate.getDate() + 1);
 
-        if (now.getTime() > toleranceDate.getTime()) {
-            console.log('Plano Premium Expirado');
-            toast.error("Seu tempo Premium acabou.", { description: "Renove para continuar usando os recursos." });
-            return { ...userProfile, is_premium: false };
-        } 
+      if (now.getTime() > toleranceDate.getTime()) {
+        console.log('Plano Premium Expirado');
+        toast.error("Seu tempo Premium acabou.", { 
+          description: "Renove para continuar usando os recursos." 
+        });
+        return { ...userProfile, is_premium: false };
+      }
     }
     return userProfile;
   };
 
   const fetchUserProfile = async () => {
-      !isLoadingProfile && setIsLoadingProfile(true);
-      try {
-          const user = await getCurrentUser();
-          if (user) {
-            const { data, error } = await supabase
-               .from('profiles')
-               .select('*')
-               .eq('id', user.id)
-               .single();
-            
-            if (data) {
-                console.log("Perfil carregado do Banco:", data.is_premium ? "PREMIUM" : "GRÁTIS (Legado)");
-                
-                let updatedProfile: UserProfile = { 
-                    ...profile,
-                    name: data.name || profile.name,
-                    email: data.email || user.email || profile.email,
-                    photo: data.photo || profile.photo,
-                    is_premium: data.is_premium,
-                    premium_expires_at: data.premium_expires_at,
-                    streak: data.streak || 0,
-                    rosaries_prayed: data.rosaries_prayed || 0,
-                    active_novenas: data.active_novenas || [],
-                    favorites: data.favorites || [],
-                    devotionalSaintId: data.devotional_saint_id,
-                    customTheme: data.custom_theme,
-                    favoriteQuote: data.favorite_quote,
-                    nightModeSpiritual: data.night_mode_spiritual,
-                    subscriptionType: data.subscription_type,
-                    subscriptionMethod: data.subscription_method,
-                    subscriptionId: data.subscription_id,
-                    onboarding_completed: true 
-                };
-                
-                updatedProfile = checkExpiration(updatedProfile);
-                setProfile(updatedProfile);
-            } else {
-                console.log("Usuário sem perfil no DB (Aguardando pagamento).");
-                setProfile(prev => ({ 
-                    ...prev, 
-                    name: user.user_metadata?.name || user.email?.split('@')[0],
-                    email: user.email,
-                    is_premium: false, 
-                    onboarding_completed: true 
-                }));
-            }
-          } else {
-            setProfile({ name: '', email: '', is_premium: false, streak: 0, rosaries_prayed: 0, favorites: [], active_novenas: [], onboarding_completed: false });
-          }
-      } catch (error) {
-          console.error('Erro ao sincronizar perfil:', error);
-      } finally {
-          setIsLoadingProfile(false);
+    !isLoadingProfile && setIsLoadingProfile(true);
+    try {
+      const user = await getCurrentUser();
+      if (user) {
+        const { data, error } = await supabase
+          .from('profiles')
+          .select('*')
+          .eq('id', user.id)
+          .single();
+
+        if (data) {
+          console.log("Perfil carregado do Banco:", data.is_premium ? "PREMIUM" : "GRÁTIS (Legado)");
+
+          let updatedProfile: UserProfile = {
+            ...profile,
+            name: data.name || profile.name,
+            email: data.email || user.email || profile.email,
+            photo: data.photo || profile.photo,
+            is_premium: data.is_premium,
+            premium_expires_at: data.premium_expires_at,
+            streak: data.streak || 0,
+            rosaries_prayed: data.rosaries_prayed || 0,
+            active_novenas: data.active_novenas || [],
+            favorites: data.favorites || [],
+            devotionalSaintId: data.devotional_saint_id,
+            customTheme: data.custom_theme,
+            favoriteQuote: data.favorite_quote,
+            nightModeSpiritual: data.night_mode_spiritual,
+            subscriptionType: data.subscription_type,
+            subscriptionMethod: data.subscription_method,
+            subscriptionId: data.subscription_id,
+            onboarding_completed: true
+          };
+
+          updatedProfile = checkExpiration(updatedProfile);
+          setProfile(updatedProfile);
+        } else {
+          console.log("Usuário sem perfil no DB (Aguardando pagamento).");
+          setProfile(prev => ({
+            ...prev,
+            name: user.user_metadata?.name || user.email?.split('@')[0],
+            email: user.email,
+            is_premium: false,
+            onboarding_completed: true
+          }));
+        }
+      } else {
+        setProfile({ 
+          name: '', email: '', is_premium: false, streak: 0, 
+          rosaries_prayed: 0, favorites: [], active_novenas: [], 
+          onboarding_completed: false 
+        });
       }
+    } catch (error) {
+      console.error('Erro ao sincronizar perfil:', error);
+    } finally {
+      setIsLoadingProfile(false);
+    }
   };
 
-  // Realtime Subscription para atualização automática do Premium
+  // Realtime: atualiza premium automaticamente
   useEffect(() => {
     let channel: RealtimeChannel | undefined;
-
     const setupRealtime = async () => {
-        const user = await getCurrentUser();
-        if (user) {
-            channel = supabase
-                .channel('profile-changes')
-                .on(
-                    'postgres_changes',
-                    {
-                        event: '*',
-                        schema: 'public',
-                        table: 'profiles',
-                        filter: `id=eq.${user.id}`,
-                    },
-                    (payload: any) => {
-                        console.log('🔔 Realtime: Perfil atualizado no banco!', payload.new);
-                        fetchUserProfile();
-                        if (payload.new?.is_premium && !profile.is_premium) {
-                            toast.success("Assinatura confirmada!", { description: "Bem-vindo(a) ao Santuário Premium."});
-                        }
-                    }
-                )
-                .subscribe();
-        }
+      const user = await getCurrentUser();
+      if (user) {
+        channel = supabase
+          .channel('profile-changes')
+          .on('postgres_changes', {
+            event: '*',
+            schema: 'public',
+            table: 'profiles',
+            filter: `id=eq.${user.id}`,
+          }, (payload: any) => {
+            console.log('Realtime: Perfil atualizado!', payload.new);
+            fetchUserProfile();
+            if (payload.new?.is_premium && !profile.is_premium) {
+              toast.success("Assinatura confirmada!", { 
+                description: "Bem-vindo(a) ao Santuário Premium." 
+              });
+            }
+          })
+          .subscribe();
+      }
     };
-
     setupRealtime();
-
-    return () => {
-        if (channel) {
-            supabase.removeChannel(channel);
-        }
-    };
+    return () => { channel && supabase.removeChannel(channel); };
   }, [profile.is_premium]);
 
-  // Auth & Visibility Listener
+  // Auth + Visibility
   useEffect(() => {
     fetchUserProfile();
 
     const { data: authListener } = supabase.auth.onAuthStateChange((event: any, session: any) => {
-       if (event === 'SIGNED_IN' || event === 'INITIAL_SESSION') {
-           fetchUserProfile();
-       }
-       if (event === 'SIGNED_OUT') {
-           setProfile({ name: '', email: '', is_premium: false, streak: 0, rosaries_prayed: 0, favorites: [], active_novenas: [], onboarding_completed: false });
-           localStorage.clear();
-           setIsLoadingProfile(false);
-       }
+      if (event === 'SIGNED_IN' || event === 'INITIAL_SESSION') fetchUserProfile();
+      if (event === 'SIGNED_OUT') {
+        setProfile({ name: '', email: '', is_premium: false, streak: 0, rosaries_prayed: 0, favorites: [], active_novenas: [], onboarding_completed: false });
+        localStorage.clear();
+        setIsLoadingProfile(false);
+      }
     });
 
     const handleVisibilityChange = () => {
-        if (document.visibilityState === 'visible') {
-            console.log("App voltou a ser visível, buscando perfil...");
-            fetchUserProfile();
-        }
+      if (document.visibilityState === 'visible') {
+        console.log("App voltou → atualizando perfil");
+        fetchUserProfile();
+      }
     };
     document.addEventListener("visibilitychange", handleVisibilityChange);
 
     return () => {
-        authListener.subscription.unsubscribe();
-        document.removeEventListener("visibilitychange", handleVisibilityChange);
+      authListener.subscription.unsubscribe();
+      document.removeEventListener("visibilitychange", handleVisibilityChange);
     };
   }, []);
 
-  // Persistência Local
+  // Persistência
   useEffect(() => {
     localStorage.setItem('fiat-profile', JSON.stringify(profile));
   }, [profile]);
-  
-  // Áudio Unlock
+
+  // Áudio unlock
   useEffect(() => {
-    const unlockAudio = () => {
-        initAudio();
-        window.removeEventListener('click', unlockAudio);
-    };
+    const unlockAudio = () => { initAudio(); window.removeEventListener('click', unlockAudio); };
     window.addEventListener('click', unlockAudio);
-    return () => {
-      window.removeEventListener('click', unlockAudio);
-    };
+    return () => window.removeEventListener('click', unlockAudio);
   }, []);
 
   const updateProfile = async (p: UserProfile) => {
-      setProfile(p);
-      if (!p.is_premium) return;
-      try {
-          const user = await getCurrentUser();
-          if (user) {
-              await supabase.from('profiles').update({
-                  name: p.name, photo: p.photo, favorites: p.favorites, active_novenas: p.active_novenas, devotional_saint_id: p.devotionalSaintId, custom_theme: p.customTheme, favorite_quote: p.favoriteQuote, night_mode_spiritual: p.nightModeSpiritual
-              }).eq('id', user.id);
-          }
-      } catch (e) { console.error('Erro ao atualizar perfil:', e); }
+    setProfile(p);
+    if (!p.is_premium) return;
+    try {
+      const user = await getCurrentUser();
+      if (user) {
+        await supabase.from('profiles').update({
+          name: p.name,
+          photo: p.photo,
+          favorites: p.favorites,
+          active_novenas: p.active_novenas,
+          devotional_saint_id: p.devotionalSaintId,
+          custom_theme: p.customTheme,
+          favorite_quote: p.favoriteQuote,
+          night_mode_spiritual: p.nightModeSpiritual
+        }).eq('id', user.id);
+      }
+    } catch (e) { console.error('Erro ao atualizar perfil:', e); }
   };
 
   return (
-    <AppContext.Provider value={{ profile, isLoadingProfile, updateProfile, refreshProfile: fetchUserProfile, themeColors: { primary: '#d4af37' } }}>
+    <AppContext.Provider value={{ 
+      profile, 
+      isLoadingProfile, 
+      updateProfile, 
+      refreshProfile: fetchUserProfile, 
+      themeColors: { primary: '#d4af37' } 
+    }}>
       <HashRouter>
         <Layout>
           <Routes>
@@ -234,10 +241,15 @@ const App: React.FC = () => {
             <Route path="/profile" element={<ProfilePage />} />
             <Route path="/viasacra" element={<ViaSacraPage />} />
             <Route path="/novena/:id" element={<NovenaDetailPage />} />
+
+            {/* NOVAS ROTAS DE COMUNIDADE */}
+            <Route path="/communities" element={<CommunitiesPage />} />
+            <Route path="/communities/:id" element={<CommunityDetailPage />} />
+
             <Route path="/admin" element={
-                <React.Suspense fallback={<div className="flex items-center justify-center h-screen bg-[#05080f] text-fiat-gold">Carregando Admin...</div>}>
-                    <AdminPage />
-                </React.Suspense>
+              <React.Suspense fallback={<div className="flex items-center justify-center h-screen bg-[#05080f] text-fiat-gold">Carregando Admin...</div>}>
+                <AdminPage />
+              </React.Suspense>
             } />
             <Route path="*" element={<Navigate to="/" replace />} />
           </Routes>
