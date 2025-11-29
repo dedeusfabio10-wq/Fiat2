@@ -42,7 +42,6 @@ export interface DevotionalRosary {
   content: string;
 }
 
-// FIX: Added missing CatechismSection interface based on its usage in constants.ts
 export interface CatechismSection {
   id: string;
   title: string;
@@ -101,14 +100,14 @@ export interface UserProfile {
   email?: string;
   photo?: string;
   is_premium: boolean;
-  premium_expires_at?: string; // Novo campo para controle de vencimento
+  premium_expires_at?: string;
   streak: number;
   rosaries_prayed: number;
   favorites: string[];
   active_novenas: {
     novenaId: string;
     currentDay: number;
-    lastDate: string | null; // Pode ser null se acabou de se inscrever
+    lastDate: string | null;
     startDate: string;
   }[];
   devotionalSaintId?: string;
@@ -128,5 +127,34 @@ export enum AppRoute {
   PRAYERS = 'PRAYERS',
   ROSARY = 'ROSARY',
   CATECHISM = 'CATECHISM',
-  PROFILE = 'PROFILE'
+  PROFILE = 'PROFILE',
+  COMMUNITIES = 'COMMUNITIES',        // NOVA ROTA
+  COMMUNITY_DETAIL = 'COMMUNITY_DETAIL' // NOVA ROTA
+}
+
+// NOVAS INTERFACES PARA COMUNIDADES (tudo que o Google adicionou)
+export interface Community {
+  id: string;
+  name: string;
+  description: string;
+  is_public: boolean;
+  owner_id: string;
+  created_at: string;
+  members_count?: number;
+}
+
+export interface CommunityMember {
+  user_id: string;
+  community_id: string;
+  role: 'admin' | 'member';
+  profiles?: { name: string; photo?: string };
+}
+
+export interface CommunityMessage {
+  id: number;
+  community_id: string;
+  sender_id: string;
+  content: string;
+  created_at: string;
+  profiles?: { name: string; photo?: string };
 }
