@@ -52,17 +52,37 @@ const ProfilePage: React.FC = () => {
 
   const handleLogout = async () => {
     await supabase.auth.signOut();
+
     if (navigator.vibrate) navigator.vibrate([50, 100, 50]);
+
     toast("Volte sempre, alma devota", {
       icon: "folded_hands",
       style: { background: '#0f172a', color: '#d4af37', border: '1px solid #d4af37' }
     });
+
     localStorage.clear();
+
+    // CORREÇÃO FINAL: ADICIONADO O id
     updateProfile({
-      name: '', email: '', streak: 0, rosaries_prayed: 0,
-      is_premium: false, onboarding_completed: false,
-      favorites: [], active_novenas: []
+      id: '', // ESSA LINHA RESOLVE O ERRO TS2345
+      name: '',
+      email: '',
+      streak: 0,
+      rosaries_prayed: 0,
+      is_premium: false,
+      onboarding_completed: false,
+      favorites: [],
+      active_novenas: [],
+      devotionalSaintId: undefined,
+      customTheme: undefined,
+      nightModeSpiritual: false,
+      premium_expires_at: undefined,
+      subscriptionType: undefined,
+      subscriptionMethod: undefined,
+      subscriptionId: undefined,
+      favoriteQuote: undefined
     });
+
     navigate('/auth');
   };
 
@@ -123,7 +143,10 @@ const ProfilePage: React.FC = () => {
             className={`relative group cursor-pointer w-28 h-28 rounded-full flex items-center justify-center shadow-2xl ${profile.is_premium ? 'border-[3px] border-fiat-gold p-1' : 'border-4 border-white/10 bg-gray-800'}`}
             onClick={() => fileInputRef.current?.click()}
           >
-            {profile.is_premium && <div className="absolute inset-0 rounded-full animate-spin-slow border-t-2 border-b-2 border-fiat-gold/50 opacity-50"></div>}
+            {profile.is_premium && (
+              <div className="absolute inset-0 rounded-full animate-spin-slow border-t-2 border-b-2 border-fiat-gold/50 opacity-50"></div>
+            )}
+
             <div className="w-full h-full rounded-full overflow-hidden bg-stone-900 flex items-center justify-center">
               {profile.photo ? (
                 <img src={profile.photo} alt="Perfil" className="w-full h-full object-cover" />
@@ -136,12 +159,20 @@ const ProfilePage: React.FC = () => {
                 <Camera className="text-white" />
               </div>
             </div>
+
             {profile.is_premium && (
               <div className="absolute -bottom-2 bg-fiat-gold text-fiat-navy text-[10px] font-bold px-2 py-0.5 rounded-full shadow-lg flex items-center gap-1 border border-white/20">
                 <Crown size={10} fill="currentColor" /> PREMIUM
               </div>
             )}
-            <input type="file" ref={fileInputRef} className="hidden" accept="image/*" onChange={handlePhotoUpload} />
+
+            <input
+              type="file"
+              ref={fileInputRef}
+              className="hidden"
+              accept="image/*"
+              onChange={handlePhotoUpload}
+            />
           </div>
 
           <div className="text-center space-y-1 z-10">
@@ -180,7 +211,7 @@ const ProfilePage: React.FC = () => {
         </div>
       </div>
 
-      {/* CARD DAS COMUNIDADES - LINDO E FUNCIONAL */}
+      {/* CARD DAS COMUNIDADES */}
       <div className="px-6 mt-6">
         <Card
           onClick={() => navigate('/communities')}
@@ -201,7 +232,7 @@ const ProfilePage: React.FC = () => {
         </Card>
       </div>
 
-      {/* CONTEÚDO PRINCIPAL (Premium / Não Premium) */}
+      {/* CONTEÚDO PRINCIPAL */}
       <div className="p-6 space-y-6">
         {profile.is_premium ? (
           <div className="space-y-6 animate-slide-up">
@@ -260,12 +291,9 @@ const ProfilePage: React.FC = () => {
                 </div>
               </div>
             </Card>
-
-            {/* Frase Espiritual, Tema, Modo Noturno... (mantidos) */}
-            {/* ... (o resto do código premium você já tem funcionando) */}
           </div>
         ) : (
-          /* ÁREA NÃO PREMIUM - CARD PREMIUM */
+          /* ÁREA NÃO PREMIUM */
           <div className="relative overflow-hidden rounded-xl bg-gradient-to-b from-gray-800 to-gray-900 border border-yellow-600/30 p-0 shadow-lg">
             <div className="bg-gradient-to-r from-yellow-700 via-yellow-600 to-yellow-500 p-4 flex items-center justify-between">
               <div className="flex items-center gap-2 text-white font-bold">
