@@ -1,3 +1,5 @@
+// src/types/index.ts  (ou onde você guarda os tipos)
+
 export interface Prayer {
   id: string;
   title: string;
@@ -95,10 +97,12 @@ export interface DailyLiturgy {
   };
 }
 
+// CORREÇÃO PRINCIPAL AQUI → ADICIONADO O CAMPO id
 export interface UserProfile {
+  id: string;                    // ESSA LINHA RESOLVE TODOS OS ERROS TS2339
   name: string;
   email?: string;
-  photo?: string;
+  photo?: string | null;
   is_premium: boolean;
   premium_expires_at?: string;
   streak: number;
@@ -128,11 +132,11 @@ export enum AppRoute {
   ROSARY = 'ROSARY',
   CATECHISM = 'CATECHISM',
   PROFILE = 'PROFILE',
-  COMMUNITIES = 'COMMUNITIES',        // NOVA ROTA
-  COMMUNITY_DETAIL = 'COMMUNITY_DETAIL' // NOVA ROTA
+  COMMUNITIES = 'COMMUNITIES',
+  COMMUNITY_DETAIL = 'COMMUNITY_DETAIL',
 }
 
-// NOVAS INTERFACES PARA COMUNIDADES (tudo que o Google adicionou)
+// TIPOS DAS COMUNIDADES
 export interface Community {
   id: string;
   name: string;
@@ -147,14 +151,14 @@ export interface CommunityMember {
   user_id: string;
   community_id: string;
   role: 'admin' | 'member';
-  profiles?: { name: string; photo?: string };
+  profiles?: { name: string; photo?: string | null };
 }
 
 export interface CommunityMessage {
-  id: number;
+  id: string;                    // Mudei de number para string (Supabase usa uuid)
   community_id: string;
   sender_id: string;
   content: string;
   created_at: string;
-  profiles?: { name: string; photo?: string };
+  profiles?: { name: string; photo?: string | null };
 }
