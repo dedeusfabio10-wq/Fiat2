@@ -10,7 +10,7 @@ import { toast } from 'sonner';
 
 const CommunitiesPage: React.FC = () => {
   const navigate = useNavigate();
-  const { profile, refreshProfile } = useContext(AppContext);
+  const { profile } = useContext(AppContext);
 
   const [myCommunities, setMyCommunities] = useState<Community[]>([]);
   const [publicCommunities, setPublicCommunities] = useState<Community[]>([]);
@@ -102,7 +102,14 @@ const CommunitiesPage: React.FC = () => {
       {isMember ? (
         <ArrowRight className="text-fiat-gold" size={24} />
       ) : (
-        <Button size="sm" onClick={(e) => { e.stopPropagation(); handleJoin(c.id); }} className="gap-2">
+        <Button
+          size="sm"
+          onClick={(e) => {
+            e.stopPropagation();
+            handleJoin(c.id);
+          }}
+          className="gap-2 bg-fiat-gold text-fiat-navy hover:bg-fiat-gold/90"
+        >
           <UserPlus size={16} /> Entrar
         </Button>
       )}
@@ -145,26 +152,73 @@ const CommunitiesPage: React.FC = () => {
           </div>
         ) : activeTab === 'my' ? (
           myCommunities.length === 0 ? (
-            <p className="text-center py-20 text-fiat-muted italic">Você ainda não está em nenhuma comunidade.</p>
-          ) : (
-            <div className="space-y-4">
-              {myCommunities.map(c => renderCard(c, true))}
+            <div className="text-center py-20 text-fiat-muted italic">
+              <Users size={60} className="mx-auto mb-4 opacity-20" />
+              <p>Você ainda não está em nenhuma comunidade.</p>
             </div>
+          ) : (
+            <div className="space-y-4">{myCommunities.map(c => renderCard(c, true))}</div>
           )
         ) : (
           publicCommunities.length === 0 ? (
             <p className="text-center py-20 text-fiat-muted italic">Nenhuma comunidade pública no momento.</p>
           ) : (
-            <div className="space-y-4">
-              {publicCommunities.map(c => renderCard(c))}
-            </div>
+            <div className="space-y-4">{publicCommunities.map(c => renderCard(c))}</div>
           )
         )}
       </div>
 
-      {/* Modal de criação - você já tem um lindo, mantenha o seu */}
+      {/* Modal de Criação */}
       {showCreate && (
-        // ... seu modal lindo aqui
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-6 bg-black/90 backdrop-blur-md">
+          <div className="bg-fiat-card w-full max-w-lg rounded-3xl border border-fiat-gold/30 shadow-2xl p-8 relative">
+            <button onClick={() => setShowCreate(false)} className="absolute top-6 right-6 text-gray-400 hover:text-white">
+              <X size={28} />
+            </button>
+
+            <h2 className="text-2xl font-serif text-fiat-gold text-center mb-8">Criar Nova Comunidade</h2>
+
+            <form onSubmit={handleCreate} className="space-y-6">
+              <div>
+                <label className="block text-sm font-bold text-fiat-gold mb-2">Nome da Comunidade</label>
+                <Input
+                  value={newName}
+                  onChange={e => setNewName(e.target.value)}
+                  placeholder="Ex: Terço dos Homens São José"
+                  required
+                  className="bg-black/40 border-fiat-gold/30 focus:border-fiat-gold"
+                />
+              </div>
+
+              <div>
+                <label className="block text-sm font-bold text-fiat-gold mb-2">Descrição (opcional)</label>
+                <Input
+                  value={newDesc}
+                  onChange={e => setNewDesc(e.target.value)}
+                  placeholder="Fale um pouco sobre o grupo..."
+                  className="bg-black/40 border-fiat-gold/30"
+                />
+              </div>
+
+              <div className="grid grid-cols-2 gap-4">
+                <button type="button" onClick={() => setIsPublic(true)} className={`p-6 rounded-2xl border-2 transition-all ${isPublic ? 'border-fiat-gold bg-fiat-gold/10' : 'border-white/10 bg-black/20'}`}>
+                  <Globe size={32} className={`mx-auto mb-3 ${isPublic ? 'text-fiat-gold' : 'text-gray-500'}`} />
+                  <p className="font-bold text-white">Pública</p>
+                  <p className="text-xs text-fiat-muted">Qualquer um pode entrar</p>
+                </button>
+                <button type="button" onClick={() => setIsPublic(false)} className={`p-6 rounded-2xl border-2 transition-all ${!isPublic ? 'border-fiat-gold bg-fiat-gold/10' : 'border-white/10 bg-black/20'}`}>
+                  <Lock size={32} className={`mx-auto mb-3 ${!isPublic ? 'text-fiat-gold' : 'text-gray-500'}`} />
+                  <p className="font-bold text-white">Privada</p>
+                  <p className="text-xs text-fiat-muted">Apenas por convite</p>
+                </button>
+              </div>
+
+              <Button type="submit" fullWidth disabled={isCreating || !newName.trim()} className="mt-6 h-14 text-lg font-bold">
+                {isCreating ? <Loader2 className="animate-spin" /> : 'Criar Comunidade'}
+              </Button>
+            </form>
+          </div>
+        </div>
       )}
     </div>
   );
