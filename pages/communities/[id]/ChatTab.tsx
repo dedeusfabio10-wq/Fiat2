@@ -22,52 +22,74 @@ export default function ChatTab() {
   const [sending, setSending] = useState(false);
   const [loading, setLoading] = useState(true);
 
-  // Carrega mensagens
+  // Carrega mensagens iniciais e escuta em tempo real
   useEffect(() => {
     loadMessages();
 
     const channel = supabase
       .channel(`community_${id}`)
-      .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'community_messages', filter: `community_id=eq.${id}` }, payload => {
-        setMessages(prev => [...prev, payload.new as Message]);
-      })
+      .on(
+        'postgres_changes',
+        {
+          event: 'INSERT',
+          schema: 'public',
+          table: 'community_messages',
+          filter: `community_id=eq.${id}`
+        },
+        (payload: { new: Message }) => {
+          setMessages((prev) => [...prev, payload.new]);
+        }
+      )
       .subscribe();
 
-    return () => { supabase.removeChannel(channel); };
+    return () => {
+      supabase.removeChannel(channel);
+    };
   }, [id]);
 
   const loadMessages = async () => {
-    const { data } = await supabase
+    const { data, error } = await supabase
       .from('community_messages')
       .select('*, profiles(name)')
       .eq('community_id', id)
       .order('created_at', { ascending: true });
-    setMessages(data || []);
+
+    if (error) {
+      console.error('Erro ao carregar mensagens:', error);
+      toast.error('Erro ao carregar o chat');
+    } else {
+      setMessages((data as Message[]) || []);
+    }
     setLoading(false);
   };
 
   const sendMessage = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!newMessage.trim() || sending) return;
+    if (!newMessage.trim() || sending || !profile?.id) return;
 
     setSending(true);
-    const { error } = await supabase
-      .from('community_messages')
-      .insert({
-        community_id: id,
-        user_id: profile.id,
-        message: newMessage.trim()
-      });
+    const { error } = await supabase.from('community_messages').insert({
+      community_id: id,
+      user_id: profile.id,
+      message: newMessage.trim(),
+    });
 
     if (error) {
-      toast.error('Erro ao enviar');
+      toast.error('Erro ao enviar mensagem');
+      console.error(error);
     } else {
       setNewMessage('');
     }
     setSending(false);
   };
 
-  if (loading) return <div className="text-center py-20"><Loader2 className="animate-spin text-fiat-gold mx-auto" size={50} /></div>;
+  if (loading) {
+    return (
+      <div className="text-center py-20">
+        <Loader2 className="animate-spin text-fiat-gold mx-auto" size={50} />
+      </div>
+    );
+  }
 
   return (
     <div className="h-full flex flex-col pb-20">
@@ -78,13 +100,23 @@ export default function ChatTab() {
         </div>
       ) : (
         <div className="flex-1 overflow-y-auto px-4 space-y-4 pb-4">
-          {messages.map(msg => (
-            <div key={msg.id} className={`flex ${msg.user_id === profile.id ? 'justify-end' : 'justify-start'}`}>
-              <div className={`max-w-xs px-4 py-3 rounded-2xl ${msg.user_id === profile.id ? 'bg-fiat-gold text-black' : 'bg-slate-700'}`}>
+          {messages.map((msg) => (
+            <div
+              key={msg.id}
+              className={`flex ${msg.user_id === profile?.id ? 'justify-end' : 'justify-start'}`}
+            >
+              <div
+                className={`max-w-xs px-4 py-3 rounded-2xl ${
+                  msg.user_id === profile?.id ? 'bg-fiat-gold text-black' : 'bg-slate-700'
+                }`}
+              >
                 <p className="font-semibold text-sm">{msg.profiles.name}</p>
                 <p className="mt-1">{msg.message}</p>
                 <p className="text-xs opacity-70 mt-1">
-                  {new Date(msg.created_at).toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' })}
+                  {new Date(msg.created_at).toLocaleTimeString('pt-BR', {
+                    hour: '2-digit',
+                    minute: '2-digit',
+                  })}
                 </p>
               </div>
             </div>
@@ -92,16 +124,23 @@ export default function ChatTab() {
         </div>
       )}
 
-      <form onSubmit={sendMessage} className="fixed bottom-20 left-0 right-0 bg-slate-950 border-t border-fiat-gold/30 p-4">
+      <form
+        onSubmit={sendMessage}
+        className="fixed bottom-20 left-0 right-0 bg-slate-950 border-t border-fiat-gold/30 p-4"
+      >
         <div className="max-w-4xl mx-auto flex gap-3">
           <Input
             value={newMessage}
-            onChange={e => setNewMessage(e.target.value)}
+            onChange={(e) => setNewMessage(e.target.value)}
             placeholder="Escreva sua oração ou mensagem..."
             className="flex-1 bg-black/40 border-fiat-gold/50"
             disabled={sending}
           />
-          <Button type="submit" disabled={sending || !newMessage.trim()} className="bg-fiat-gold text-black">
+          <Button
+            type="submit"
+            disabled={sending || !newMessage.trim()}
+            className="bg-fiat-gold text-black hover:bg-yellow-500 transition"
+          >
             {sending ? <Loader2 className="animate-spin" size={20} /> : <Send size={20} />}
           </Button>
         </div>
