@@ -4,7 +4,7 @@ import { supabase } from '../../../services/supabase';
 import { AppContext } from '../../../contexts/AppContext';
 import { Send, Loader2 } from 'lucide-react';
 import { Button, Input } from '../../../ui/UIComponents';
-import { toast from 'sonner';
+import { toast } from 'sonner'; // ← ERA SÓ ISSO QUE FALTAVA: a vírgula aqui!
 
 interface Message {
   id: string;
@@ -23,7 +23,6 @@ export default function ChatTab() {
   const [sending, setSending] = useState(false);
   const [loading, setLoading] = useState(true);
 
-  // Carrega mensagens + realtime
   useEffect(() => {
     if (!id) return;
 
@@ -59,11 +58,7 @@ export default function ChatTab() {
           setMessages((prev) => [...prev, payload.new]);
         }
       )
-      .subscribe((status) => {
-        if (status === 'SUBSCRIBED') {
-          console.log('Realtime conectado na comunidade', id);
-        }
-      });
+      .subscribe();
 
     return () => {
       supabase.removeChannel(channel);
@@ -101,7 +96,6 @@ export default function ChatTab() {
 
   return (
     <div className="flex flex-col h-full">
-      {/* Lista de mensagens */}
       {messages.length === 0 ? (
         <div className="flex-1 flex flex-col items-center justify-center text-gray-400 px-6">
           <p className="text-xl mb-2">Nenhuma mensagem ainda.</p>
@@ -135,7 +129,6 @@ export default function ChatTab() {
         </div>
       )}
 
-      {/* Input fixado na parte inferior */}
       <form
         onSubmit={sendMessage}
         className="fixed bottom-0 left-0 right-0 bg-slate-950 border-t border-fiat-gold/30 p-4 z-50"
