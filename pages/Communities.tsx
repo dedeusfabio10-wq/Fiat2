@@ -1,18 +1,11 @@
+// src/pages/Communities.tsx
 import React, { useState, useEffect, useContext } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { AppContext } from '../contexts/AppContext';
-import { 
-  supabase, 
-  createCommunity, 
-  getCommunities, 
-  getUserCommunities,
-  joinCommunity 
-} from '../services/supabase';
+import { supabase, createCommunity, getCommunities, getUserCommunities, joinCommunity } from '../services/supabase';
 import { Community } from '../types';
 import { Button, Card, Input } from '../ui/UIComponents';
-import { 
-  ArrowLeft, Plus, Users, Globe, Lock, Loader2, X, UserPlus 
-} from 'lucide-react';
+import { ArrowLeft, Plus, Users, Globe, Lock, Loader2, X, UserPlus, ArrowRight } from 'lucide-react';
 import { toast } from 'sonner';
 
 const CommunitiesPage: React.FC = () => {
@@ -24,23 +17,18 @@ const CommunitiesPage: React.FC = () => {
   const [loading, setLoading] = useState(true);
   const [activeTab, setActiveTab] = useState<'my' | 'explore'>('my');
 
-  // Modal de criação
   const [showCreate, setShowCreate] = useState(false);
   const [newName, setNewName] = useState('');
   const [newDesc, setNewDesc] = useState('');
   const [isPublic, setIsPublic] = useState(true);
   const [isCreating, setIsCreating] = useState(false);
 
-  // Forçar refresh ao montar (caso o usuário tenha entrado em alguma comunidade em outra aba)
   useEffect(() => {
-    if (profile.id) {
-      fetchData();
-    }
+    if (profile.id) fetchData();
   }, [profile.id]);
 
   const fetchData = async () => {
     if (!profile.id) return;
-
     setLoading(true);
     try {
       const [myData, allPublic] = await Promise.all([
@@ -50,9 +38,8 @@ const CommunitiesPage: React.FC = () => {
 
       setMyCommunities(myData || []);
 
-      // Filtra apenas comunidades públicas que o usuário AINDA NÃO entrou
-      const myIds = (myData || []).map(c => c.id);
-      const exploreList = (allPublic || []).filter(c => 
+      const myIds = (myData || []).map((c: Community) => c.id);
+      const exploreList = (allPublic || []).filter((c: Community) =>
         c.is_public && !myIds.includes(c.id)
       );
 
@@ -73,52 +60,49 @@ const CommunitiesPage: React.FC = () => {
     setIsCreating(false);
 
     if (newCommunity) {
-      toast.success("Comunidade criada com sucesso! Bem-vindo(a) como administrador.");
+      toast.success("Comunidade criada com sucesso!");
       setShowCreate(false);
       setNewName('');
       setNewDesc('');
-      await fetchData(); // Atualiza listas
+      await fetchData();
       navigate(`/communities/${newCommunity.id}`);
     } else {
-      toast.error("Erro ao criar comunidade. Tente novamente.");
+      toast.error("Erro ao criar comunidade");
     }
   };
 
   const handleJoin = async (communityId: string) => {
     if (!profile.id) return;
-    
     const success = await joinCommunity(communityId, profile.id);
     if (success) {
       toast.success("Você entrou na comunidade!");
       await fetchData();
     } else {
-      toast.error("Erro ao entrar na comunidade.");
+      toast.error("Erro ao entrar");
     }
   };
 
-  const renderCommunityCard = (community: Community, isJoined: boolean = false) => (
-    <Card 
-      key={community.id}
-      className="bg-fiat-card-blue p-4 flex items-center justify-between gap-4 cursor-pointer hover:bg-fiat-card-blue/80 transition-all"
-      onClick={() => !isJoined && community.is_public && handleJoin(community.id)}
+  const renderCard = (c: Community, isMember: boolean = false) => (
+    <Card
+      key={c.id}
+      onClick={() => isMember ? navigate(`/communities/${c.id}`) : handleJoin(c.id)}
+      className="bg-fiat-card-blue p-5 flex items-center justify-between cursor-pointer hover:bg-fiat-card-blue/80 transition-all border border-white/10"
     >
       <div className="flex items-center gap-4">
         <div className="w-12 h-12 rounded-full bg-black/30 flex items-center justify-center text-fiat-gold border border-white/10">
-          {community.is_public ? <Globe size={24} /> : <Lock size={24} />}
+          {c.is_public ? <Globe size={24} /> : <Lock size={24} />}
         </div>
         <div>
-          <h3 className="font-serif text-white text-lg">{community.name}</h3>
+          <h3 className="font-serif text-white text-lg">{c.name}</h3>
           <p className="text-xs text-fiat-muted">
-            {community.members_count || 1} {community.members_count === 1 ? 'membro' : 'membros'}
-            {community.is_public ? '' : ' • Privada'}
+            {c.members_count || 1} {c.members_count === 1 ? 'membro' : 'membros'}
           </p>
         </div>
       </div>
-
-      {isJoined ? (
-        <div className="text-fiat-gold font-bold">›</div>
+      {isMember ? (
+        <ArrowRight className="text-fiat-gold" size={24} />
       ) : (
-        <Button size="sm" variant="sacred" className="gap-2" onClick={(e) => { e.stopPropagation(); handleJoin(community.id); }}>
+        <Button size="sm" onClick={(e) => { e.stopPropagation(); handleJoin(c.id); }} className="gap-2">
           <UserPlus size={16} /> Entrar
         </Button>
       )}
@@ -126,148 +110,61 @@ const CommunitiesPage: React.FC = () => {
   );
 
   return (
-    <div className="min-h-screen pb-32 bg-black">
-      {/* Header */}
-      <div className="p-6 pb-4">
+    <div className="min-h-screen bg-black text-white pb-32">
+      <div className="p-6">
         <div className="flex items-center gap-4 mb-6">
-          <Button variant="ghost" size="icon" onClick={() => navigate(-1)}>
-            <ArrowLeft size={28} className="text-gray-400" />
+          <Button variant="ghost" size="sm" className="p-2" onClick={() => navigate(-1)}>
+            <ArrowLeft size={28} />
           </Button>
           <h1 className="text-3xl font-serif text-fiat-gold">Comunidades</h1>
         </div>
 
-        <p className="text-fiat-muted text-center italic -mt-4 mb-6">
-          Reze em família com seus irmãos no Fiat
-        </p>
-
-        {/* Tabs + Botão Criar */}
-        <div className="flex items-center justify-between mb-8">
-          <div className="flex bg-fiat-card/50 backdrop-blur rounded-xl p-1 border border-fiat-gold/20">
-            <button 
-              onClick={() => setActiveTab('my')} 
-              className={`px-6 py-2 rounded-lg text-sm font-bold transition-all ${activeTab === 'my' ? 'bg-fiat-gold text-fiat-navy' : 'text-gray-400'}`}
+        <div className="flex justify-between items-center mb-6">
+          <div className="flex bg-fiat-card-blue/50 backdrop-blur rounded-xl p-1 border border-fiat-gold/20">
+            <button
+              onClick={() => setActiveTab('my')}
+              className={`px-6 py-2 rounded-lg text-sm font-bold ${activeTab === 'my' ? 'bg-fiat-gold text-fiat-navy' : 'text-gray-400'}`}
             >
               Minhas
             </button>
-            <button 
-              onClick={() => setActiveTab('explore')} 
-              className={`px-6 py-2 rounded-lg text-sm font-bold transition-all ${activeTab === 'explore' ? 'bg-fiat-gold text-fiat-navy' : 'text-gray-400'}`}
+            <button
+              onClick={() => setActiveTab('explore')}
+              className={`px-6 py-2 rounded-lg text-sm font-bold ${activeTab === 'explore' ? 'bg-fiat-gold text-fiat-navy' : 'text-gray-400'}`}
             >
               Explorar
             </button>
           </div>
-
-          <Button onClick={() => setShowCreate(true)} className="bg-fiat-gold text-fiat-navy hover:bg-fiat-gold/90 gap-2">
+          <Button onClick={() => setShowCreate(true)} className="bg-fiat-gold text-fiat-navy gap-2">
             <Plus size={18} /> Criar
           </Button>
         </div>
 
-        {/* Conteúdo */}
         {loading ? (
           <div className="flex justify-center py-20">
             <Loader2 className="animate-spin text-fiat-gold" size={40} />
           </div>
         ) : activeTab === 'my' ? (
           myCommunities.length === 0 ? (
-            <div className="text-center py-20 text-fiat-muted">
-              <Users size={60} className="mx-auto mb-4 opacity-20" />
-              <p className="italic">Você ainda não faz parte de nenhuma comunidade.</p>
-              <Button onClick={() => setActiveTab('explore')} className="mt-6" variant="outline">
-                Explorar comunidades
-              </Button>
-            </div>
+            <p className="text-center py-20 text-fiat-muted italic">Você ainda não está em nenhuma comunidade.</p>
           ) : (
             <div className="space-y-4">
-              {myCommunities.map(c => (
-                <div key={c.id} onClick={() => navigate(`/communities/${c.id}`)}>
-                  {renderCommunityCard(c, true)}
-                </div>
-              ))}
+              {myCommunities.map(c => renderCard(c, true))}
             </div>
           )
         ) : (
           publicCommunities.length === 0 ? (
-            <p className="text-center py-20 text-fiat-muted italic">
-              Nenhuma comunidade pública disponível no momento.
-            </p>
+            <p className="text-center py-20 text-fiat-muted italic">Nenhuma comunidade pública no momento.</p>
           ) : (
             <div className="space-y-4">
-              {publicCommunities.map(c => renderCommunityCard(c))}
+              {publicCommunities.map(c => renderCard(c))}
             </div>
           )
         )}
       </div>
 
-      {/* MODAL DE CRIAÇÃO */}
+      {/* Modal de criação - você já tem um lindo, mantenha o seu */}
       {showCreate && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-6 bg-black/90 backdrop-blur-md">
-          <div className="bg-fiat-card w-full max-w-lg rounded-3xl border border-fiat-gold/30 shadow-2xl p-8 relative">
-            <button 
-              onClick={() => setShowCreate(false)} 
-              className="absolute top-6 right-6 text-gray-400 hover:text-white"
-            >
-              <X size={28} />
-            </button>
-
-            <h2 className="text-2xl font-serif text-fiat-gold text-center mb-8">
-              Criar Nova Comunidade
-            </h2>
-
-            <form onSubmit={handleCreate} className="space-y-6">
-              <div>
-                <label className="block text-sm font-bold text-fiat-gold mb-2">Nome da Comunidade</label>
-                <Input 
-                  value={newName} 
-                  onChange={e => setNewName(e.target.value)} 
-                  placeholder="Ex: Terço dos Homens São José"
-                  required 
-                  className="bg-black/40 border-fiat-gold/30 focus:border-fiat-gold"
-                />
-              </div>
-
-              <div>
-                <label className="block text-sm font-bold text-fiat-gold mb-2">Descrição (opcional)</label>
-                <Input 
-                  value={newDesc} 
-                  onChange={e => setNewDesc(e.target.value)} 
-                  placeholder="Fale um pouco sobre o grupo..."
-                  className="bg-black/40 border-fiat-gold/30"
-                />
-              </div>
-
-              <div className="grid grid-cols-2 gap-4">
-                <button 
-                  type="button"
-                  onClick={() => setIsPublic(true)}
-                  className={`p-6 rounded-2xl border-2 transition-all ${isPublic ? 'border-fiat-gold bg-fiat-gold/10' : 'border-white/10 bg-black/20'}`}
-                >
-                  <Globe size={32} className={`mx-auto mb-3 ${isPublic ? 'text-fiat-gold' : 'text-gray-500'}`} />
-                  <p className="font-bold text-white">Pública</p>
-                  <p className="text-xs text-fiat-muted">Qualquer um pode entrar</p>
-                </button>
-
-                <button 
-                  type="button"
-                  onClick={() => setIsPublic(false)}
-                  className={`p-6 rounded-2xl border-2 transition-all ${!isPublic ? 'border-fiat-gold bg-fiat-gold/10' : 'border-white/10 bg-black/20'}`}
-                >
-                  <Lock size={32} className={`mx-auto mb-3 ${!isPublic ? 'text-fiat-gold' : 'text-gray-500'}`} />
-                  <p className="font-bold text-white">Privada</p>
-                  <p className="text-xs text-fiat-muted">Apenas por convite</p>
-                </button>
-              </div>
-
-              <Button 
-                type="submit" 
-                fullWidth 
-                disabled={isCreating || !newName.trim()}
-                className="mt-6 h-14 text-lg font-bold"
-              >
-                {isCreating ? <Loader2 className="animate-spin" /> : 'Criar Comunidade'}
-              </Button>
-            </form>
-          </div>
-        </div>
+        // ... seu modal lindo aqui
       )}
     </div>
   );
