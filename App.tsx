@@ -33,18 +33,25 @@ const AdminPage = React.lazy(() => import('./pages/Admin'));
 
 const App: React.FC = () => {
   const [isLoadingProfile, setIsLoadingProfile] = useState(true);
+
   const [profile, setProfile] = useState<UserProfile>(() => {
     const saved = localStorage.getItem('fiat-profile');
-    return saved ? JSON.parse(saved) : {
-      name: '',
-      email: '',
-      is_premium: false,
-      streak: 0,
-      rosaries_prayed: 0,
-      favorites: [],
-      active_novenas: [],
-      onboarding_completed: false
-    };
+    return saved
+      ? JSON.parse(saved)
+      : {
+          id: '',                                      // ADICIONADO
+          name: '',
+          email: '',
+          is_premium: false,
+          streak: 0,
+          rosaries_prayed: 0,
+          favorites: [],
+          active_novenas: [],
+          onboarding_completed: false,
+          devotionalSaintId: undefined,
+          customTheme: undefined,
+          nightModeSpiritual: false
+        };
   });
 
   const checkExpiration = (userProfile: UserProfile): UserProfile => {
@@ -56,8 +63,8 @@ const App: React.FC = () => {
 
       if (now.getTime() > toleranceDate.getTime()) {
         console.log('Plano Premium Expirado');
-        toast.error("Seu tempo Premium acabou.", { 
-          description: "Renove para continuar usando os recursos." 
+        toast.error("Seu tempo Premium acabou.", {
+          description: "Renove para continuar usando os recursos."
         });
         return { ...userProfile, is_premium: false };
       }
@@ -78,9 +85,8 @@ const App: React.FC = () => {
 
         if (data) {
           console.log("Perfil carregado do Banco:", data.is_premium ? "PREMIUM" : "GRÁTIS (Legado)");
-
           let updatedProfile: UserProfile = {
-            ...profile,
+            id: user.id,                               // ADICIONADO
             name: data.name || profile.name,
             email: data.email || user.email || profile.email,
             photo: data.photo || profile.photo,
@@ -99,24 +105,34 @@ const App: React.FC = () => {
             subscriptionId: data.subscription_id,
             onboarding_completed: true
           };
-
           updatedProfile = checkExpiration(updatedProfile);
           setProfile(updatedProfile);
         } else {
           console.log("Usuário sem perfil no DB (Aguardando pagamento).");
           setProfile(prev => ({
             ...prev,
-            name: user.user_metadata?.name || user.email?.split('@')[0],
-            email: user.email,
+            id: user.id,                             // ADICIONADO
+            name: user.user_metadata?.name || user.email?.split('@')[0] || '',
+            email: user.email || '',
             is_premium: false,
             onboarding_completed: true
           }));
         }
       } else {
-        setProfile({ 
-          name: '', email: '', is_premium: false, streak: 0, 
-          rosaries_prayed: 0, favorites: [], active_novenas: [], 
-          onboarding_completed: false 
+        // Usuário deslogado → reset completo com id vazio
+        setProfile({
+          id: '',                                      // ADICIONADO
+          name: '',
+          email: '',
+          is_premium: false,
+          streak: 0,
+          rosaries_prayed: 0,
+          favorites: [],
+          active_novenas: [],
+          onboarding_completed: false,
+          devotionalSaintId: undefined,
+          customTheme: undefined,
+          nightModeSpiritual: false
         });
       }
     } catch (error) {
@@ -134,25 +150,31 @@ const App: React.FC = () => {
       if (user) {
         channel = supabase
           .channel('profile-changes')
-          .on('postgres_changes', {
-            event: '*',
-            schema: 'public',
-            table: 'profiles',
-            filter: `id=eq.${user.id}`,
-          }, (payload: any) => {
-            console.log('Realtime: Perfil atualizado!', payload.new);
-            fetchUserProfile();
-            if (payload.new?.is_premium && !profile.is_premium) {
-              toast.success("Assinatura confirmada!", { 
-                description: "Bem-vindo(a) ao Santuário Premium." 
-              });
+          .on(
+            'postgres_changes',
+            {
+              event: '*',
+              schema: 'public',
+              table: 'profiles',
+              filter: `id=eq.${user.id}`,
+            },
+            (payload: any) => {
+              console.log('Realtime: Perfil atualizado!', payload.new);
+              fetchUserProfile();
+              if (payload.new?.is_premium && !profile.is_premium) {
+                toast.success("Assinatura confirmada!", {
+                  description: "Bem-vindo(a) ao Santuário Premium."
+                });
+              }
             }
-          })
+          )
           .subscribe();
       }
     };
     setupRealtime();
-    return () => { channel && supabase.removeChannel(channel); };
+    return () => {
+      channel && supabase.removeChannel(channel);
+    };
   }, [profile.is_premium]);
 
   // Auth + Visibility
@@ -162,7 +184,20 @@ const App: React.FC = () => {
     const { data: authListener } = supabase.auth.onAuthStateChange((event: any, session: any) => {
       if (event === 'SIGNED_IN' || event === 'INITIAL_SESSION') fetchUserProfile();
       if (event === 'SIGNED_OUT') {
-        setProfile({ name: '', email: '', is_premium: false, streak: 0, rosaries_prayed: 0, favorites: [], active_novenas: [], onboarding_completed: false });
+        setProfile({
+          id: '',                                      // ADICIONADO AQUI TAMBÉM
+          name: '',
+          email: '',
+          is_premium: false,
+          streak: 0,
+          rosaries_prayed: 0,
+          favorites: [],
+          active_novenas: [],
+          onboarding_completed: false,
+          devotionalSaintId: undefined,
+          customTheme: undefined,
+          nightModeSpiritual: false
+        });
         localStorage.clear();
         setIsLoadingProfile(false);
       }
@@ -174,6 +209,7 @@ const App: React.FC = () => {
         fetchUserProfile();
       }
     };
+
     document.addEventListener("visibilitychange", handleVisibilityChange);
 
     return () => {
@@ -189,7 +225,10 @@ const App: React.FC = () => {
 
   // Áudio unlock
   useEffect(() => {
-    const unlockAudio = () => { initAudio(); window.removeEventListener('click', unlockAudio); };
+    const unlockAudio = () => {
+      initAudio();
+      window.removeEventListener('click', unlockAudio);
+    };
     window.addEventListener('click', unlockAudio);
     return () => window.removeEventListener('click', unlockAudio);
   }, []);
@@ -197,30 +236,36 @@ const App: React.FC = () => {
   const updateProfile = async (p: UserProfile) => {
     setProfile(p);
     if (!p.is_premium) return;
+
     try {
       const user = await getCurrentUser();
       if (user) {
-        await supabase.from('profiles').update({
-          name: p.name,
-          photo: p.photo,
-          favorites: p.favorites,
-          active_novenas: p.active_novenas,
-          devotional_saint_id: p.devotionalSaintId,
-          custom_theme: p.customTheme,
-          favorite_quote: p.favoriteQuote,
-          night_mode_spiritual: p.nightModeSpiritual
-        }).eq('id', user.id);
+        await supabase
+          .from('profiles')
+          .update({
+            name: p.name,
+            photo: p.photo,
+            favorites: p.favorites,
+            active_novenas: p.active_novenas,
+            devotional_saint_id: p.devotionalSaintId,
+            custom_theme: p.customTheme,
+            favorite_quote: p.favoriteQuote,
+            night_mode_spiritual: p.nightModeSpiritual
+          })
+          .eq('id', user.id);
       }
-    } catch (e) { console.error('Erro ao atualizar perfil:', e); }
+    } catch (e) {
+      console.error('Erro ao atualizar perfil:', e);
+    }
   };
 
   return (
-    <AppContext.Provider value={{ 
-      profile, 
-      isLoadingProfile, 
-      updateProfile, 
-      refreshProfile: fetchUserProfile, 
-      themeColors: { primary: '#d4af37' } 
+    <AppContext.Provider value={{
+      profile,
+      isLoadingProfile,
+      updateProfile,
+      refreshProfile: fetchUserProfile,
+      themeColors: { primary: '#d4af37' }
     }}>
       <HashRouter>
         <Layout>
@@ -251,6 +296,7 @@ const App: React.FC = () => {
                 <AdminPage />
               </React.Suspense>
             } />
+
             <Route path="*" element={<Navigate to="/" replace />} />
           </Routes>
         </Layout>
