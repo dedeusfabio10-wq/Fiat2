@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { VIA_SACRA } from '../constants';
 import { Button } from '../ui/UIComponents';
 import { ChevronRight, ChevronLeft, ArrowLeft } from 'lucide-react';
+import SEO from '../components/SEO';
 
 const ViaSacraPage: React.FC = () => {
   const [currentStation, setCurrentStation] = useState(0);
@@ -13,6 +14,7 @@ const ViaSacraPage: React.FC = () => {
 
   return (
     <div className="min-h-screen bg-stone-950 text-stone-200 flex flex-col">
+      <SEO title="Via-Sacra Meditada – As 15 Estações da Paixão" description="Medite a Paixão de Jesus com texto completo das 15 estações da Via-Sacra." />
       <div className="flex items-center p-4 border-b border-stone-800 bg-stone-950/50 backdrop-blur-md sticky top-0 z-20"><button onClick={() => navigate('/')} className="p-2 mr-2 text-stone-400 hover:text-white"><ArrowLeft /></button><div><h1 className="text-lg font-serif text-purple-400">Via Sacra</h1><p className="text-xs text-stone-500 uppercase tracking-widest">Caminho da Cruz</p></div></div>
       <div className="h-72 bg-stone-900 relative w-full overflow-hidden shadow-inner group">
          <div className="absolute inset-0 bg-gradient-to-t from-stone-950 via-transparent to-transparent z-10"></div>
