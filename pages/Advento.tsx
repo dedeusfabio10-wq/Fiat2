@@ -3,6 +3,8 @@ import { useNavigate } from 'react-router-dom';
 import { ArrowLeft, Flame, Calendar, Star, Lock, ChevronRight, BookOpen, Gift } from 'lucide-react';
 import { Button } from '../ui/UIComponents';
 import { toast } from 'sonner';
+import SEO from '../components/SEO';
+
 
 // --- DADOS DO ADVENTO ---
 
@@ -88,6 +90,7 @@ const AdventoPage: React.FC = () => {
 
   return (
     <div className="min-h-screen bg-gradient-to-b from-[#1a0b2e] via-[#2e1065] to-[#0f172a] text-white pb-32 animate-fade-in">
+      <SEO title="Especial Advento 2025 – Coroa do Advento e Orações" description="Prepare-se para o Natal com a Coroa do Advento, orações diárias e calendário litúrgico." />
       
       {/* Header */}
       <div className="relative h-64 w-full overflow-hidden">
