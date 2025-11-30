@@ -13,12 +13,10 @@ interface Community {
 export default function CommunityDetail() {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
-
   const [community, setCommunity] = useState<Community | null>(null);
 
   useEffect(() => {
     if (!id) return;
-
     const fetch = async () => {
       const { data } = await supabase
         .from('communities')
@@ -39,10 +37,9 @@ export default function CommunityDetail() {
   }
 
   return (
-    // pb-20 = altura do menu inferior do app (80px ≈ 5rem)
-    <div className="min-h-screen bg-slate-950 text-white pb-20">
+    <>
       {/* HEADER FIXO */}
-      <header className="sticky top-0 z-40 bg-gradient-to-b from-slate-900 to-slate-950 border-b border-fiat-gold/20">
+      <header className="fixed top-0 left-0 right-0 z-40 bg-gradient-to-b from-slate-900 to-slate-950 border-b border-fiat-gold/20">
         <div className="px-6 py-6 flex items-center gap-4">
           <button onClick={() => navigate('/communities')}>
             <ArrowLeft size={32} className="text-fiat-gold" />
@@ -72,10 +69,10 @@ export default function CommunityDetail() {
         </div>
       </header>
 
-      {/* CHAT OCUPA TODO O ESPAÇO ATÉ O MENU INFERIOR */}
-      <div className="h-screen pb-32 pt-44"> {/* pt-44 = altura do header */}
+      {/* CHAT COMEÇA LOGO ABAIXO DO HEADER E VAI ATÉ O INPUT */}
+      <div className="pt-52 pb-24"> {/* pt-52 = altura exata do header */}
         <ChatTab />
       </div>
-    </div>
+    </>
   );
 }
