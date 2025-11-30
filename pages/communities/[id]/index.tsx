@@ -1,7 +1,7 @@
 // src/pages/communities/[id]/index.tsx
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { ArrowLeft, { MessageCircle, Calendar, Users } from 'lucide-react';
+import { ArrowLeft, MessageCircle, Calendar, Users } from 'lucide-react';
 import { supabase } from '../../../services/supabase';
 import ChatTab from './ChatTab';
 
@@ -14,7 +14,6 @@ export default function CommunityDetail() {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
   const [community, setCommunity] = useState<Community | null>(null);
-  const [activeTab] = useState<'chat' | 'plans' | 'members'>('chat'); // só chat por enquanto
 
   useEffect(() => {
     if (!id) return;
@@ -46,9 +45,8 @@ export default function CommunityDetail() {
 
   return (
     <div className="min-h-screen bg-slate-950 text-white pb-20">
-      {/* HEADER FIXO NO TOPO */}
-      <header className="sticky top-0 z-0 z-40 bg-gradient-to-b from-slate-900 to-slate-950 border-b border-fiat-gold/20">
-        {/* Voltar + Título */}
+      {/* HEADER FIXO */}
+      <header className="sticky top-0 z-40 bg-gradient-to-b from-slate-900 to-slate-950 border-b border-fiat-gold/20">
         <div className="px-6 py-6 flex items-center gap-4">
           <button onClick={() => navigate('/communities')} className="text-fiat-gold">
             <ArrowLeft size={32} />
@@ -61,7 +59,7 @@ export default function CommunityDetail() {
           </div>
         </div>
 
-        {/* ABAS FIXAS */}
+        {/* ABAS */}
         <div className="flex gap-10 px-6 py-4 bg-slate-950/95 backdrop-blur border-t border-fiat-gold/10">
           <div className="flex items-center gap-2 text-fiat-gold font-bold border-b-4 border-fiat-gold pb-3">
             <MessageCircle size={22} />
@@ -78,21 +76,9 @@ export default function CommunityDetail() {
         </div>
       </header>
 
-      {/* CONTEÚDO COM SCROLL (menu inferior some ao rolar)
+      {/* CONTEÚDO COM SCROLL */}
       <main className="h-full overflow-y-auto">
-        {activeTab === 'chat' && <ChatTab />}
-        {activeTab === 'plans' && (
-          <div className="flex flex-col items-center justify-center h-screen text-gray-400 pt-20">
-            <Calendar size={80} className="mb-6 opacity-30" />
-            <p className="text-xl">Planos de oração em breve</p>
-          </div>
-        )}
-        {activeTab === 'members' && (
-          <div className="flex flex-col items-center justify-center h-screen text-gray-400 pt-20">
-            <Users size={80} className="mb-6 opacity-30" />
-            <p className="text-xl">Lista de membros em breve</p>
-          </div>
-        )}
+        <ChatTab />
       </main>
     </div>
   );
