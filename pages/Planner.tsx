@@ -23,7 +23,7 @@ const SACRED_MUSIC = [
   },
   {
     name: "Adoro Te Devote",
-    url: "https://orangefreesounds.com/wp-content/uploads/2017/12/Adoro-Te-Devote-Gregorian-Chant.mp3",
+    url: "https://orangefreesounds.com/wp-content/uploads/2017/12/Adoro-Te-Devoto-Gregorian-Chant.mp3",
     desc: "Órgão gregoriano profundo"
   },
   {
