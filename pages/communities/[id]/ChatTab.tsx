@@ -4,7 +4,7 @@ import { useParams } from 'react-router-dom';
 import { supabase } from '../../../services/supabase';
 import { AppContext } from '../../../contexts/AppContext';
 import { Send, Loader2 } from 'lucide-react';
-import { Button, { Button, Input } from '../../../ui/UIComponents';
+import { Button, Input } from '../../../ui/UIComponents';  // CORRIGIDO: vírgula removida aqui
 import { toast } from 'sonner';
 
 interface Message {
@@ -23,7 +23,6 @@ export default function ChatTab() {
   const [sending, setSending] = useState(false);
   const scrollRef = useRef<HTMLDivElement>(null);
 
-  // Carrega mensagens e realtime
   useEffect(() => {
     if (!id || !profile) return;
 
@@ -39,7 +38,12 @@ export default function ChatTab() {
 
     const channel = supabase
       .channel(`chat_${id}`)
-      .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'community_messages', filter: `community_id=eq.${id}` }, (payload) => {
+      .on('postgres_changes', { 
+        event: 'INSERT', 
+        schema: 'public', 
+        table: 'community_messages', 
+        filter: `community_id=eq.${id}` 
+      }, (payload) => {
         setMessages(prev => [...prev, payload.new as Message]);
       })
       .subscribe();
@@ -47,7 +51,6 @@ export default function ChatTab() {
     return () => { supabase.removeChannel(channel); };
   }, [id, profile]);
 
-  // Scroll automático
   useEffect(() => {
     scrollRef.current?.scrollIntoView({ behavior: 'smooth' });
   }, [messages]);
@@ -73,7 +76,6 @@ export default function ChatTab() {
 
   return (
     <>
-      {/* MENSAGENS */}
       <div className="px-4 space-y-4 pb-20">
         {messages.length === 0 ? (
           <div className="text-center pt-32 text-gray-400">
