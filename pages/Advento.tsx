@@ -1,8 +1,7 @@
-
-import React, { useState, useEffect, useMemo } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { ArrowLeft, Flame, Calendar, Star, Lock, ChevronRight, BookOpen, Gift } from 'lucide-react';
-import { Button, Card } from '../ui/UIComponents';
+import { Button } from '../ui/UIComponents';
 import { toast } from 'sonner';
 
 // --- DADOS DO ADVENTO ---
@@ -54,23 +53,30 @@ const ADVENT_CALENDAR_DAYS = Array.from({ length: 24 }, (_, i) => ({
 const AdventoPage: React.FC = () => {
   const navigate = useNavigate();
   
-  // Estado das Velas (simulado para demonstração, idealmente persistido)
-  const [litCandles, setLitCandles] = useState<boolean[]>([false, false, false, false]);
+  // Estado das Velas agora lido do localStorage
+  const [litCandles, setLitCandles] = useState<boolean[]>(() => {
+    try {
+      const saved = localStorage.getItem('fiat-advent-candles');
+      return saved ? JSON.parse(saved) : [false, false, false, false];
+    } catch (e) {
+      return [false, false, false, false];
+    }
+  });
+
   const [selectedWeek, setSelectedWeek] = useState<number | null>(null);
   
-  // Estado do Calendário
   const [openedDoor, setOpenedDoor] = useState<number | null>(null);
   const today = new Date().getDate();
   const currentMonth = new Date().getMonth(); // 11 = Dezembro
-  
-  // Lógica simplificada: Em produção, validar se é Dezembro.
-  // Para teste, vamos assumir que estamos em Dezembro ou permitir abrir tudo.
-  const isDecember = currentMonth === 11 || currentMonth === 10; // Permitindo Nov para teste
+  const isDecember = currentMonth === 11;
 
-  const toggleCandle = (index: number) => {
+  const handleToggleCandle = (index: number) => {
     const newLit = [...litCandles];
     newLit[index] = !newLit[index];
     setLitCandles(newLit);
+    
+    // Salva no localStorage
+    localStorage.setItem('fiat-advent-candles', JSON.stringify(newLit));
     
     if (newLit[index]) {
         setSelectedWeek(index);
@@ -110,25 +116,19 @@ const AdventoPage: React.FC = () => {
          {/* 1. COROA DO ADVENTO INTERATIVA */}
          <section>
              <div className="bg-black/40 backdrop-blur-xl border border-purple-500/30 p-8 rounded-3xl shadow-2xl text-center relative overflow-hidden">
-                 {/* Glow de fundo */}
                  <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-64 h-64 bg-purple-600/20 rounded-full blur-3xl pointer-events-none"></div>
-
                  <h2 className="text-xl font-serif text-white mb-8 relative z-10">Coroa do Advento</h2>
-                 
                  <div className="flex justify-center items-end gap-4 md:gap-8 h-48 mb-6 relative z-10">
                      {ADVENT_WEEKS.map((week, index) => (
                          <div key={index} className="flex flex-col items-center gap-2 group">
-                             {/* Chama (Flame) */}
                              <div className={`transition-all duration-700 ${litCandles[index] ? 'opacity-100 scale-100' : 'opacity-0 scale-50'}`}>
                                  <div className="relative">
                                      <Flame size={32} className="text-yellow-400 animate-pulse" fill="currentColor" />
                                      <div className="absolute inset-0 bg-yellow-500 blur-lg opacity-50 animate-pulse-slow"></div>
                                  </div>
                              </div>
-                             
-                             {/* Vela */}
                              <button 
-                                onClick={() => toggleCandle(index)}
+                                onClick={() => handleToggleCandle(index)}
                                 className={`w-8 md:w-12 rounded-t-lg transition-all duration-500 relative overflow-hidden border-b-0 border-white/20 shadow-lg
                                     ${week.candleColor} 
                                     ${litCandles[index] ? 'h-32 md:h-40 shadow-[0_0_30px_rgba(147,51,234,0.4)]' : 'h-32 md:h-40 opacity-60 hover:opacity-80'}
@@ -137,13 +137,10 @@ const AdventoPage: React.FC = () => {
                                  <div className="absolute top-0 left-0 w-full h-4 bg-white/10 rounded-t-lg"></div>
                                  <div className="absolute bottom-0 left-0 w-full h-full bg-gradient-to-t from-black/60 to-transparent"></div>
                              </button>
-                             
                              <span className="text-[10px] uppercase font-bold text-purple-300/70">{index + 1}ª Sem</span>
                          </div>
                      ))}
                  </div>
-
-                 {/* Oração da Vela Acesa */}
                  {selectedWeek !== null && litCandles[selectedWeek] && (
                      <div className="mt-6 bg-purple-900/30 border border-purple-500/30 p-4 rounded-xl animate-slide-up">
                          <h3 className="text-purple-300 font-serif text-sm font-bold mb-2 uppercase tracking-widest">
@@ -154,7 +151,6 @@ const AdventoPage: React.FC = () => {
                          </p>
                      </div>
                  )}
-                 
                  {selectedWeek === null && (
                      <p className="text-xs text-gray-400 animate-pulse">Toque em uma vela para acender</p>
                  )}
