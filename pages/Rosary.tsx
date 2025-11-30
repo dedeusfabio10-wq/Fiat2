@@ -9,6 +9,7 @@ import { toggleFavorite } from '../services/storage';
 import { toast } from 'sonner';
 import { IconRosary } from '../ui/Icons';
 import { initAudio } from '../services/audio';
+import SEO from '../components/SEO';
 
 const VOICES = {
   female: { name: "Voz Mariana ♡" },
@@ -38,6 +39,9 @@ const RosaryPage: React.FC = () => {
 
   return (
     <div className="h-full flex flex-col p-6 relative overflow-y-auto pb-32">
+      
+      <SEO title="Terço do Rosário com Áudio Guiado – Voz Mariana e Sacerdotal" description="Reze o Santo Rosário completo com áudio guiado. Escolha voz feminina ou sacerdotal. Mistérios do dia automático." />
+     
       <div className="fixed inset-0 bg-[url('https://images.unsplash.com/photo-1560116422-196535370997?ixlib=rb-4.0.3&auto=format&fit=crop&w=1000&q=80')] bg-cover bg-center opacity-25 pointer-events-none mix-blend-luminosity"></div>
       <div className="fixed inset-0 bg-gradient-to-b from-sacred-sapphire/95 via-sacred-sapphire/80 to-sacred-sapphire/95 pointer-events-none"></div>
       <div className="relative z-10 space-y-8 max-w-md mx-auto w-full pt-4">
