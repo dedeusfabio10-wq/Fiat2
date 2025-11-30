@@ -1,9 +1,10 @@
+// src/pages/communities/[id]/ChatTab.tsx
 import React, { useState, useEffect, useContext, useRef } from 'react';
 import { useParams } from 'react-router-dom';
 import { supabase } from '../../../services/supabase';
 import { AppContext } from '../../../contexts/AppContext';
 import { Send, Loader2 } from 'lucide-react';
-import { Button, Input } from '../../../ui/UIComponents';
+import { Button, { Button, Input } from '../../../ui/UIComponents';
 import { toast } from 'sonner';
 
 interface Message {
@@ -20,157 +21,99 @@ export default function ChatTab() {
   const [messages, setMessages] = useState<Message[]>([]);
   const [newMessage, setNewMessage] = useState('');
   const [sending, setSending] = useState(false);
-  const [loading, setLoading] = useState(true);
-  const messagesEndRef = useRef<HTMLDivElement>(null);
+  const scrollRef = useRef<HTMLDivElement>(null);
 
-  // Scroll automático para a última mensagem
-  const scrollToBottom = () => {
-    messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
-  };
-
+  // Carrega mensagens e realtime
   useEffect(() => {
-    scrollToBottom();
-  }, [messages]);
+    if (!id || !profile) return;
 
-  useEffect(() => {
-    if (!id || !profile?.id) {
-      setLoading(false);
-      return;
-    }
-
-    const loadMessages = async () => {
-      const { data, error } = await supabase
+    const load = async () => {
+      const { data } = await supabase
         .from('community_messages')
         .select('*, profiles(name)')
         .eq('community_id', id)
         .order('created_at', { ascending: true });
-
-      if (error) {
-        console.error('Erro ao carregar mensagens:', error);
-        toast.error('Erro ao carregar o chat');
-      } else {
-        setMessages((data as Message[]) || []);
-      }
-      setLoading(false);
+      setMessages(data || []);
     };
-
-    loadMessages();
+    load();
 
     const channel = supabase
-      .channel(`community_${id}`)
-      .on(
-        'postgres_changes',
-        {
-          event: 'INSERT',
-          schema: 'public',
-          table: 'community_messages',
-          filter: `community_id=eq.${id}`,
-        },
-        (payload: { new: Message }) => {
-          setMessages((prev) => [...prev, payload.new]);
-        }
-      )
+      .channel(`chat_${id}`)
+      .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'community_messages', filter: `community_id=eq.${id}` }, (payload) => {
+        setMessages(prev => [...prev, payload.new as Message]);
+      })
       .subscribe();
 
-    return () => {
-      supabase.removeChannel(channel);
-    };
-  }, [id, profile?.id]);
+    return () => { supabase.removeChannel(channel); };
+  }, [id, profile]);
 
-  const sendMessage = async (e: React.FormEvent) => {
+  // Scroll automático
+  useEffect(() => {
+    scrollRef.current?.scrollIntoView({ behavior: 'smooth' });
+  }, [messages]);
+
+  const send = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!newMessage.trim() || sending || !profile?.id) {
-      if (!profile?.id) toast.error('Você precisa estar logado para enviar mensagens');
-      return;
-    }
+    if (!newMessage.trim() || sending || !profile) return;
 
-    const messageToSend = newMessage.trim();
+    const msg = newMessage.trim();
     setNewMessage('');
     setSending(true);
 
-    const { error } = await supabase.from('community_messages').insert({
-      community_id: id,
-      user_id: profile.id,
-      message: messageToSend,
-    });
+    const { error } = await supabase
+      .from('community_messages')
+      .insert({ community_id: id, user_id: profile.id, message: msg });
 
     if (error) {
-      toast.error('Erro ao enviar mensagem');
-      console.error(error);
-      setNewMessage(messageToSend); // devolve a mensagem se deu erro
+      toast.error('Erro ao enviar');
+      setNewMessage(msg);
     }
     setSending(false);
   };
 
-  if (loading) {
-    return (
-      <div className="flex items-center justify-center h-screen">
-        <Loader2 className="animate-spin text-fiat-gold" size={60} />
-      </div>
-    );
-  }
-
   return (
-    <div className="flex flex-col h-screen bg-slate-950">
-      {/* Área das mensagens com scroll */}
-      <div className="flex-1 overflow-y-auto px-4 pt-4 pb-24">
+    <>
+      {/* MENSAGENS */}
+      <div className="px-4 space-y-4 pb-20">
         {messages.length === 0 ? (
-          <div className="flex flex-col items-center justify-center h-full text-gray-400">
-            <p className="text-2xl font-light mb-2">Nenhuma mensagem ainda.</p>
-            <p className="text-lg">Seja o primeiro a rezar!</p>
+          <div className="text-center pt-32 text-gray-400">
+            <p className="text-2xl font-light">Nenhuma mensagem ainda.</p>
+            <p className="text-lg mt-3">Seja o primeiro a rezar!</p>
           </div>
         ) : (
-          <div className="space-y-4">
-            {messages.map((msg) => (
-              <div
-                key={msg.id}
-                className={`flex ${msg.user_id === profile?.id ? 'justify-end' : 'justify-start'}`}
-              >
-                <div
-                  className={`max-w-[80%] px-4 py-3 rounded-2xl shadow-lg ${
-                    msg.user_id === profile?.id
-                      ? 'bg-fiat-gold text-black'
-                      : 'bg-slate-700 text-white'
-                  }`}
-                >
-                  <p className="font-semibold text-sm opacity-90">{msg.profiles.name}</p>
-                  <p className="mt-1 break-words">{msg.message}</p>
-                  <p className="text-xs opacity-60 mt-2 text-right">
-                    {new Date(msg.created_at).toLocaleTimeString('pt-BR', {
-                      hour: '2-digit',
-                      minute: '2-digit',
-                    })}
-                  </p>
-                </div>
+          messages.map(msg => (
+            <div key={msg.id} className={`flex ${msg.user_id === profile?.id ? 'justify-end' : 'justify-start'} mb-4`}>
+              <div className={`max-w-[80%] px-5 py-3 rounded-2xl ${msg.user_id === profile?.id ? 'bg-fiat-gold text-black' : 'bg-slate-700'}`}>
+                <p className="font-bold text-sm">{msg.profiles.name}</p>
+                <p className="mt-1">{msg.message}</p>
+                <p className="text-xs opacity-70 text-right mt-2">
+                  {new Date(msg.created_at).toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' })}
+                </p>
               </div>
-            ))}
-            <div ref={messagesEndRef} />
-          </div>
+            </div>
+          ))
         )}
+        <div ref={scrollRef} />
       </div>
 
-      {/* Input fixo no fundo - compatível com menu retrátil */}
-      <form
-        onSubmit={sendMessage}
-        className="fixed bottom-20 left-0 right-0 bg-slate-950 border-t border-fiat-gold/30 p-4 z-40 shadow-2xl"
-      >
-        <div className="max-w-4xl mx-auto flex gap-3">
+      {/* INPUT FIXO ACIMA DO MENU INFERIOR */}
+      <div className="fixed bottom-20 left-0 right-0 bg-slate-950 border-t border-fiat-gold/30 px-4 py-3 z-50 shadow-2xl">
+        <form onSubmit={send} className="max-w-4xl mx-auto flex gap-3">
           <Input
             value={newMessage}
-            onChange={(e) => setNewMessage(e.target.value)}
+            onChange={e => setNewMessage(e.target.value)}
             placeholder="Ave Maria Puríssima..."
-            className="flex-1 bg-black/50 border-fiat-gold/60 text-white placeholder-gray-500 focus:border-fiat-gold focus:ring-fiat-gold"
-            disabled={sending}
+            className="flex-1 bg-black/50 border border-fiat-gold/60 text-white placeholder-gray-400 focus:border-fiat-gold"
           />
           <Button
             type="submit"
             disabled={sending || !newMessage.trim()}
-            className="bg-fiat-gold hover:bg-yellow-500 text-black font-bold px-6 transition-all disabled:opacity-50"
+            className="bg-fiat-gold hover:bg-yellow-500 text-black font-bold px-6 rounded-lg transition"
           >
-            {sending ? <Loader2 className="animate-spin" size={20} /> : <Send size={20} />}
+            {sending ? <Loader2 className="animate-spin" size={22} /> : <Send size={22} />}
           </Button>
-        </div>
-      </form>
-    </div>
+        </form>
+      </div>
+    </>
   );
 }
