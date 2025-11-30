@@ -352,7 +352,7 @@ const CatechismPage: React.FC = () => {
                     </div>
                     {pope.highlight && (
                       <span className="text-fiat-gold text-xs uppercase tracking-widest font-bold">
-                       • Primeiro Papa • 
+                       
                       </span>
                     )}
                     <p className="text-sm text-gray-300 font-serif italic mt-2 leading-relaxed">
