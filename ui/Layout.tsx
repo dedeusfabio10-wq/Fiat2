@@ -12,7 +12,6 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
   const location = useLocation();
   const isRosary = location.pathname === '/rosary';
   const isViaSacra = location.pathname === '/viasacra';
-  const isAdvento = location.pathname === '/advento';
   
   // Estado para controle da Nav Bar Retrátil
   const [showNav, setShowNav] = useState(true);
@@ -173,13 +172,13 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
       <main 
         ref={mainRef}
         onScroll={handleScroll}
-        className={`flex-1 relative z-10 ${isRosary || isViaSacra || isAdvento ? 'h-screen overflow-hidden' : 'overflow-y-auto scroll-smooth'}`}
+        className={`flex-1 relative z-10 ${isRosary || isViaSacra ? 'h-screen overflow-hidden' : 'overflow-y-auto scroll-smooth'}`}
       >
         {children}
       </main>
 
       {/* Bottom Navigation */}
-      {!isRosary && !isViaSacra && !isAdvento && location.pathname !== '/' && location.pathname !== '/auth' && location.pathname !== '/admin' && (
+      {!isRosary && !isViaSacra && location.pathname !== '/' && location.pathname !== '/auth' && location.pathname !== '/admin' && (
         <nav 
           className={`
             fixed bottom-0 left-0 right-0 z-50 bg-black/80 backdrop-blur-xl border-t border-white/5 h-20 pb-safe
