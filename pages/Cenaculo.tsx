@@ -6,6 +6,7 @@ import { Button, Card } from '../ui/UIComponents';
 import { IconRosary } from '../ui/Icons';
 import { CENACULO_CONSAGRACAO } from '../constants';
 import { toast } from 'sonner';
+import SEO from '../components/SEO';
 
 // --- BANCO DE CONTEÚDO DINÂMICO ---
 // O conteúdo muda baseado na semana do ano (Rotação)
@@ -150,6 +151,7 @@ const CenaculoPage: React.FC = () => {
   // --- TELA DO CENÁCULO (SE FOR SÁBADO) ---
   return (
     <div className="min-h-screen bg-gradient-to-b from-[#450a0a] via-[#1c0505] to-[#05080f] text-white pb-32 animate-fade-in">
+      <SEO title="Cenáculo com Maria – Todo Sábado ao Vivo" description="Participe do Cenáculo com Maria todo sábado: terço meditado e formação ao vivo." />
       
       {/* Header com Imagem de Pentecostes */}
       <div className="relative h-80 w-full overflow-hidden">
