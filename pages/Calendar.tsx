@@ -8,6 +8,7 @@ import { toggleFavorite } from '../services/storage';
 import { SaintIcon } from '../ui/SaintIcons';
 import { getDailyLiturgy } from '../data/liturgy';
 import { LiturgyReading, DailyLiturgy } from '../types';
+import SEO from '../components/SEO';
 
 const CalendarPage: React.FC = () => {
   const [activeTab, setActiveTab] = useState<'liturgy' | 'saints'>('liturgy');
@@ -121,6 +122,7 @@ const CalendarPage: React.FC = () => {
 
   return (
     <div className="p-6 pb-24 min-h-full">
+      <SEO title="Liturgia Diária de Hoje – Leituras, Evangelho e Salmo" description="Liturgia católica completa de hoje: 1ª leitura, salmo, evangelho e cor litúrgica. Atualizada diariamente." />
       <div className="flex items-center justify-between mb-8 pt-2 border-b border-white/5 pb-4">
         <h1 className="text-2xl font-serif text-white tracking-wide">SACRO CALENDÁRIO</h1>
         <div className="flex bg-fiat-card-blue rounded-lg p-1 border border-white/5">
