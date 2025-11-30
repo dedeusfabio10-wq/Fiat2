@@ -12,7 +12,7 @@ import SEO from '../components/SEO';
 const SACRED_MUSIC = [
   {
     name: "Noite Feliz (Instrumental)",
-    url: "https://pixabay.com/pt/music/natal-silent-night-christmas-piano-cover-441733/",
+    url: "https://cdn.pixabay.com/audio/2022/03/24/03-18-21-919_200x200.mp3",
     desc: "Especial de Natal",
     special: true
   },
