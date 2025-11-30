@@ -7,6 +7,7 @@ import { toggleFavorite } from '../services/storage';
 import { toast } from 'sonner';
 import { Prayer } from '../types';
 import { useNavigate } from 'react-router-dom';
+import SEO from '../components/SEO';
 
 const PrayersPage: React.FC = () => {
   const { profile, updateProfile } = useContext(AppContext);
@@ -33,6 +34,7 @@ const PrayersPage: React.FC = () => {
 
   return (
     <>
+      <SEO title="Orações Católicas Completas – Pai Nosso, Ave Maria, Creio" description="Todas as orações essenciais com texto completo e áudio: Ave Maria, Pai Nosso, Maria Passa na Frente e mais." />
       <div className="p-6 min-h-full pb-24 animate-fade-in">
         <div className="flex flex-col items-center mb-8 pt-4">
             <h1 className="text-3xl font-serif text-fiat-gold text-center drop-shadow-md tracking-wide uppercase border-b pb-4 border-fiat-gold/20 w-full">
