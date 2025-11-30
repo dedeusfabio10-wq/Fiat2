@@ -4,7 +4,7 @@ import { supabase } from '../../../services/supabase';
 import { AppContext } from '../../../contexts/AppContext';
 import { Send, Loader2 } from 'lucide-react';
 import { Button, Input } from '../../../ui/UIComponents';
-import { toast } from 'sonner'; // ← ERA SÓ ISSO QUE FALTAVA: a vírgula aqui!
+import { toast } from 'sonner';
 
 interface Message {
   id: string;
@@ -24,24 +24,17 @@ export default function ChatTab() {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    if (!id) return;
+    if (!id || !profile) return;
 
     const loadMessages = async () => {
-      const { data, error } = await supabase
+      const { data } = await supabase
         .from('community_messages')
         .select('*, profiles(name)')
         .eq('community_id', id)
         .order('created_at', { ascending: true });
-
-      if (error) {
-        console.error(error);
-        toast.error('Erro ao carregar mensagens');
-      } else {
-        setMessages((data as Message[]) || []);
-      }
+      setMessages((data as Message[]) || []);
       setLoading(false);
     };
-
     loadMessages();
 
     const channel = supabase
@@ -63,14 +56,16 @@ export default function ChatTab() {
     return () => {
       supabase.removeChannel(channel);
     };
-  }, [id]);
+  }, [id, profile]);
 
   const sendMessage = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!newMessage.trim() || sending || !profile?.id) return;
+    if (!newMessage.trim() || sending || !profile) {
+      toast.error('Você precisa estar logado para enviar mensagens');
+      return;
+    }
 
     setSending(true);
-
     const { error } = await supabase.from('community_messages').insert({
       community_id: id,
       user_id: profile.id,
@@ -86,49 +81,51 @@ export default function ChatTab() {
     setSending(false);
   };
 
-  if (loading) {
+  if (loading || !profile) {
     return (
       <div className="flex items-center justify-center h-96">
-        <Loader2 className="animate-spin text-fiat-gold" size={60} />
+        <Loader2 className="animate-spin text-fiat-gold" size={50} />
       </div>
     );
   }
 
   return (
     <div className="flex flex-col h-full">
-      {messages.length === 0 ? (
-        <div className="flex-1 flex flex-col items-center justify-center text-gray-400 px-6">
-          <p className="text-xl mb-2">Nenhuma mensagem ainda.</p>
-          <p className="text-lg">Seja o primeiro a rezar!</p>
-        </div>
-      ) : (
-        <div className="flex-1 overflow-y-auto px-4 pt-4 pb-20 space-y-4">
-          {messages.map((msg) => (
-            <div
-              key={msg.id}
-              className={`flex ${msg.user_id === profile?.id ? 'justify-end' : 'justify-start'}`}
-            >
+      {/* Mensagens */}
+      <div className="flex-1 overflow-y-auto px-4 pt-4 pb-20">
+        {messages.length === 0 ? (
+          <div className="text-center py-20 text-gray-400">
+            <p className="text-xl mb-4">Nenhuma mensagem ainda.</p>
+            <p className="text-lg">Seja o primeiro a rezar!</p>
+          </div>
+        ) : (
+          <div className="space-y-4">
+            {messages.map((msg) => (
               <div
-                className={`max-w-[75%] px-4 py-3 rounded-2xl ${
-                  msg.user_id === profile?.id
-                    ? 'bg-fiat-gold text-black'
-                    : 'bg-slate-700 text-white'
-                }`}
+                key={msg.id}
+                className={`flex ${msg.user_id === profile.id ? 'justify-end' : 'justify-start'}`}
               >
-                <p className="font-semibold text-sm">{msg.profiles.name}</p>
-                <p className="mt-1">{msg.message}</p>
-                <p className="text-xs opacity-70 mt-1">
-                  {new Date(msg.created_at).toLocaleTimeString('pt-BR', {
-                    hour: '2-digit',
-                    minute: '2-digit',
-                  })}
-                </p>
+                <div
+                  className={`max-w-xs px-4 py-3 rounded-2xl ${
+                    msg.user_id === profile.id ? 'bg-fiat-gold text-black' : 'bg-slate-700'
+                  }`}
+                >
+                  <p className="font-semibold text-sm">{msg.profiles.name}</p>
+                  <p className="mt-1">{msg.message}</p>
+                  <p className="text-xs opacity-70 mt-1">
+                    {new Date(msg.created_at).toLocaleTimeString('pt-BR', {
+                      hour: '2-digit',
+                      minute: '2-digit',
+                    })}
+                  </p>
+                </div>
               </div>
-            </div>
-          ))}
-        </div>
-      )}
+            ))}
+          </div>
+        )}
+      </div>
 
+      {/* Input fixo no fundo */}
       <form
         onSubmit={sendMessage}
         className="fixed bottom-0 left-0 right-0 bg-slate-950 border-t border-fiat-gold/30 p-4 z-50"
@@ -137,14 +134,13 @@ export default function ChatTab() {
           <Input
             value={newMessage}
             onChange={(e) => setNewMessage(e.target.value)}
-            placeholder="Escreva sua oração ou mensagem..."
+            placeholder="Ave Maria Puríssima..."
             className="flex-1 bg-black/40 border-fiat-gold/50 focus:border-fiat-gold"
-            disabled={sending}
           />
           <Button
             type="submit"
             disabled={sending || !newMessage.trim()}
-            className="bg-fiat-gold hover:bg-yellow-500 text-black font-bold px-6 transition"
+            className="bg-fiat-gold hover:bg-yellow-500 text-black font-bold"
           >
             {sending ? <Loader2 className="animate-spin" size={20} /> : <Send size={20} />}
           </Button>
