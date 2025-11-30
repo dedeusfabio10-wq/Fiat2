@@ -5,6 +5,7 @@ import { Button } from '../ui/UIComponents';
 import { ChevronRight, Sun, Cross, Gift, Flame, Star } from 'lucide-react';
 import { DAILY_QUOTES, MYSTERIES } from '../constants';
 import { IconRosary } from '../ui/Icons';
+import SEO from '../components/SEO';
 
 const HomePage: React.FC = () => {
   const { profile, themeColors } = useContext(AppContext);
@@ -55,6 +56,9 @@ const HomePage: React.FC = () => {
 
   return (
     <div className="p-6 space-y-6 animate-fade-in pb-32">
+      
+      <SEO title="Fiat – Santuário Digital Católico" description="Terço guiado com áudio, liturgia diária, orações completas, catequese e comunidades de oração." />
+     
       <div className="flex justify-between items-start pt-4">
         <div>
           <h1 className="text-xl font-serif text-white leading-tight tracking-wide flex items-center gap-2">
