@@ -7,6 +7,7 @@ import { getPlans, deletePlan } from '../services/storage';
 import { SpiritualPlan } from '../types';
 import { toast } from 'sonner';
 import { supabase } from '../services/supabase';
+import SEO from '../components/SEO';
 
 const SACRED_MUSIC = [
   {
@@ -225,7 +226,9 @@ const PlannerPage: React.FC = () => {
 
   return (
     <div className="p-6 pb-32 animate-fade-in min-h-screen relative">
-      <div className="mb-8 bg-black/40 backdrop-blur-xl border border-sacred-gold/30 rounded-2xl p-5 shadow-2xl animate-fade-in">
+     <SEO title="Meu Planner Espiritual – Direção Espiritual e Metas" description="Crie seu plano de oração: terço diário, missa, confissão. Acompanhe seu progresso espiritual." />
+      
+     <div className="mb-8 bg-black/40 backdrop-blur-xl border border-sacred-gold/30 rounded-2xl p-5 shadow-2xl animate-fade-in">
         <div className="flex items-center gap-3 text-sacred-gold mb-4">
           <Music size={22} className="animate-pulse" />
           <h3 className="font-serif text-lg">Música Sacra para Meditação</h3>
