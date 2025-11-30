@@ -41,6 +41,7 @@ import {
 } from 'lucide-react';
 import { toast } from 'sonner';
 import { SaintIcon } from '../ui/SaintIcons';
+import SEO from '../components/SEO';
 
 const CatechismPage: React.FC = () => {
   const { profile, isLoadingProfile, refreshProfile } = useContext(AppContext);
@@ -169,6 +170,8 @@ const CatechismPage: React.FC = () => {
 
   return (
     <div className="p-6 pb-32 min-h-screen animate-fade-in">
+      
+      <SEO title="Catecismo da Igreja Católica – Credo, Sacramentos, Mandamentos" description="Catequese completa: O Credo, Os 7 Sacramentos, Os 10 Mandamentos, A Virgem Maria e mais." />
       <div className="flex justify-between items-center mb-8 pt-4 border-b border-white/5 pb-4">
         <div>
           <h1 className="text-2xl font-serif text-white tracking-wide">CATEQUESE</h1>
