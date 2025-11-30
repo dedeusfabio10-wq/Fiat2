@@ -4,7 +4,7 @@ import { useParams } from 'react-router-dom';
 import { supabase } from '../../../services/supabase';
 import { AppContext } from '../../../contexts/AppContext';
 import { Send, Loader2 } from 'lucide-react';
-import { Button, Input } from '../../../ui/UIComponents';  // CORRIGIDO: vírgula removida aqui
+import { Button, Input } from '../../../ui/UIComponents';
 import { toast } from 'sonner';
 
 interface Message {
@@ -18,43 +18,55 @@ interface Message {
 export default function ChatTab() {
   const { id } = useParams<{ id: string }>();
   const { profile } = useContext(AppContext);
+
   const [messages, setMessages] = useState<Message[]>([]);
   const [newMessage, setNewMessage] = useState('');
   const [sending, setSending] = useState(false);
   const scrollRef = useRef<HTMLDivElement>(null);
 
+  // Carrega mensagens iniciais + escuta novas mensagens em tempo real
   useEffect(() => {
     if (!id || !profile) return;
 
-    const load = async () => {
+    const loadInitialMessages = async () => {
       const { data } = await supabase
         .from('community_messages')
         .select('*, profiles(name)')
         .eq('community_id', id)
         .order('created_at', { ascending: true });
-      setMessages(data || []);
+
+      if (data) setMessages(data);
     };
-    load();
+
+    loadInitialMessages();
 
     const channel = supabase
       .channel(`chat_${id}`)
-      .on('postgres_changes', { 
-        event: 'INSERT', 
-        schema: 'public', 
-        table: 'community_messages', 
-        filter: `community_id=eq.${id}` 
-      }, (payload) => {
-        setMessages(prev => [...prev, payload.new as Message]);
-      })
+      .on(
+        'postgres_changes',
+        {
+          event: 'INSERT',
+          schema: 'public',
+          table: 'community_messages',
+          filter: `community_id=eq.${id}`,
+        },
+        (payload: { new: Message }) => {
+          setMessages((prev) => [...prev, payload.new]);
+        }
+      )
       .subscribe();
 
-    return () => { supabase.removeChannel(channel); };
+    return () => {
+      supabase.removeChannel(channel);
+    };
   }, [id, profile]);
 
+  // Scroll automático para a última mensagem
   useEffect(() => {
     scrollRef.current?.scrollIntoView({ behavior: 'smooth' });
   }, [messages]);
 
+  // Enviar mensagem
   const send = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!newMessage.trim() || sending || !profile) return;
@@ -65,12 +77,17 @@ export default function ChatTab() {
 
     const { error } = await supabase
       .from('community_messages')
-      .insert({ community_id: id, user_id: profile.id, message: msg });
+      .insert({
+        community_id: id,
+        user_id: profile.id,
+        message: msg,
+      });
 
     if (error) {
-      toast.error('Erro ao enviar');
-      setNewMessage(msg);
+      toast.error('Erro ao enviar mensagem');
+      setNewMessage(msg); // devolve o texto caso dê erro
     }
+
     setSending(false);
   };
 
@@ -83,13 +100,23 @@ export default function ChatTab() {
             <p className="text-lg mt-3">Seja o primeiro a rezar!</p>
           </div>
         ) : (
-          messages.map(msg => (
-            <div key={msg.id} className={`flex ${msg.user_id === profile?.id ? 'justify-end' : 'justify-start'} mb-4`}>
-              <div className={`max-w-[80%] px-5 py-3 rounded-2xl ${msg.user_id === profile?.id ? 'bg-fiat-gold text-black' : 'bg-slate-700'}`}>
+          messages.map((msg) => (
+            <div
+              key={msg.id}
+              className={`flex ${msg.user_id === profile?.id ? 'justify-end' : 'justify-start'} mb-4`}
+            >
+              <div
+                className={`max-w-[80%] px-5 py-3 rounded-2xl ${
+                  msg.user_id === profile?.id ? 'bg-fiat-gold text-black' : 'bg-slate-700'
+                }`}
+              >
                 <p className="font-bold text-sm">{msg.profiles.name}</p>
                 <p className="mt-1">{msg.message}</p>
                 <p className="text-xs opacity-70 text-right mt-2">
-                  {new Date(msg.created_at).toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' })}
+                  {new Date(msg.created_at).toLocaleTimeString('pt-BR', {
+                    hour: '2-digit',
+                    minute: '2-digit',
+                  })}
                 </p>
               </div>
             </div>
@@ -98,12 +125,12 @@ export default function ChatTab() {
         <div ref={scrollRef} />
       </div>
 
-      {/* INPUT FIXO ACIMA DO MENU INFERIOR */}
+      {/* Input fixo acima do menu inferior */}
       <div className="fixed bottom-20 left-0 right-0 bg-slate-950 border-t border-fiat-gold/30 px-4 py-3 z-50 shadow-2xl">
         <form onSubmit={send} className="max-w-4xl mx-auto flex gap-3">
           <Input
             value={newMessage}
-            onChange={e => setNewMessage(e.target.value)}
+            onChange={(e) => setNewMessage(e.target.value)}
             placeholder="Ave Maria Puríssima..."
             className="flex-1 bg-black/50 border border-fiat-gold/60 text-white placeholder-gray-400 focus:border-fiat-gold"
           />
