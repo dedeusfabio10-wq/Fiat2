@@ -3,9 +3,8 @@ import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Button } from '../ui/UIComponents';
 import { IconRosary, IconMonstrance, IconBible, IconSacredHeart, IconBookCross } from '../ui/Icons';
-import { Star, ArrowRight, Sparkles, Check, Crown, ShieldCheck, Smartphone, ChevronRight, HelpCircle, Quote, Instagram } from 'lucide-react';
+import { Star, ArrowRight, Sparkles, Check, Crown, ShieldCheck, Smartphone, ChevronRight, HelpCircle, Quote } from 'lucide-react';
 import { initAudio, playSacredIntro } from '../services/audio';
-
 
 const LandingPage: React.FC = () => {
   const navigate = useNavigate();
@@ -119,30 +118,6 @@ const LandingPage: React.FC = () => {
           <div className="max-w-6xl mx-auto px-6 flex flex-col items-center space-y-4">
               <div className="w-12 h-12 flex items-center justify-center text-sacred-gold/30 border border-sacred-gold/10 rounded-full hover:bg-sacred-gold/5 transition-colors cursor-pointer" onClick={handleEnter}><IconMonstrance size={24} /></div>
               <p>&copy; 2024 Fiat App. Ad Maiorem Dei Gloriam.</p>
-                          {/* Instagram e TikTok – discretos e bonitos */}
-              <div className="flex items-center gap-8 text-gray-500">
-                <a
-                  href="https://instagram.com/fiatcatolico"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="flex items-center gap-2 hover:text-sacred-gold transition"
-                >
-                  <Instagram size={18} />
-                  <span className="text-sm">@fiatcatolico</span>
-                </a>
-
-                <a
-                  href="https://tiktok.com/@fiatcatolico"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="flex items-center gap-2 hover:text-sacred-gold transition"
-                >
-                  <svg className="w-[18px] h-[18px]" viewBox="0 0 24 24" fill="currentColor">
-                    <path d="M19.58 6.79c-.88-1.1-1.32-2.43-1.32-3.78 0-.52-.42-.94-.94-.94-.94h-3.29c-.52 0-.94.42-.94.94v9.42c0 2.2-1.79 3.99-3.99 3.99s-3.99-1.79-3.99-3.99 1.79-3.99 3.99-3.99c.52 0 .94-.42.94-.94v-3.29c0-.52-.42-.94-.94-.94-4.43 0-8.02 3.59-8.02 8.02s3.59 8.02 8.02 8.02c4.43 0 8.02-3.59 8.02-8.02v-4.14c1.36-.88 2.88-1.98 3.76-3.08.33-.41.14-.99-.38-.99h-2.92z"/>
-                  </svg>
-                  <span className="text-sm">@fiatcatolico</span>
-                </a>
-              </div>
               <div className="flex gap-4"><button className="hover:text-gray-400">Termos de Uso</button><button className="hover:text-gray-400">Política de Privacidade</button><button className="hover:text-gray-400">Suporte</button></div>
           </div>
       </footer>
