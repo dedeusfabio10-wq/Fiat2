@@ -3,12 +3,18 @@ import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Button } from '../ui/UIComponents';
 import { IconRosary, IconMonstrance, IconBible, IconSacredHeart, IconBookCross } from '../ui/Icons';
-import { Star, ArrowRight, Sparkles, Check, Crown, ShieldCheck, Smartphone, ChevronRight, HelpCircle, Quote, Instagram, TikTok } from 'lucide-react';
+import { Star, ArrowRight, Sparkles, Check, Crown, ShieldCheck, Smartphone, ChevronRight, HelpCircle, Quote, Instagram } from 'lucide-react';
 import { initAudio, playSacredIntro } from '../services/audio';
 
 const LandingPage: React.FC = () => {
   const navigate = useNavigate();
   const [scrolled, setScrolled] = useState(false);
+  
+  const TikTokIcon = () => (
+  <svg className="w-8 h-8" viewBox="0 0 24 24" fill="currentColor">
+    <path d="M19.66 3.8c-.38-.7-1.18-1.16-2.07-1.16-1.04 0-1.88.84-1.88 1.88s.84 1.88 1.88 1.88c.72 0 1.34-.4 1.68-.98V8.6h2.1v2.3h-2.1v6.9c0 .72-.24 1.41-.66 1.97a2.1 2.1 0 0 1-1.5.62c-.83 0-1.5-.67-1.5-1.5s.67-1.5 1.5-1.5c.43 0 .82.18 1.1.48v-2h-2.1v-2.3h2.1V5.9c-.64.7-1.04 1.68-1.04 2.79 0 2.29 1.87 4.16 4.17 4.16s4.17-1.87 4.17-4.16S21.95 3.8 19.66 3.8z"/>
+  </svg>
+);
 
   useEffect(() => {
     const handleScroll = () => setScrolled(window.scrollY > 50);
@@ -118,30 +124,34 @@ const LandingPage: React.FC = () => {
           <div className="max-w-6xl mx-auto px-6 flex flex-col items-center space-y-4">
               <div className="w-12 h-12 flex items-center justify-center text-sacred-gold/30 border border-sacred-gold/10 rounded-full hover:bg-sacred-gold/5 transition-colors cursor-pointer" onClick={handleEnter}><IconMonstrance size={24} /></div>
             <div className="flex gap-8">
-  {/* Instagram com gradiente */}
+              
+ <div className="flex gap-8 justify-center items-center mt-12">
+  {/* INSTAGRAM */}
   <a
     href="https://instagram.com/fiatcatolicos"
     target="_blank"
     rel="noopener noreferrer"
-    className="group"
+    className="group transition-all duration-300 hover:scale-125"
+    aria-label="Instagram do Fiat Católicos"
   >
-    <div className="p-3 bg-gradient-to-tr from-purple-600 via-pink-500 to-orange-400 rounded-xl group-hover:scale-125 transition-all duration-300 shadow-lg">
-      <Instagram size={28} className="text-white" />
+    <div className="p-4 bg-gradient-to-tr from-purple-600 via-pink-500 to-orange-400 rounded-2xl shadow-lg group-hover:shadow-2xl transition-all">
+      <Instagram size={32} className="text-white drop-shadow-md" />
     </div>
   </a>
 
-  {/* TikTok preto clássico */}
+  {/* TIKTOK */}
   <a
     href="https://tiktok.com/@fiatcatolicos"
     target="_blank"
     rel="noopener noreferrer"
-    className="group"
+    className="group transition-all duration-300 hover:scale-125"
+    aria-label="TikTok do Fiat Católicos"
   >
-    <div className="p-3 bg-black rounded-xl border border-white/20 group-hover:scale-125 transition-all duration-300 shadow-lg">
-      <TikTok size={28} className="text-white" />
+    <div className="p-4 bg-black rounded-2xl shadow-lg group-hover:shadow-2xl transition-all border border-white/20">
+      <TikTokIcon />
     </div>
   </a>
-</div> 
+</div>
             <p>&copy; 2024 Fiat App. Ad Maiorem Dei Gloriam.</p>
               <div className="flex gap-4"><button className="hover:text-gray-400">Termos de Uso</button><button className="hover:text-gray-400">Política de Privacidade</button><button className="hover:text-gray-400">Suporte</button></div>
           </div>
