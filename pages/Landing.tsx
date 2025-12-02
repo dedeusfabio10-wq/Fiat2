@@ -5,6 +5,10 @@ import { Button } from '../ui/UIComponents';
 import { IconRosary, IconMonstrance, IconBible, IconSacredHeart, IconBookCross } from '../ui/Icons';
 import { Star, ArrowRight, Sparkles, Check, Crown, ShieldCheck, Smartphone, ChevronRight, HelpCircle, Quote } from 'lucide-react';
 import { initAudio, playSacredIntro } from '../services/audio';
+import { 
+  Star, ArrowRight, Sparkles, Check, Crown, ShieldCheck, 
+  Smartphone, ChevronRight, HelpCircle, Quote, Instagram   // <--- ADICIONA AQUI
+} from 'lucide-react';
 
 const LandingPage: React.FC = () => {
   const navigate = useNavigate();
