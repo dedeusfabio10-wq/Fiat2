@@ -117,7 +117,32 @@ const LandingPage: React.FC = () => {
       <footer className="py-12 text-center text-gray-600 text-xs bg-[#050a14] border-t border-white/5">
           <div className="max-w-6xl mx-auto px-6 flex flex-col items-center space-y-4">
               <div className="w-12 h-12 flex items-center justify-center text-sacred-gold/30 border border-sacred-gold/10 rounded-full hover:bg-sacred-gold/5 transition-colors cursor-pointer" onClick={handleEnter}><IconMonstrance size={24} /></div>
-              <p>&copy; 2024 Fiat App. Ad Maiorem Dei Gloriam.</p>
+            <div className="flex gap-8">
+  {/* Instagram com gradiente */}
+  <a
+    href="https://instagram.com/fiatcatolicos"
+    target="_blank"
+    rel="noopener noreferrer"
+    className="group"
+  >
+    <div className="p-3 bg-gradient-to-tr from-purple-600 via-pink-500 to-orange-400 rounded-xl group-hover:scale-125 transition-all duration-300 shadow-lg">
+      <Instagram size={28} className="text-white" />
+    </div>
+  </a>
+
+  {/* TikTok preto clássico */}
+  <a
+    href="https://tiktok.com/@fiatcatolicos"
+    target="_blank"
+    rel="noopener noreferrer"
+    className="group"
+  >
+    <div className="p-3 bg-black rounded-xl border border-white/20 group-hover:scale-125 transition-all duration-300 shadow-lg">
+      <TikTok size={28} className="text-white" />
+    </div>
+  </a>
+</div> 
+            <p>&copy; 2024 Fiat App. Ad Maiorem Dei Gloriam.</p>
               <div className="flex gap-4"><button className="hover:text-gray-400">Termos de Uso</button><button className="hover:text-gray-400">Política de Privacidade</button><button className="hover:text-gray-400">Suporte</button></div>
           </div>
       </footer>
