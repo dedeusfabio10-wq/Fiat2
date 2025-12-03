@@ -124,95 +124,40 @@ const TikTokIcon = ({ className = "w-5 h-5" }) => (
           </div>
       </section>
 
-           </section>
-
-      {/* FAQ – agora com fundo um pouco mais claro pra não cobrir o footer */}
-      <section className="py-24 bg-[#0b1120] border-t border-white/5">
-        <div className="max-w-3xl mx-auto px-6">
-          <div className="text-center mb-12">
-            <div className="inline-block p-3 rounded-full bg-white/5 mb-4 text-gray-400">
-              <HelpCircle size={24} />
-            </div>
-            <h2 className="text-3xl font-serif text-white mb-4">Dúvidas Frequentes</h2>
-            <p className="text-gray-400 font-light">Tudo o que você precisa saber sobre o Fiat.</p>
+      <section className="py-24 bg-[#050a14] border-t border-white/5 relative overflow-hidden">
+          <div className="absolute inset-0 bg-[url('https://www.transparenttextures.com/patterns/stardust.png')] opacity-5 pointer-events-none"></div>
+          <div className="max-w-3xl mx-auto px-6 relative z-10">
+              <div className="text-center mb-12"><div className="inline-block p-3 rounded-full bg-white/5 mb-4 text-gray-400"><HelpCircle size={24} /></div><h2 className="text-3xl font-serif text-white mb-4">Dúvidas Frequentes</h2><p className="text-gray-400 font-light">Tudo o que você precisa saber sobre o Fiat.</p></div>
+              <div className="grid gap-4"><FAQItem question="Preciso de internet para usar?" answer="Sim. Como o Fiat é um Web App moderno (acessado pelo navegador), é necessária uma conexão com a internet para carregar a Liturgia Diária, salvar seu progresso no Planner e acessar os áudios. O app foi otimizado para ser extremamente leve e gastar poucos dados." /><FAQItem question="Como funciona a assinatura Premium?" answer="É uma contribuição mensal de R$ 4,90 ou anual de R$ 39,90. O pagamento é processado de forma segura pelo Mercado Pago (Pix ou Cartão) e você tem total liberdade para cancelar quando quiser nas configurações do seu perfil." /><FAQItem question="O conteúdo é fiel à Igreja Católica?" answer="Absolutamente. Todo o conteúdo (orações, leituras, santos, catequese) segue rigorosamente o Magistério da Igreja Católica, a Bíblia Sagrada (tradução da CNBB ou Ave Maria) e a Tradição Apostólica." /><FAQItem question="Para onde vai o dinheiro da assinatura?" answer="90% do valor é reinvestido na manutenção do app e evangelização digital, e 10% é doado para apoiar obras de caridade." /></div>
           </div>
-
-          <div className="grid gap-4 max-w-2xl mx-auto">
-            <FAQItem question="Preciso de internet para usar?" answer="Sim. Como o Fiat é um Web App moderno (acessado pelo navegador), é necessária uma conexão com a internet para carregar a Liturgia Diária, salvar seu progresso no Planner e acessar os áudios. O app foi otimizado para ser extremamente leve e gastar poucos dados." />
-            <FAQItem question="Como funciona a assinatura Premium?" answer="É uma contribuição mensal de R$ 4,90 ou anual de R$ 39,90. O pagamento é processado de forma segura pelo Mercado Pago (Pix ou Cartão) e você tem total liberdade para cancelar quando quiser nas configurações do seu perfil." />
-            <FAQItem question="O conteúdo é fiel à Igreja Católica?" answer="Absolutamente. Todo o conteúdo (orações, leituras, santos, catequese) segue rigorosamente o Magistério da Igreja Católica, a Bíblia Sagrada (tradução da CNBB ou Ave Maria) e a Tradição Apostólica." />
-            <FAQItem question="Para onde vai o dinheiro da assinatura?" answer="90% do valor é reinvestido na manutenção do app e evangelização digital, e 10% é doado para apoiar obras de caridade." />
-          </div>
-        </div>
       </section>
 
-      {/* Footer – agora totalmente visível e com mais contraste */}
-      <footer className="py-16 bg-[#050a14] border-t border-white/10">
-        <div className="max-w-6xl mx-auto px-6 flex flex-col items-center space-y-8 text-center">
-          <div 
-            className="w-14 h-14 rounded-full border border-sacred-gold/20 flex items-center justify-center text-sacred-gold/50 hover:text-sacred-gold hover:border-sacred-gold/50 transition cursor-pointer"
-            onClick={handleEnter}
-          >
-            <IconMonstrance size={28} />
-          </div>
-
-          <div className="flex gap-10">
-            <a href="https://instagram.com/fiatcatolicos" target="_blank" rel="noopener noreferrer" className="group">
-              <div className="p-4 bg-gradient-to-tr from-purple-600 via-pink-500 to-orange-400 rounded-2xl shadow-xl group-hover:scale-110 transition">
-                <Instagram size={36} className="text-white" />
-              </div>
-            </a>
-            <a href="https://tiktok.com/@fiatcatolicos" target="_blank" rel="noopener noreferrer" className="group">
-              <div className="p-4 bg-black rounded-2xl shadow-xl border border-white/20 group-hover:scale-110 transition">
-                <TikTokIcon />
-              </div>
-            </a>
-          </div>
-
-          <div className="space-y-3">
-            <p className="text-gray-300 text-sm">
-              © 2025 Fiat – Santuário Digital. <span className="text-sacred-gold">Ad Maiorem Dei Gloriam.</span>
-            </p>
-            <div className="flex gap-6 text-sm">
-              <button className="text-gray-500 hover:text-sacred-gold transition">Termos de Uso</button>
-              <button className="text-gray-500 hover:text-sacred-gold transition">Política de Privacidade</button>
-              <button className="text-gray-500 hover:text-sacred-gold transition">Suporte</button>
+      <footer className="py-12 text-center text-gray-600 text-xs bg-[#050a14] border-t border-white/5">
+          <div className="max-w-6xl mx-auto px-6 flex flex-col items-center space-y-4">
+              <div className="w-12 h-12 flex items-center justify-center text-sacred-gold/30 border border-sacred-gold/10 rounded-full hover:bg-sacred-gold/5 transition-colors cursor-pointer" onClick={handleEnter}><IconMonstrance size={24} /></div>
+             
+             {/* Redes Sociais */}
+            <div className="flex flex-col sm:flex-row justify-center items-center gap-6 mb-8">
+                <a href="https://instagram.com/fiatcatolicos" target="_blank" rel="noreferrer" className="flex items-center gap-2 text-slate-400 hover:text-pink-500 transition-colors">
+                    <Instagram size={20} />
+                    <span className="font-medium">@fiatcatolicos</span>
+                </a>
+                <a href="https://tiktok.com/@fiatcatolico" target="_blank" rel="noreferrer" className="flex items-center gap-2 text-slate-400 hover:text-cyan-400 transition-colors">
+                    <TikTokIcon className="w-5 h-5" />
+                    <span className="font-medium">@fiatcatolico</span>
+                </a>
             </div>
+            
+            <p>&copy; 2024 Fiat App. Ad Maiorem Dei Gloriam.</p>
+              <div className="flex gap-4"><button className="hover:text-gray-400">Termos de Uso</button><button className="hover:text-gray-400">Política de Privacidade</button><button className="hover:text-gray-400">Suporte</button></div>
           </div>
-        </div>
       </footer>
-    </div> {/* fecha o div principal da página (o que começa lá em cima com min-h-screen) */}
-  );
-};
-
-// componentes que estavam lá embaixo (não mexi neles)
-const FeatureBullet: React.FC<{ text: string; active?: boolean }> = ({ text, active }) => (
-  <li className="flex items-start gap-3">
-    <Check size={16} className={active ? "text-sacred-gold shrink-0 mt-0.5" : "text-gray-500 shrink-0 mt-0.5"} />
-    <span>{text}</span>
-  </li>
-);
-
-const TestimonialCard: React.FC<{ name: string; role: string; image: string; text: string }> = ({ name, role, image, text }) => (
-  // ... (mantido igual)
-);
-
-const FAQItem: React.FC<{ question: string; answer: string }> = ({ question, answer }) => {
-  const [isOpen, setIsOpen] = useState(false);
-  return (
-    <div 
-      className={`bg-[#0f1219]/50 backdrop-blur border rounded-xl overflow-hidden transition-all cursor-pointer ${isOpen ? 'border-sacred-gold/40' : 'border-white/10 hover:border-sacred-gold/20'}`}
-      onClick={() => setIsOpen(!isOpen)}
-    >
-      <div className="p-5 flex justify-between items-center">
-        <h3 className={`font-serif text-lg ${isOpen ? 'text-sacred-gold' : 'text-white'}`}>{question}</h3>
-        <ChevronRight className={`transition-transform ${isOpen ? 'rotate-90 text-sacred-gold' : 'text-gray-500'}`} size={20} />
-      </div>
-      {isOpen && (
-        <p className="px-5 pb-5 text-gray-400 text-sm leading-relaxed">{answer}</p>
-      )}
     </div>
   );
 };
+
+const FeatureBullet: React.FC<{ text: string, active?: boolean }> = ({ text, active }) => (<li className="flex items-start gap-3"><Check size={16} className={active ? "text-sacred-gold shrink-0 mt-0.5" : "text-gray-500 shrink-0 mt-0.5"} /><span>{text}</span></li>);
+const TestimonialCard: React.FC<{ name: string, role: string, image: string, text: string }> = ({ name, role, image, text }) => (<div className="bg-[#161b26] p-6 rounded-2xl border border-white/5 relative group hover:-translate-y-1 transition-transform duration-300"><div className="flex items-center gap-4 mb-4"><img src={image} alt={name} className="w-12 h-12 rounded-full object-cover border-2 border-sacred-gold/20" /><div><h4 className="text-white font-serif font-medium">{name}</h4><p className="text-xs text-sacred-gold uppercase tracking-wider">{role}</p></div></div><div className="flex gap-1 mb-3 text-yellow-500">{[1,2,3,4,5].map(i => <Star key={i} size={12} fill="currentColor" />)}</div><p className="text-gray-400 text-sm leading-relaxed font-light italic">"{text}"</p></div>);
+const FAQItem: React.FC<{ question: string, answer: string }> = ({ question, answer }) => { const [isOpen, setIsOpen] = useState(false); return (<div className={`bg-[#0f1219] border rounded-xl overflow-hidden transition-all cursor-pointer duration-300 ${isOpen ? 'border-sacred-gold/40 bg-[#13161f]' : 'border-white/5 hover:border-sacred-gold/20'}`} onClick={() => setIsOpen(!isOpen)}><div className="p-5 flex justify-between items-center"><h3 className={`font-serif font-medium text-lg transition-colors ${isOpen ? 'text-sacred-gold' : 'text-white'}`}>{question}</h3><ChevronRight className={`text-gray-500 transition-transform duration-300 ${isOpen ? 'rotate-90 text-sacred-gold' : ''}`} size={20} /></div><div className={`overflow-hidden transition-all duration-500 ease-in-out ${isOpen ? 'max-h-48 opacity-100' : 'max-h-0 opacity-0'}`}><p className="p-5 pt-0 text-gray-400 text-sm leading-relaxed border-t border-white/5 font-light">{answer}</p></div></div>); };
 
 export default LandingPage;
