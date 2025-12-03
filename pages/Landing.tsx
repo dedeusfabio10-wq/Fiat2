@@ -131,7 +131,7 @@ const TikTokIcon = ({ className = "w-5 h-5" }) => (
               <div className="grid gap-4"><FAQItem question="Preciso de internet para usar?" answer="Sim. Como o Fiat é um Web App moderno (acessado pelo navegador), é necessária uma conexão com a internet para carregar a Liturgia Diária, salvar seu progresso no Planner e acessar os áudios. O app foi otimizado para ser extremamente leve e gastar poucos dados." /><FAQItem question="Como funciona a assinatura Premium?" answer="É uma contribuição mensal de R$ 4,90 ou anual de R$ 39,90. O pagamento é processado de forma segura pelo Mercado Pago (Pix ou Cartão) e você tem total liberdade para cancelar quando quiser nas configurações do seu perfil." /><FAQItem question="O conteúdo é fiel à Igreja Católica?" answer="Absolutamente. Todo o conteúdo (orações, leituras, santos, catequese) segue rigorosamente o Magistério da Igreja Católica, a Bíblia Sagrada (tradução da CNBB ou Ave Maria) e a Tradição Apostólica." /><FAQItem question="Para onde vai o dinheiro da assinatura?" answer="90% do valor é reinvestido na manutenção do app e evangelização digital, e 10% é doado para apoiar obras de caridade." /></div>
           </div>
       </section>
-      </div>
+      </section>
 
       <footer className="py-12 text-center text-gray-600 text-xs bg-[#050a14] border-t border-white/5">
           <div className="max-w-6xl mx-auto px-6 flex flex-col items-center space-y-4">
