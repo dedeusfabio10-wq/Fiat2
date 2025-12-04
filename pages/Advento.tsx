@@ -68,8 +68,15 @@ const ADVENT_CALENDAR_DAYS = [
   { day: 21, verse: "Ó Oriente!", reflection: "Sol nascente que vem nos visitar.", action: "Assistir o nascer do sol rezando" },
   { day: 22, verse: "Ó Rei das nações!", reflection: "Pedra angular que une os povos.", action: "Rezar pela paz no mundo" },
   { day: 23, verse: "Ó Emanuel!", reflection: "Deus conosco. Ele já está no meio de nós.", action: "Receber Jesus na Eucaristia" },
-  { day: 24, verse: "Hoje nasce o Salvador!", reflection: "É Natal! O Menino Deus chegou. Aleluia!", action: "Cantar um cântico de Natal em família" },
-].map(item => ({ day: item.day, content: { verse: item.verse, reflection: item.reflection, action: item.action } }));
+  { day: 24, verse: "Hoje nasce o Salvador!", reflection: "É Natal! O Menino Deus chegou. Aleluia!", action: "Cantar um cântico de Natal em família" }
+].map(item => ({
+  day: item.day,
+  content: {
+    verse: item.verse,
+    reflection: item.reflection,
+    action: item.action
+  }
+}));
 
 const AdventoPage: React.FC = () => {
   const navigate = useNavigate();
@@ -216,17 +223,20 @@ const AdventoPage: React.FC = () => {
                      return (
                          <div key={item.day} className="relative aspect-square">
                              {isOpen ? (
-                                 <div 
-                                    onClick={() => setOpenedDoor(null)}
-                                    className="absolute inset-0 bg-white text-purple-900 rounded-xl p-2 flex flex-col items-center justify-center text-center cursor-pointer animate-scale-in shadow-[0_0_20px_rgba(255,255,255,0.3)] z-10"
-                                 >
-                                     <BookOpen size={16} className="mb-1 opacity-50" />
-                                     <div className="text-[9px] leading-tight space-y-2 font-serif">
-  <p className="font-bold text-purple-800">"{item.content.verse}"</p>
-  <p className="italic text-purple-700">"{item.content.reflection}"</p>
-  <p className="text-purple-900 font-medium underline">Hoje: {item.content.action}</p>
-</div>
-                             ) : (
+  <div
+    onClick={() => setOpenedDoor(null)}
+    className="absolute inset-0 bg-white text-purple-900 rounded-xl p-3 flex flex-col justify-center text-center cursor-pointer animate-scale-in shadow-[0_0_30px_rgba(147,51,234,0.6)] z-50"
+  >
+    <BookOpen size={20} className="mx-auto mb-2 text-purple-600" />
+    <div className="text-[10px] space-y-2 leading-tight font-serif">
+      <p className="font-bold text-purple-900">"{item.content.verse}"</p>
+      <p className="italic text-purple-700 text-[9px]">"{item.content.reflection}"</p>
+      <p className="font-bold text-purple-800 underline mt-2">
+        Hoje: {item.content.action}
+      </p>
+    </div>
+  </div>
+) : (
                                  <button 
                                     onClick={() => {
                                         if (isLocked) {
