@@ -43,14 +43,33 @@ const ADVENT_WEEKS = [
   }
 ];
 
-const ADVENT_CALENDAR_DAYS = Array.from({ length: 24 }, (_, i) => ({
-  day: i + 1,
-  content: {
-    verse: "E o Verbo se fez carne e habitou entre nós.",
-    reflection: "Hoje, prepare uma manjedoura em seu coração. O que você pode oferecer a Jesus?",
-    action: "Rezar uma Ave-Maria pelos nascituros."
-  }
-}));
+// === 24 DIAS DO ADVENTO COM FRASES ÚNICAS E AÇÕES ===
+const ADVENT_CALENDAR_DAYS = [
+  { day: 1, verse: "Vigiai, pois não sabeis o dia nem a hora.", reflection: "Começa o Advento. Hoje é dia de renovar a esperança.", action: "Fazer um propósito de oração diária" },
+  { day: 2, verse: "Preparai o caminho do Senhor.", reflection: "João Batista clama no deserto. E você, está preparando o coração?", action: "Confessar-se esta semana" },
+  { day: 3, verse: "Eis que envio o meu mensageiro diante de ti.", reflection: "Deus sempre envia alguém para nos preparar. Quem é o seu João Batista?", action: "Agradecer a alguém que te ajudou na fé" },
+  { day: 4, verse: "E o Verbo se fez carne e habitou entre nós.", reflection: "Deus quis precisar de uma mãe. Que mistério de humildade!", action: "Rezar uma Ave-Maria pelos nascituros" },
+  { day: 5, verse: "Levanta-te, ó Jerusalém, e sobe ao monte.", reflection: "É tempo de subir, de elevar o coração. Deixa o vale do pecado.", action: "Fazer um ato de caridade hoje" },
+  { day: 6, verse: "São Nicolau", reflection: "Hoje celebramos São Nicolau, o verdadeiro Papai Noel que dava tudo em segredo.", action: "Fazer uma doação anônima" },
+  { day: 7, verse: "A Imaculada Conceição está próxima", reflection: "Maria foi preservada do pecado. Ela é a aurora do novo dia.", action: "Consagrar-se a Nossa Senhora" },
+  { day: 8, verse: "Ó Maria, cheia de graça!", reflection: "Imaculada Conceição — Maria é a Tota Pulchra, toda bela.", action: "Rezar o Terço em família" },
+  { day: 9, verse: "Nossa Senhora de Guadalupe", reflection: "Maria apareceu a Juan Diego com o rosto moreno. Ela ama cada povo.", action: "Honrar a Virgem de Guadalupe" },
+  { day: 10, verse: "Gaudete! Alegrai-vos!", reflection: "Domingo da alegria. O Senhor está perto!", action: "Sorrir para alguém hoje" },
+  { day: 11, verse: "São João da Cruz", reflection: "Noite escura da alma. Às vezes Deus se esconde para nos atrair mais.", action: "Oferecer um sacrifício com amor" },
+  { day: 12, verse: "Nossa Senhora de Guadalupe (México)", reflection: "As rosas no tilma de Juan Diego são sinal do céu.", action: "Colocar uma rosa diante de uma imagem de Maria" },
+  { day: 13, verse: "Santa Luzia, virgem e mártir", reflection: "Luzia levou luz aos cristãos nas catacumbas. Você é luz?", action: "Ajudar alguém que está nas trevas" },
+  { day: 14, verse: "São João da Cruz", reflection: "Tudo passa, só Deus basta.", action: "Fazer um momento de silêncio interior" },
+  { day: 15, verse: "A árvore genealógica de Jesus", reflection: "Jesus quis ter uma família humana, com santos e pecadores.", action: "Rezar por sua família" },
+  { day: 16, verse: "Começa a Novena de Natal", reflection: "Faltam 9 dias! Hoje começa a reta final.", action: "Iniciar a Novena de Natal" },
+  { day: 17, verse: "Ó Sabedoria!", reflection: "Primeira Antífona do Ó. Jesus é a Sabedoria eterna.", action: "Ler um trecho do livro da Sabedoria" },
+  { day: 18, verse: "Ó Adonai!", reflection: "Senhor que guiaste Moisés na sarça ardente.", action: "Adorar Jesus no Santíssimo" },
+  { day: 19, verse: "Ó Raiz de Jessé!", reflection: "Tu és o sinal levantado para os povos.", action: "Fazer um gesto de paz com alguém" },
+  { day: 20, verse: "Ó Chave de Davi!", reflection: "Tu abres e ninguém fecha.", action: "Perdoar quem te feriu" },
+  { day: 21, verse: "Ó Oriente!", reflection: "Sol nascente que vem nos visitar.", action: "Assistir o nascer do sol rezando" },
+  { day: 22, verse: "Ó Rei das nações!", reflection: "Pedra angular que une os povos.", action: "Rezar pela paz no mundo" },
+  { day: 23, verse: "Ó Emanuel!", reflection: "Deus conosco. Ele já está no meio de nós.", action: "Receber Jesus na Eucaristia" },
+  { day: 24, verse: "Hoje nasce o Salvador!", reflection: "É Natal! O Menino Deus chegou. Aleluia!", action: "Cantar um cântico de Natal em família" },
+].map(item => ({ day: item.day, content: { verse: item.verse, reflection: item.reflection, action: item.action } }));
 
 const AdventoPage: React.FC = () => {
   const navigate = useNavigate();
@@ -202,8 +221,11 @@ const AdventoPage: React.FC = () => {
                                     className="absolute inset-0 bg-white text-purple-900 rounded-xl p-2 flex flex-col items-center justify-center text-center cursor-pointer animate-scale-in shadow-[0_0_20px_rgba(255,255,255,0.3)] z-10"
                                  >
                                      <BookOpen size={16} className="mb-1 opacity-50" />
-                                     <p className="text-[8px] leading-tight font-serif line-clamp-3 font-bold">"{item.content.verse}"</p>
-                                 </div>
+                                     <div className="text-[9px] leading-tight space-y-2 font-serif">
+  <p className="font-bold text-purple-800">"{item.content.verse}"</p>
+  <p className="italic text-purple-700">"{item.content.reflection}"</p>
+  <p className="text-purple-900 font-medium underline">Hoje: {item.content.action}</p>
+</div>
                              ) : (
                                  <button 
                                     onClick={() => {
