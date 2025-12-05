@@ -12,7 +12,6 @@ export default function CommunityDetail() {
 
   useEffect(() => {
     if (!id) return;
-
     const fetch = async () => {
       const { data } = await supabase
         .from('communities')
@@ -33,7 +32,9 @@ export default function CommunityDetail() {
   }
 
   return (
-    <div className="min-h-screen bg-slate-950 text-white">
+    // ← EXATAMENTE COMO NO PROFILE
+    <div className="min-h-screen bg-slate-950 text-white pb-32">
+      
       {/* HEADER FIXO */}
       <header className="sticky top-0 z-40 bg-gradient-to-b from-slate-900 to-slate-950 border-b border-fiat-gold/20">
         <div className="px-6 py-6 flex items-center gap-4">
@@ -57,8 +58,8 @@ export default function CommunityDetail() {
         </div>
       </header>
 
-      {/* CHAT COM ESPAÇO PRO MENU INFERIOR */}
-      <div className="pb-32">
+      {/* CHAT COM SCROLL — MENU VAI SUMIR AO ROLAR */}
+      <div className="overflow-y-auto h-full">
         <ChatTab />
       </div>
     </div>
