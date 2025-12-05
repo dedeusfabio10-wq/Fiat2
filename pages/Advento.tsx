@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { ArrowLeft, Flame, Calendar, Star, Lock, ChevronRight, BookOpen, Gift } from 'lucide-react';
+import { ArrowLeft, Flame, Calendar, Star, Lock, ChevronRight, BookOpen, Gift, X } from 'lucide-react';
 import { Button } from '../ui/UIComponents';
 import { toast } from 'sonner';
 import SEO from '../components/SEO';
