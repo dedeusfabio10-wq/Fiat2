@@ -23,6 +23,7 @@ export default function ChatTab() {
   const [sending, setSending] = useState(false);
   const scrollRef = useRef<HTMLDivElement>(null);
 
+  // Carrega mensagens + realtime
   useEffect(() => {
     if (!id || !profile?.id) return;
 
@@ -38,16 +39,26 @@ export default function ChatTab() {
 
     const channel = supabase
       .channel(`chat_${id}`)
-      .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'community_messages', filter: `community_id=eq.${id}` }, 
+      .on(
+        'postgres_changes',
+        {
+          event: 'INSERT',
+          schema: 'public',
+          table: 'community_messages',
+          filter: `community_id=eq.${id}`,
+        },
         (payload: { new: Message }) => {
-          setMessages(prev => [...prev, payload.new]);
+          setMessages((prev) => [...prev, payload.new]);
         }
       )
       .subscribe();
 
-    return () => { supabase.removeChannel(channel); };
+    return () => {
+      supabase.removeChannel(channel);
+    };
   }, [id, profile?.id]);
 
+  // Scroll automático para a última mensagem
   useEffect(() => {
     scrollRef.current?.scrollIntoView({ behavior: 'smooth' });
   }, [messages]);
@@ -62,60 +73,75 @@ export default function ChatTab() {
 
     const { error } = await supabase
       .from('community_messages')
-      .insert({ community_id: id, user_id: profile.id, message: msg });
+      .insert({
+        community_id: id,
+        user_id: profile.id,
+        message: msg,
+      });
 
     if (error) {
       toast.error('Erro ao enviar mensagem');
-      setNewMessage(msg);
+      setNewMessage(msg); // devolve se deu erro
     }
     setSending(false);
   };
 
   return (
-    <div className="h-full flex flex-col">
+    <>
       {/* MENSAGENS */}
-      <div className="flex-1 overflow-y-auto px-4 pt-4 pb-24">
+      <div className="px-4 space-y-4 pb-32">
         {messages.length === 0 ? (
           <div className="text-center pt-32 text-gray-400">
             <p className="text-2xl font-light">Nenhuma mensagem ainda.</p>
             <p className="text-lg mt-3">Seja o primeiro a rezar!</p>
           </div>
         ) : (
-          <div className="space-y-4">
-            {messages.map(msg => (
-              <div key={msg.id} className={`flex ${msg.user_id === profile?.id ? 'justify-end' : 'justify-start'} mb-4`}>
-                <div className={`max-w-[80%] px-5 py-3 rounded-2xl ${msg.user_id === profile?.id ? 'bg-fiat-gold text-black' : 'bg-slate-700'}`}>
-                  <p className="font-bold text-sm">{msg.profiles.name}</p>
-                  <p className="mt-1">{msg.message}</p>
-                  <p className="text-xs opacity-70 text-right mt-2">
-                    {new Date(msg.created_at).toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' })}
-                  </p>
-                </div>
+          messages.map((msg) => (
+            <div
+              key={msg.id}
+              className={`flex ${msg.user_id === profile?.id ? 'justify-end' : 'justify-start'} mb-4`}
+            >
+              <div
+                className={`max-w-[80%] px-5 py-3 rounded-2xl shadow-lg ${
+                  msg.user_id === profile?.id
+                    ? 'bg-fiat-gold text-black'
+                    : 'bg-slate-700 text-white'
+                }`}
+              >
+                <p className="font-bold text-sm">{msg.profiles.name}</p>
+                <p className="mt-1 break-words">{msg.message}</p>
+                <p className="text-xs opacity-70 text-right mt-2">
+                  {new Date(msg.created_at).toLocaleTimeString('pt-BR', {
+                    hour: '2-digit',
+                    minute: '2-digit',
+                  })}
+                </p>
               </div>
-            ))}
-            <div ref={scrollRef} />
-          </div>
+            </div>
+          ))
         )}
+        <div ref={scrollRef} />
       </div>
 
       {/* INPUT FIXO ACIMA DO MENU INFERIOR */}
-      <div className="fixed inset-x-0 bottom-20 bg-slate-950 border-t border-fiat-gold/30 px-4 py-4 z-[9999]">
+      <div className="fixed bottom-20 left-0 right-0 bg-slate-950 border-t border-fiat-gold/30 px-4 py-4 z-[9999]">
         <form onSubmit={send} className="max-w-4xl mx-auto flex gap-3">
           <Input
             value={newMessage}
-            onChange={e => setNewMessage(e.target.value)}
+            onChange={(e) => setNewMessage(e.target.value)}
             placeholder="Ave Maria Puríssima..."
             className="flex-1 bg-black/60 border border-fiat-gold/70 text-white placeholder-gray-400 focus:border-fiat-gold rounded-xl"
+            autoFocus
           />
           <Button
             type="submit"
             disabled={sending || !newMessage.trim()}
-            className="bg-fiat-gold hover:bg-yellow-500 text-black font-bold px-8 rounded-xl"
+            className="bg-fiat-gold hover:bg-yellow-500 text-black font-bold px-8 rounded-xl shadow-lg"
           >
             {sending ? <Loader2 className="animate-spin" size={22} /> : <Send size={22} />}
           </Button>
         </form>
       </div>
-    </div>
+    </>
   );
 }
