@@ -6,11 +6,13 @@ import { supabase } from '../../../services/supabase';
 import ChatTab from './ChatTab';
 
 export default function CommunityDetail() {
-  const { id } = '' } = useParams<{ id: string }>();
+  const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
   const [community, setCommunity] = useState<any>(null);
 
   useEffect(() => {
+    if (!id) return;
+
     const fetch = async () => {
       const { data } = await supabase
         .from('communities')
@@ -23,7 +25,11 @@ export default function CommunityDetail() {
   }, [id]);
 
   if (!community) {
-    return <div className="flex items-center justify-center h-screen text-fiat-gold text-2xl">Carregando...</div>;
+    return (
+      <div className="flex items-center justify-center h-screen bg-slate-950 text-fiat-gold text-2xl">
+        Carregando...
+      </div>
+    );
   }
 
   return (
@@ -36,11 +42,13 @@ export default function CommunityDetail() {
           </button>
           <div>
             <h1 className="text-3xl font-serif text-fiat-gold">{community.name}</h1>
-            <p className="text-gray-400 text-sm mt-1">{community.description || 'Rezar o Rosário todos os dias'}</p>
+            <p className="text-gray-400 text-sm mt-1">
+              {community.description || 'Rezar o Rosário todos os dias'}
+            </p>
           </div>
         </div>
 
-        {/* ABAS FIXAS */}
+        {/* ABAS */}
         <div className="flex gap-10 px-6 py-4 bg-slate-950 border-t border-fiat-gold/10">
           <div className="flex items-center gap-2 text-fiat-gold font-bold border-b-4 border-fiat-gold pb-3">
             <MessageCircle size={22} />
@@ -49,8 +57,8 @@ export default function CommunityDetail() {
         </div>
       </header>
 
-      {/* CHAT COM ESPAÇO RESERVADO PRO MENU INFERIOR */}
-      <div className="pb-32 pt-2">
+      {/* CHAT COM ESPAÇO PRO MENU INFERIOR */}
+      <div className="pb-32">
         <ChatTab />
       </div>
     </div>
