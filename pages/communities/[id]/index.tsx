@@ -1,22 +1,16 @@
 // src/pages/communities/[id]/index.tsx
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { ArrowLeft, MessageCircle, Calendar, Users } from 'lucide-react';
+import { ArrowLeft, MessageCircle } from 'lucide-react';
 import { supabase } from '../../../services/supabase';
 import ChatTab from './ChatTab';
 
-interface Community {
-  name: string;
-  description: string | null;
-}
-
 export default function CommunityDetail() {
-  const { id } = useParams<{ id: string }>();
+  const { id } = '' } = useParams<{ id: string }>();
   const navigate = useNavigate();
-  const [community, setCommunity] = useState<Community | null>(null);
+  const [community, setCommunity] = useState<any>(null);
 
   useEffect(() => {
-    if (!id) return;
     const fetch = async () => {
       const { data } = await supabase
         .from('communities')
@@ -29,26 +23,20 @@ export default function CommunityDetail() {
   }, [id]);
 
   if (!community) {
-    return (
-      <div className="flex items-center justify-center h-screen bg-slate-950 text-fiat-gold text-2xl">
-        Carregando...
-      </div>
-    );
+    return <div className="flex items-center justify-center h-screen text-fiat-gold text-2xl">Carregando...</div>;
   }
 
   return (
-    <>
+    <div className="min-h-screen bg-slate-950 text-white">
       {/* HEADER FIXO */}
-      <header className="fixed top-0 left-0 right-0 z-40 bg-gradient-to-b from-slate-900 to-slate-950 border-b border-fiat-gold/20">
+      <header className="sticky top-0 z-40 bg-gradient-to-b from-slate-900 to-slate-950 border-b border-fiat-gold/20">
         <div className="px-6 py-6 flex items-center gap-4">
           <button onClick={() => navigate('/communities')}>
             <ArrowLeft size={32} className="text-fiat-gold" />
           </button>
           <div>
             <h1 className="text-3xl font-serif text-fiat-gold">{community.name}</h1>
-            <p className="text-gray-400 text-sm mt-1">
-              {community.description || 'Rezar o Rosário todos os dias'}
-            </p>
+            <p className="text-gray-400 text-sm mt-1">{community.description || 'Rezar o Rosário todos os dias'}</p>
           </div>
         </div>
 
@@ -58,21 +46,13 @@ export default function CommunityDetail() {
             <MessageCircle size={22} />
             Chat
           </div>
-          <div className="flex items-center gap-2 text-gray-500">
-            <Calendar size={22} />
-            Planos
-          </div>
-          <div className="flex items-center gap-2 text-gray-500">
-            <Users size={22} />
-            Membros
-          </div>
         </div>
       </header>
 
-      {/* CHAT COMEÇA LOGO ABAIXO DO HEADER E VAI ATÉ O INPUT */}
-      <div className="pt-52 pb-24"> {/* pt-52 = altura exata do header */}
+      {/* CHAT COM ESPAÇO RESERVADO PRO MENU INFERIOR */}
+      <div className="pb-32 pt-2">
         <ChatTab />
       </div>
-    </>
+    </div>
   );
 }
