@@ -225,38 +225,63 @@ const AdventoPage: React.FC = () => {
                              {isOpen ? (
   <div
     onClick={() => setOpenedDoor(null)}
-    className="absolute inset-0 bg-white text-purple-900 rounded-xl p-3 flex flex-col justify-center text-center cursor-pointer animate-scale-in shadow-[0_0_30px_rgba(147,51,234,0.6)] z-50"
+    className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 backdrop-blur-sm px-4"
   >
-    <BookOpen size={20} className="mx-auto mb-2 text-purple-600" />
-    <div className="text-[10px] space-y-2 leading-tight font-serif">
-      <p className="font-bold text-purple-900">"{item.content.verse}"</p>
-      <p className="italic text-purple-700 text-[9px]">"{item.content.reflection}"</p>
-      <p className="font-bold text-purple-800 underline mt-2">
-        Hoje: {item.content.action}
-      </p>
+    <div
+      className="bg-white rounded-3xl shadow-2xl p-8 max-w-md w-full mx-4 animate-scale-in border border-purple-500/30"
+      onClick={(e) => e.stopPropagation()} // impede fechar ao clicar dentro
+    >
+      <button
+        onClick={() => setOpenedDoor(null)}
+        className="absolute top-4 right-4 text-purple-900 hover:text-purple-700"
+      >
+        <X size={28} />
+      </button>
+
+      <BookOpen size={40} className="mx-auto mb-4 text-purple-700" />
+      
+      <div className="space-y-5 text-center font-serif">
+        <p className="text-lg font-bold text-purple-900 leading-relaxed">
+          "{item.content.verse}"
+        </p>
+        
+        <div className="py-4 border-y border-purple-200">
+          <p className="text-purple-800 italic text-base leading-relaxed">
+            {item.content.reflection}
+          </p>
+        </div>
+        
+        <p className="text-purple-900 font-bold text-lg">
+          Hoje: {item.content.action}
+        </p>
+      </div>
     </div>
   </div>
 ) : (
-                                 <button 
-                                    onClick={() => {
-                                        if (isLocked) {
-                                            toast.error(`Aguarde até dia ${item.day} de Dezembro!`);
-                                        } else {
-                                            setOpenedDoor(item.day);
-                                            if (navigator.vibrate) navigator.vibrate(20);
-                                        }
-                                    }}
-                                    className={`w-full h-full rounded-xl border flex flex-col items-center justify-center transition-all relative overflow-hidden
-                                        ${isLocked 
-                                            ? 'bg-[#1a0b2e] border-purple-900/50 text-gray-600' 
-                                            : 'bg-gradient-to-br from-purple-800 to-purple-900 border-purple-500/50 text-white hover:border-yellow-400 hover:shadow-[0_0_15px_rgba(147,51,234,0.5)]'}
-                                    `}
-                                 >
-                                     {isLocked && <Lock size={12} className="absolute top-2 right-2 opacity-50" />}
-                                     <span className={`font-serif font-bold ${isLocked ? 'text-xl' : 'text-2xl'}`}>{item.day}</span>
-                                     {!isLocked && <span className="text-[8px] uppercase tracking-widest opacity-70 mt-1">Abrir</span>}
-                                 </button>
-                             )}
+  // botão normal (não muda nada)
+  <button
+    onClick={() => {
+      if (isLocked) {
+        toast.error(`Aguarde até dia ${item.day} de Dezembro!`);
+      } else {
+        setOpenedDoor(item.day);
+        if (navigator.vibrate) navigator.vibrate(20);
+      }
+    }}
+    className={`w-full h-full rounded-xl border flex flex-col items-center justify-center transition-all relative overflow-hidden
+      ${isLocked
+        ? 'bg-[#1a0b2e] border-purple-900/50 text-gray-600'
+        : 'bg-gradient-to-br from-purple-800 to-purple-900 border-purple-500/50 text-white hover:border-yellow-400 hover:shadow-[0_0_20px_rgba(147,51,234,0.6)]'
+      }
+    `}
+  >
+    {isLocked && <Lock size={14} className="absolute top-2 right-2 opacity-50" />}
+    <span className={`font-serif font-bold ${isLocked ? 'text-2xl' : 'text-3xl'}`}>
+      {item.day}
+    </span>
+    {!isLocked && <span className="text-xs uppercase tracking-widest opacity-80 mt-1">Abrir</span>}
+  </button>
+)}
                          </div>
                      );
                  })}
