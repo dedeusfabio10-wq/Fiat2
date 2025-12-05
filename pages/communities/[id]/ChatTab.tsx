@@ -24,7 +24,7 @@ export default function ChatTab() {
   const scrollRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
-    if (!id || !profile) return;
+    if (!id || !profile?.id) return;
 
     const load = async () => {
       const { data } = await supabase
@@ -38,22 +38,15 @@ export default function ChatTab() {
 
     const channel = supabase
       .channel(`chat_${id}`)
-      .on(
-  'postgres_changes',
-  { 
-    event: 'INSERT', 
-    schema: 'public', 
-    table: 'community_messages', 
-    filter: `community_id=eq.${id}`
-  },
-  (payload: { new: Message }) => {
-    setMessages(prev => [...prev, payload.new]);
-  }
-)
+      .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'community_messages', filter: `community_id=eq.${id}` }, 
+        (payload: { new: Message }) => {
+          setMessages(prev => [...prev, payload.new]);
+        }
+      )
       .subscribe();
 
     return () => { supabase.removeChannel(channel); };
-  }, [id, profile]);
+  }, [id, profile?.id]);
 
   useEffect(() => {
     scrollRef.current?.scrollIntoView({ behavior: 'smooth' });
@@ -61,7 +54,7 @@ export default function ChatTab() {
 
   const send = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!newMessage.trim() || sending || !profile) return;
+    if (!newMessage.trim() || sending || !profile?.id) return;
 
     const msg = newMessage.trim();
     setNewMessage('');
@@ -72,59 +65,57 @@ export default function ChatTab() {
       .insert({ community_id: id, user_id: profile.id, message: msg });
 
     if (error) {
-      toast.error('Erro ao enviar');
+      toast.error('Erro ao enviar mensagem');
       setNewMessage(msg);
     }
     setSending(false);
   };
 
   return (
-    <>
+    <div className="h-full flex flex-col">
       {/* MENSAGENS */}
-      <div className="px-4 space-y-4 pb-20">
+      <div className="flex-1 overflow-y-auto px-4 pt-4 pb-24">
         {messages.length === 0 ? (
           <div className="text-center pt-32 text-gray-400">
             <p className="text-2xl font-light">Nenhuma mensagem ainda.</p>
             <p className="text-lg mt-3">Seja o primeiro a rezar!</p>
           </div>
         ) : (
-          messages.map(msg => (
-            <div key={msg.id} className={`flex ${msg.user_id === profile?.id ? 'justify-end' : 'justify-start'} mb-4`}>
-              <div className={`max-w-[80%] px-5 py-3 rounded-2xl ${msg.user_id === profile?.id ? 'bg-fiat-gold text-black' : 'bg-slate-700'}`}>
-                <p className="font-bold text-sm">{msg.profiles.name}</p>
-                <p className="mt-1">{msg.message}</p>
-                <p className="text-xs opacity-70 text-right mt-2">
-                  {new Date(msg.created_at).toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' })}
-                </p>
+          <div className="space-y-4">
+            {messages.map(msg => (
+              <div key={msg.id} className={`flex ${msg.user_id === profile?.id ? 'justify-end' : 'justify-start'} mb-4`}>
+                <div className={`max-w-[80%] px-5 py-3 rounded-2xl ${msg.user_id === profile?.id ? 'bg-fiat-gold text-black' : 'bg-slate-700'}`}>
+                  <p className="font-bold text-sm">{msg.profiles.name}</p>
+                  <p className="mt-1">{msg.message}</p>
+                  <p className="text-xs opacity-70 text-right mt-2">
+                    {new Date(msg.created_at).toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' })}
+                  </p>
+                </div>
               </div>
-            </div>
-          ))
+            ))}
+            <div ref={scrollRef} />
+          </div>
         )}
-        <div ref={scrollRef} />
       </div>
 
       {/* INPUT FIXO ACIMA DO MENU INFERIOR */}
-      <form
-        onSubmit={send}
-        className="fixed bottom-20 left-0 right-0 bg-slate-950 border-t border-fiat-gold/30 px-4 py-4 z-[9999]"
-      >
-        <div className="max-w-4xl mx-auto flex gap-3">
+      <div className="fixed inset-x-0 bottom-20 bg-slate-950 border-t border-fiat-gold/30 px-4 py-4 z-[9999]">
+        <form onSubmit={send} className="max-w-4xl mx-auto flex gap-3">
           <Input
             value={newMessage}
             onChange={e => setNewMessage(e.target.value)}
             placeholder="Ave Maria Puríssima..."
-            className="flex-1 bg-black/60 border border-fiat-gold/70 text-white placeholder-gray-400 focus:border-fiat-gold focus:ring-1 focus:ring-fiat-gold rounded-xl"
-            autoFocus
+            className="flex-1 bg-black/60 border border-fiat-gold/70 text-white placeholder-gray-400 focus:border-fiat-gold rounded-xl"
           />
           <Button
             type="submit"
             disabled={sending || !newMessage.trim()}
-            className="bg-fiat-gold hover:bg-yellow-500 text-black font-bold px-8 rounded-xl shadow-lg transition-all"
+            className="bg-fiat-gold hover:bg-yellow-500 text-black font-bold px-8 rounded-xl"
           >
             {sending ? <Loader2 className="animate-spin" size={22} /> : <Send size={22} />}
           </Button>
-        </div>
-      </form>
-    </>
+        </form>
+      </div>
+    </div>
   );
 }
