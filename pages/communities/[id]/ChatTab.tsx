@@ -125,23 +125,28 @@ export default function ChatTab() {
         <div ref={scrollRef} />
       </div>
 
-      {/* Input fixo acima do menu inferior */}
-      <div className="fixed bottom-20 left-0 right-0 bg-slate-950 border-t border-fiat-gold/30 px-4 py-3 z-50 shadow-2xl">
-        <form onSubmit={send} className="max-w-4xl mx-auto flex gap-3">
-          <Input
-            value={newMessage}
-            onChange={(e) => setNewMessage(e.target.value)}
-            placeholder="Ave Maria Puríssima..."
-            className="flex-1 bg-black/50 border border-fiat-gold/60 text-white placeholder-gray-400 focus:border-fiat-gold"
-          />
-          <Button
-            type="submit"
-            disabled={sending || !newMessage.trim()}
-            className="bg-fiat-gold hover:bg-yellow-500 text-black font-bold px-6 rounded-lg transition"
-          >
-            {sending ? <Loader2 className="animate-spin" size={22} /> : <Send size={22} />}
-          </Button>
-        </form>
+      {/* INPUT FIXO ACIMA DO MENU INFERIOR - AGORA SIM! */}
+<form
+  onSubmit={send}
+  className="fixed bottom-20 left-0 right-0 bg-slate-950 border-t border-fiat-gold/30 px-4 py-4 z-[9999]" // z-index altíssimo
+>
+  <div className="max-w-4xl mx-auto flex gap-3">
+    <Input
+      value={newMessage}
+      onChange={(e) => setNewMessage(e.target.value)}
+      placeholder="Ave Maria Puríssima..."
+      className="flex-1 bg-black/60 border border-fiat-gold/70 text-white placeholder-gray-400 focus:border-fiat-gold focus:ring-1 focus:ring-fiat-gold rounded-xl"
+      autoFocus
+    />
+    <Button
+      type="submit"
+      disabled={sending || !newMessage.trim()}
+      className="bg-fiat-gold hover:bg-yellow-500 text-black font-bold px-8 rounded-xl shadow-lg transition-all"
+    >
+      {sending ? <Loader2 className="animate-spin" size={22} /> : <Send size={22} />}
+    </Button>
+  </div>
+</form>
       </div>
     </>
   );
