@@ -38,14 +38,18 @@ export default function ChatTab() {
 
     const channel = supabase
       .channel(`chat_${id}`)
-      .on('postgres_changes', { 
-        event: 'INSERT', 
-        schema: 'public', 
-        table: 'community_messages', 
-        filter: `community_id=eq.${id}` 
-      }, (payload) => {
-        setMessages(prev => [...prev, payload.new as Message]);
-      })
+      .on(
+  'postgres_changes',
+  { 
+    event: 'INSERT', 
+    schema: 'public', 
+    table: 'community_messages', 
+    filter: `community_id=eq.${id}`
+  },
+  (payload: { new: Message }) => {
+    setMessages(prev => [...prev, payload.new]);
+  }
+)
       .subscribe();
 
     return () => { supabase.removeChannel(channel); };
