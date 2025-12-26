@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Home, BookOpen, CalendarDays, User, Cross } from 'lucide-react';
+import { Home, BookOpen, Cross, User } from 'lucide-react';
 import { AppRoute } from '../types';
 
 interface BottomNavProps {
@@ -8,7 +8,7 @@ interface BottomNavProps {
 }
 
 export const BottomNav: React.FC<BottomNavProps> = ({ currentRoute, onNavigate }) => {
-  const [visible, setVisible] = useState(true);
+  const [hidden, setHidden] = useState(false);
   const [lastScrollY, setLastScrollY] = useState(0);
 
   const navItems = [
@@ -19,19 +19,19 @@ export const BottomNav: React.FC<BottomNavProps> = ({ currentRoute, onNavigate }
     { id: AppRoute.PROFILE, label: 'Perfil', icon: User },
   ];
 
-  // Hide on Welcome/Auth
+  // Esconde em Welcome/Auth
   if (currentRoute === AppRoute.WELCOME || currentRoute === AppRoute.AUTH) return null;
 
   useEffect(() => {
     const handleScroll = () => {
       const currentScrollY = window.scrollY;
 
-      if (currentScrollY > lastScrollY && currentScrollY > 100) {
-        // Rolando pra baixo
-        setVisible(false);
+      if (currentScrollY > lastScrollY && currentScrollY > 80) {
+        // Rolando pra baixo → esconde
+        setHidden(true);
       } else if (currentScrollY < lastScrollY) {
-        // Rolando pra cima
-        setVisible(true);
+        // Rolando pra cima → mostra
+        setHidden(false);
       }
 
       setLastScrollY(currentScrollY);
@@ -44,8 +44,8 @@ export const BottomNav: React.FC<BottomNavProps> = ({ currentRoute, onNavigate }
 
   return (
     <div
-      className={`fixed bottom-0 left-0 right-0 bg-fiat-dark/95 backdrop-blur-lg border-t border-white/5 px-4 py-2 z-50 transition-transform duration-300 ease-out ${
-        visible ? 'translate-y-0 pb-safe' : 'translate-y-full pb-0'
+      className={`fixed left-0 right-0 bg-fiat-dark/95 backdrop-blur-lg border-t border-white/5 px-4 py-2 z-50 transition-transform duration-300 ${
+        hidden ? 'translate-y-full' : 'translate-y-0 bottom-0 pb-safe'
       }`}
     >
       <div className="flex justify-between items-center max-w-md mx-auto">
