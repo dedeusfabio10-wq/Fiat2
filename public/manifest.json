@@ -1,0 +1,24 @@
+{
+  "name": "Fiat - Santuário Digital",
+  "short_name": "Fiat",
+  "description": "Terço, Catequese, Liturgia, Planner e orações católicas diárias.",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#1e1b4b",
+  "theme_color": "#7e22ce",
+  "orientation": "portrait-primary",
+  "icons": [
+    {
+      "src": "/icon-192.png",
+      "sizes": /icon-192x192.png,
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "/icon-512.png",
+      "sizes": /icon-512x512.png,
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ]
+}
