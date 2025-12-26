@@ -32,9 +32,7 @@ export default function CommunityDetail() {
   }
 
   return (
-    // ← EXATAMENTE COMO NO PROFILE
-    <div className="min-h-screen bg-slate-950 text-white pb-32">
-      
+    <div className="min-h-screen bg-slate-950 text-white">
       {/* HEADER FIXO */}
       <header className="sticky top-0 z-40 bg-gradient-to-b from-slate-900 to-slate-950 border-b border-fiat-gold/20">
         <div className="px-6 py-6 flex items-center gap-4">
@@ -48,7 +46,6 @@ export default function CommunityDetail() {
             </p>
           </div>
         </div>
-
         {/* ABAS */}
         <div className="flex gap-10 px-6 py-4 bg-slate-950 border-t border-fiat-gold/10">
           <div className="flex items-center gap-2 text-fiat-gold font-bold border-b-4 border-fiat-gold pb-3">
@@ -58,8 +55,8 @@ export default function CommunityDetail() {
         </div>
       </header>
 
-      {/* CHAT COM SCROLL — MENU VAI SUMIR AO ROLAR */}
-      <div className="overflow-y-auto h-full">
+      {/* CONTEÚDO COM SCROLL E PADDING INFERIOR PARA A BARRA DE MENU */}
+      <div className="overflow-y-auto h-full pb-32"> {/* ← AQUI: pb-32 no conteúdo rolável */}
         <ChatTab />
       </div>
     </div>
