@@ -32,10 +32,9 @@ export default function CommunityDetail() {
   }
 
   return (
-    // Container principal – igual ao Perfil: min-h-screen pb-32
     <div className="min-h-screen bg-slate-950 text-white pb-32">
-      {/* Header – rola junto com o conteúdo */}
-      <header className="bg-gradient-to-b from-slate-900 to-slate-950 border-b border-fiat-gold/20">
+      {/* Header e abas rolam junto com o conteúdo */}
+      <div className="bg-gradient-to-b from-slate-900 to-slate-950 border-b border-fiat-gold/20">
         <div className="px-6 py-6 flex items-center gap-4">
           <button onClick={() => navigate('/communities')}>
             <ArrowLeft size={32} className="text-fiat-gold" />
@@ -47,19 +46,16 @@ export default function CommunityDetail() {
             </p>
           </div>
         </div>
-        {/* Abas – rolam junto */}
         <div className="flex gap-10 px-6 py-4 bg-slate-950 border-t border-fiat-gold/10">
           <div className="flex items-center gap-2 text-fiat-gold font-bold border-b-4 border-fiat-gold pb-3">
             <MessageCircle size={22} />
             Chat
           </div>
         </div>
-      </header>
-
-      {/* Conteúdo do chat – rola livremente */}
-      <div>
-        <ChatTab />
       </div>
+
+      {/* Chat – ocupa o resto da tela e rola */}
+      <ChatTab />
     </div>
   );
 }
