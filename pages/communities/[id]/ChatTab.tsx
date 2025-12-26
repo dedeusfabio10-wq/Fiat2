@@ -23,9 +23,10 @@ export default function ChatTab() {
   const [sending, setSending] = useState(false);
   const scrollRef = useRef<HTMLDivElement>(null);
 
-  // Carrega mensagens + realtime (igual)
+  // Carrega mensagens + realtime
   useEffect(() => {
     if (!id || !profile?.id) return;
+
     const load = async () => {
       const { data } = await supabase
         .from('community_messages')
@@ -57,7 +58,7 @@ export default function ChatTab() {
     };
   }, [id, profile?.id]);
 
-  // Scroll automático
+  // Scroll automático para a última mensagem
   useEffect(() => {
     scrollRef.current?.scrollIntoView({ behavior: 'smooth' });
   }, [messages]);
@@ -65,6 +66,7 @@ export default function ChatTab() {
   const send = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!newMessage.trim() || sending || !profile?.id) return;
+
     const msg = newMessage.trim();
     setNewMessage('');
     setSending(true);
@@ -79,15 +81,15 @@ export default function ChatTab() {
 
     if (error) {
       toast.error('Erro ao enviar mensagem');
-      setNewMessage(msg);
+      setNewMessage(msg); // devolve a mensagem se der erro
     }
     setSending(false);
   };
 
   return (
-    <div className="flex flex-col h-screen bg-slate-950">
-      {/* MENSAGENS - ocupa todo o espaço disponível */}
-      <div className="flex-1 overflow-y-auto px-4 pt-4 pb-28"> {/* pb-28 dá espaço pro input */}
+    <div className="flex flex-col min-h-screen bg-slate-950">
+      {/* Área das mensagens – ocupa todo o espaço disponível */}
+      <div className="flex-1 overflow-y-auto px-4 pt-4 pb-32">
         {messages.length === 0 ? (
           <div className="text-center pt-32 text-gray-400">
             <p className="text-2xl font-light">Nenhuma mensagem ainda.</p>
@@ -121,7 +123,7 @@ export default function ChatTab() {
         <div ref={scrollRef} />
       </div>
 
-      {/* INPUT NO FINAL DO CONTEÚDO (não fixed) - sempre visível acima da barra de menu */}
+      {/* Input fixo no final – sempre acima da barra de menu do app */}
       <div className="border-t border-fiat-gold/30 bg-slate-950 px-4 py-4">
         <form onSubmit={send} className="max-w-4xl mx-auto flex gap-3">
           <Input
