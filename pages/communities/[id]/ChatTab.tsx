@@ -26,7 +26,6 @@ export default function ChatTab() {
   // Carrega mensagens + realtime
   useEffect(() => {
     if (!id || !profile?.id) return;
-
     const load = async () => {
       const { data } = await supabase
         .from('community_messages')
@@ -66,7 +65,6 @@ export default function ChatTab() {
   const send = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!newMessage.trim() || sending || !profile?.id) return;
-
     const msg = newMessage.trim();
     setNewMessage('');
     setSending(true);
@@ -81,15 +79,15 @@ export default function ChatTab() {
 
     if (error) {
       toast.error('Erro ao enviar mensagem');
-      setNewMessage(msg); // devolve se deu erro
+      setNewMessage(msg);
     }
     setSending(false);
   };
 
   return (
     <>
-      {/* MENSAGENS */}
-      <div className="px-4 space-y-4 pb-32">
+      {/* MENSAGENS - com mais padding inferior pra não ficar embaixo do input */}
+      <div className="px-4 space-y-4 pb-40"> {/* ← aumentei de pb-32 para pb-40 */}
         {messages.length === 0 ? (
           <div className="text-center pt-32 text-gray-400">
             <p className="text-2xl font-light">Nenhuma mensagem ainda.</p>
@@ -123,8 +121,8 @@ export default function ChatTab() {
         <div ref={scrollRef} />
       </div>
 
-      {/* INPUT FIXO ACIMA DO MENU INFERIOR */}
-      <div className="fixed bottom-20 left-0 right-0 bg-slate-950 border-t border-fiat-gold/30 px-4 py-4 z-[9999]">
+      {/* INPUT FIXO - subido mais pra cima da barra de menu */}
+      <div className="fixed bottom-24 left-0 right-0 bg-slate-950 border-t border-fiat-gold/30 px-4 py-4 z-[9999]">
         <form onSubmit={send} className="max-w-4xl mx-auto flex gap-3">
           <Input
             value={newMessage}
