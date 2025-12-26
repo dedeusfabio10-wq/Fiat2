@@ -25,15 +25,16 @@ export default function CommunityDetail() {
 
   if (!community) {
     return (
-      <div className="flex items-center justify-center h-screen bg-slate-950 text-fiat-gold text-2xl">
+      <div className="flex items-center justify-center min-h-screen bg-slate-950 text-fiat-gold text-2xl">
         Carregando...
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-slate-950 text-white pb-32"> {/* ← pb-32 reserva espaço pra barra inferior */}
-      {/* HEADER NORMAL (não sticky) - rola junto com o conteúdo */}
+    // Container principal com scroll natural e espaço pra barra inferior
+    <div className="min-h-screen bg-slate-950 text-white pb-32 overflow-y-auto">
+      {/* Header (rola junto com o conteúdo) */}
       <header className="bg-gradient-to-b from-slate-900 to-slate-950 border-b border-fiat-gold/20">
         <div className="px-6 py-6 flex items-center gap-4">
           <button onClick={() => navigate('/communities')}>
@@ -46,28 +47,21 @@ export default function CommunityDetail() {
             </p>
           </div>
         </div>
-        {/* ABAS FIXAS NO HEADER */}
+
+        {/* Abas (rola junto) */}
         <div className="flex gap-10 px-6 py-4 bg-slate-950 border-t border-fiat-gold/10">
           <div className="flex items-center gap-2 text-fiat-gold font-bold border-b-4 border-fiat-gold pb-3">
             <MessageCircle size={22} />
             Chat
           </div>
-          {/* Futuras abas: Planos e Membros */}
-          {/* <div className="flex items-center gap-2 text-gray-400">
-            <Calendar size={22} />
-            Planos
-          </div>
-          <div className="flex items-center gap-2 text-gray-400">
-            <Users size={22} />
-            Membros
-          </div> */}
+          {/* Futuras abas */}
+          {/* <div className="flex items-center gap-2 text-gray-400 pb-3">Planos</div>
+          <div className="flex items-center gap-2 text-gray-400 pb-3">Membros</div> */}
         </div>
       </header>
 
-      {/* CONTEÚDO ROLÁVEL - ocupa o resto da tela */}
-      <div className="overflow-y-auto">
-        <ChatTab />
-      </div>
+      {/* Conteúdo do chat */}
+      <ChatTab />
     </div>
   );
 }
