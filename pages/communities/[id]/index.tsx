@@ -32,7 +32,7 @@ export default function CommunityDetail() {
   }
 
   return (
-    <div className="min-h-screen bg-slate-950 text-white">
+    <div className="min-h-screen bg-slate-950 text-white pb-32"> {/* ← mantém o pb-32 aqui, como no Perfil */}
       {/* HEADER FIXO */}
       <header className="sticky top-0 z-40 bg-gradient-to-b from-slate-900 to-slate-950 border-b border-fiat-gold/20">
         <div className="px-6 py-6 flex items-center gap-4">
@@ -55,8 +55,8 @@ export default function CommunityDetail() {
         </div>
       </header>
 
-      {/* CONTEÚDO COM SCROLL E PADDING INFERIOR PARA A BARRA DE MENU */}
-      <div className="overflow-y-auto h-full pb-32"> {/* ← AQUI: pb-32 no conteúdo rolável */}
+      {/* CONTEÚDO ROLÁVEL - sem h-full, deixa o pb-32 funcionar */}
+      <div className="overflow-y-auto"> {/* ← REMOVI o h-full aqui */}
         <ChatTab />
       </div>
     </div>
