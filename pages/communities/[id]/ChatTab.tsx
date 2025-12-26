@@ -58,7 +58,7 @@ export default function ChatTab() {
     };
   }, [id, profile?.id]);
 
-  // Scroll automático para a última mensagem
+  // Scroll automático
   useEffect(() => {
     scrollRef.current?.scrollIntoView({ behavior: 'smooth' });
   }, [messages]);
@@ -81,15 +81,15 @@ export default function ChatTab() {
 
     if (error) {
       toast.error('Erro ao enviar mensagem');
-      setNewMessage(msg); // devolve a mensagem se der erro
+      setNewMessage(msg);
     }
     setSending(false);
   };
 
   return (
-    <div className="flex flex-col min-h-screen bg-slate-950">
-      {/* Área das mensagens – ocupa todo o espaço disponível */}
-      <div className="flex-1 overflow-y-auto px-4 pt-4 pb-32">
+    <div className="px-4 pt-4">
+      {/* Mensagens com espaço extra no final para a barra de menu do app */}
+      <div className="space-y-4 pb-40">
         {messages.length === 0 ? (
           <div className="text-center pt-32 text-gray-400">
             <p className="text-2xl font-light">Nenhuma mensagem ainda.</p>
@@ -123,8 +123,8 @@ export default function ChatTab() {
         <div ref={scrollRef} />
       </div>
 
-      {/* Input fixo no final – sempre acima da barra de menu do app */}
-      <div className="border-t border-fiat-gold/30 bg-slate-950 px-4 py-4">
+      {/* Input sempre visível no final, acima da barra de menu */}
+      <div className="fixed bottom-20 left-0 right-0 bg-slate-950 border-t border-fiat-gold/30 px-4 py-4 z-50">
         <form onSubmit={send} className="max-w-4xl mx-auto flex gap-3">
           <Input
             value={newMessage}
