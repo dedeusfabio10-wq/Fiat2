@@ -23,7 +23,6 @@ export default function ChatTab() {
   const [sending, setSending] = useState(false);
   const scrollRef = useRef<HTMLDivElement>(null);
 
-  // Carrega mensagens + realtime
   useEffect(() => {
     if (!id || !profile?.id) return;
 
@@ -58,7 +57,6 @@ export default function ChatTab() {
     };
   }, [id, profile?.id]);
 
-  // Scroll automático
   useEffect(() => {
     scrollRef.current?.scrollIntoView({ behavior: 'smooth' });
   }, [messages]);
@@ -88,7 +86,7 @@ export default function ChatTab() {
 
   return (
     <div className="px-4 pt-4">
-      {/* Mensagens com espaço extra no final para a barra de menu do app */}
+      {/* Mensagens com espaço extra no final */}
       <div className="space-y-4 pb-40">
         {messages.length === 0 ? (
           <div className="text-center pt-32 text-gray-400">
@@ -123,7 +121,7 @@ export default function ChatTab() {
         <div ref={scrollRef} />
       </div>
 
-      {/* Input sempre visível no final, acima da barra de menu */}
+      {/* Input fixed acima da barra de menu */}
       <div className="fixed bottom-20 left-0 right-0 bg-slate-950 border-t border-fiat-gold/30 px-4 py-4 z-50">
         <form onSubmit={send} className="max-w-4xl mx-auto flex gap-3">
           <Input
