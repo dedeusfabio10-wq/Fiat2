@@ -23,7 +23,7 @@ export default function ChatTab() {
   const [sending, setSending] = useState(false);
   const scrollRef = useRef<HTMLDivElement>(null);
 
-  // Carrega mensagens + realtime
+  // Carrega mensagens + realtime (igual)
   useEffect(() => {
     if (!id || !profile?.id) return;
     const load = async () => {
@@ -57,7 +57,7 @@ export default function ChatTab() {
     };
   }, [id, profile?.id]);
 
-  // Scroll automático para a última mensagem
+  // Scroll automático
   useEffect(() => {
     scrollRef.current?.scrollIntoView({ behavior: 'smooth' });
   }, [messages]);
@@ -85,9 +85,9 @@ export default function ChatTab() {
   };
 
   return (
-    <>
-      {/* MENSAGENS - com mais padding inferior pra não ficar embaixo do input */}
-      <div className="px-4 space-y-4 pb-40"> {/* ← aumentei de pb-32 para pb-40 */}
+    <div className="flex flex-col h-screen bg-slate-950">
+      {/* MENSAGENS - ocupa todo o espaço disponível */}
+      <div className="flex-1 overflow-y-auto px-4 pt-4 pb-28"> {/* pb-28 dá espaço pro input */}
         {messages.length === 0 ? (
           <div className="text-center pt-32 text-gray-400">
             <p className="text-2xl font-light">Nenhuma mensagem ainda.</p>
@@ -121,8 +121,8 @@ export default function ChatTab() {
         <div ref={scrollRef} />
       </div>
 
-      {/* INPUT FIXO - subido mais pra cima da barra de menu */}
-      <div className="fixed bottom-24 left-0 right-0 bg-slate-950 border-t border-fiat-gold/30 px-4 py-4 z-[9999]">
+      {/* INPUT NO FINAL DO CONTEÚDO (não fixed) - sempre visível acima da barra de menu */}
+      <div className="border-t border-fiat-gold/30 bg-slate-950 px-4 py-4">
         <form onSubmit={send} className="max-w-4xl mx-auto flex gap-3">
           <Input
             value={newMessage}
@@ -140,6 +140,6 @@ export default function ChatTab() {
           </Button>
         </form>
       </div>
-    </>
+    </div>
   );
 }
