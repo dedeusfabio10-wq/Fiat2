@@ -32,9 +32,9 @@ export default function CommunityDetail() {
   }
 
   return (
-    // Container principal com scroll natural e espaço pra barra inferior
-    <div className="min-h-screen bg-slate-950 text-white pb-32 overflow-y-auto">
-      {/* Header (rola junto com o conteúdo) */}
+    // Container principal – igual ao Perfil: min-h-screen pb-32
+    <div className="min-h-screen bg-slate-950 text-white pb-32">
+      {/* Header – rola junto com o conteúdo */}
       <header className="bg-gradient-to-b from-slate-900 to-slate-950 border-b border-fiat-gold/20">
         <div className="px-6 py-6 flex items-center gap-4">
           <button onClick={() => navigate('/communities')}>
@@ -47,21 +47,19 @@ export default function CommunityDetail() {
             </p>
           </div>
         </div>
-
-        {/* Abas (rola junto) */}
+        {/* Abas – rolam junto */}
         <div className="flex gap-10 px-6 py-4 bg-slate-950 border-t border-fiat-gold/10">
           <div className="flex items-center gap-2 text-fiat-gold font-bold border-b-4 border-fiat-gold pb-3">
             <MessageCircle size={22} />
             Chat
           </div>
-          {/* Futuras abas */}
-          {/* <div className="flex items-center gap-2 text-gray-400 pb-3">Planos</div>
-          <div className="flex items-center gap-2 text-gray-400 pb-3">Membros</div> */}
         </div>
       </header>
 
-      {/* Conteúdo do chat */}
-      <ChatTab />
+      {/* Conteúdo do chat – rola livremente */}
+      <div>
+        <ChatTab />
+      </div>
     </div>
   );
 }
