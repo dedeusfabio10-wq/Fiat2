@@ -1,7 +1,6 @@
-
-import { defineConfig } from 'vite'
-import react from '@vitejs/plugin-react'
-import { VitePWA } from 'vite-plugin-pwa'
+import { defineConfig } from 'vite';
+import react from '@vitejs/plugin-react';
+import { VitePWA } from 'vite-plugin-pwa';
 
 export default defineConfig({
   plugins: [
@@ -17,12 +16,13 @@ export default defineConfig({
         background_color: '#1e1b4b',
         display: 'standalone',
         start_url: '/',
+        orientation: 'portrait-primary',
         icons: [
           {
             src: '/icon-192x192.png',
             sizes: '192x192',
             type: 'image/png',
-            purpose: 'any maskable'
+            purpose: 'any'
           },
           {
             src: '/icon-512x512.png',
@@ -71,18 +71,18 @@ export default defineConfig({
         manualChunks(id) {
           if (id.includes('node_modules')) {
             if (id.includes('react') || id.includes('react-dom') || id.includes('react-router-dom')) {
-              return 'vendor'
+              return 'vendor';
             }
             if (id.includes('lucide-react') || id.includes('sonner')) {
-              return 'ui'
+              return 'ui';
             }
-            return 'deps' // Other dependencies
+            return 'deps';
           }
           if (id.includes('constants.ts')) {
-            return 'data' // Separate large data file
+            return 'data';
           }
         }
       }
     }
   }
-})
+});
