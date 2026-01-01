@@ -82,52 +82,66 @@ const CommunitiesPage: React.FC = () => {
 
   // CRIAÇÃO DE COMUNIDADE — 100% CORRETA
   const handleCreate = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!newName.trim() || !profile?.id) return;
+  e.preventDefault();
+  if (!newName.trim() || !profile?.id) return;
+  setIsCreating(true);
 
-    setIsCreating(true);
+  try {
+    // Log para ver exatamente o que está sendo enviado
+    console.log('Tentando criar comunidade com os dados:', {
+      name: newName.trim(),
+      description: newDesc.trim() || null,
+      is_public: isPublic,
+      creator_id: profile.id,
+      user_uuid: profile.id
+    });
 
-    try {
-      // 1) Cria a comunidade
-      const { data: community, error: createError } = await supabase
-        .from('communities')
-        .insert({
-          name: newName.trim(),
-          description: newDesc.trim() || null,
-          is_public: isPublic,        // ← COLUNA CORRETA!
-          creator_id: profile.id
-        })
-        .select()
-        .single();
+    // 1) Cria a comunidade
+    const { data: community, error: createError } = await supabase
+      .from('communities')
+      .insert({
+        name: newName.trim(),
+        description: newDesc.trim() || null,
+        is_public: isPublic,
+        creator_id: profile.id
+      })
+      .select()
+      .single();
 
-      if (createError) throw createError;
-
-      // 2) Adiciona o criador como membro automaticamente
-      const { error: memberError } = await supabase
-        .from('community_members')
-        .insert({
-          community_id: community.id,
-          user_id: profile.id
-        });
-
-      if (memberError) throw memberError;
-
-      toast.success('Comunidade criada com sucesso!');
-      setShowCreate(false);
-      setNewName('');
-      setNewDesc('');
-      setIsPublic(true);
-
-      fetchData();
-      navigate(`/communities/${community.id}`);
-    } catch (err: any) {
-      console.error('Erro ao criar comunidade:', err);
-      toast.error('Erro ao criar comunidade. Tente novamente.');
-    } finally {
-      setIsCreating(false);
+    if (createError) {
+      console.error('Erro do Supabase ao criar a comunidade:', createError);
+      throw createError;
     }
-  };
 
+    console.log('Comunidade criada com sucesso:', community);
+
+    // 2) Adiciona o criador como membro automaticamente
+    const { error: memberError } = await supabase
+      .from('community_members')
+      .insert({
+        community_id: community.id,
+        user_id: profile.id
+      });
+
+    if (memberError) {
+      console.error('Erro ao adicionar criador como membro:', memberError);
+      throw memberError;
+    }
+
+    toast.success('Comunidade criada com sucesso!');
+    setShowCreate(false);
+    setNewName('');
+    setNewDesc('');
+    setIsPublic(true);
+    fetchData();
+    navigate(`/communities/${community.id}`);
+  } catch (err: any) {
+    console.error('Erro completo ao criar comunidade:', err);
+    toast.error('Erro ao criar comunidade: ' + (err.message || 'Tente novamente'));
+  } finally {
+    setIsCreating(false);
+  }
+};
   // Entrar em comunidade pública
   const handleJoin = async (communityId: string) => {
     if (!profile?.id) return;
