@@ -32,8 +32,10 @@ export default function ChatTab() {
         .select('*, profiles(name)')
         .eq('community_id', id)
         .order('created_at', { ascending: true });
+
       setMessages(data || []);
     };
+
     load();
 
     const channel = supabase
@@ -63,7 +65,7 @@ export default function ChatTab() {
 
   const send = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!newMessage.trim() || sending || !profile?.id) return;
+    if (!newMessage.trim() || sending) return;
 
     const msg = newMessage.trim();
     setNewMessage('');
@@ -73,14 +75,16 @@ export default function ChatTab() {
       .from('community_messages')
       .insert({
         community_id: id,
-        user_id: profile.id,
         message: msg,
+        // Removido user_id intencional — Supabase preenche automaticamente com auth.uid()
       });
 
     if (error) {
-      toast.error('Erro ao enviar mensagem');
-      setNewMessage(msg);
+      console.error('Erro ao enviar mensagem no chat:', error);
+      toast.error('Erro ao enviar mensagem: ' + error.message);
+      setNewMessage(msg); // Restaura a mensagem caso falhe
     }
+
     setSending(false);
   };
 
