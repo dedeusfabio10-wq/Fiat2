@@ -162,3 +162,12 @@ export interface CommunityMessage {
   created_at: string;
   profiles?: { name: string; photo?: string | null };
 }
+export interface CommunityPlan {
+  id: string;
+  community_id: string;
+  title: string;
+  description: string;
+  items: PlanItem[];
+  created_at: string;
+}
+
