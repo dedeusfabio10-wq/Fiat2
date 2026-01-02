@@ -142,7 +142,7 @@ export interface Community {
   name: string;
   description: string;
   is_public: boolean;
-  owner_id: string;
+  creator_id: string;
   created_at: string;
   members_count?: number;
 }
