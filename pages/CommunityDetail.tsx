@@ -1,10 +1,10 @@
 import React, { useState, useEffect, useContext, useRef } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { AppContext } from '../../../contexts/AppContext'; // sobe 3 níveis para src/contexts
-import { supabase } from '../../../services/supabase'; // sobe 3 níveis para src/services
-import { Community, CommunityMessage, CommunityPlan, PlanItem } from '../../../types'; // sobe 3 níveis para src/types
-import { Button, Input } from '../../../ui/UIComponents'; // sobe 3 níveis para src/ui
-import { PRAYERS } from '../../../constants'; // sobe 3 níveis para src/constants
+import { AppContext } from '../../../contexts/AppContext';
+import { supabase } from '../../../services/supabase';
+import { Community, CommunityMessage, CommunityPlan, PlanItem } from '../../../types';
+import { Button, Input } from '../../../ui/UIComponents';
+import { PRAYERS } from '../../../constants';
 import {
   ArrowLeft, Send, Users, Loader2, BookOpen, CheckCircle2,
   Circle, Plus, X, Search, CalendarCheck, MessageCircle
@@ -173,7 +173,7 @@ const CommunityDetailPage: React.FC = () => {
                   <p className="text-[9px] text-gray-500 uppercase mt-1">Meta de hoje • Marque ao finalizar</p>
                 </div>
                 <div className="divide-y divide-white/5">
-                  {plan.items.map((item: PlanItem) => {  // tipado como PlanItem
+                  {plan.items.map((item: PlanItem) => {
                     const isChecked = userProgress.includes(item.id);
                     return (
                       <div key={item.id} className="flex items-center justify-between p-4 hover:bg-white/5 transition-colors">
