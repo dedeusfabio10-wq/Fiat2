@@ -3,7 +3,7 @@ import React, { useState, useEffect, useContext, useRef } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { AppContext } from '../contexts/AppContext';
 import { supabase } from '../services/supabase';
-import { Community, CommunityMessage, CommunityPlan } from '../types';
+import { Community, CommunityMessage, CommunityPlan, PlanItem } from '../types';
 import { Button, Input } from '../ui/UIComponents';
 import { PRAYERS } from '../constants';
 import { 
@@ -56,6 +56,7 @@ const CommunityDetailPage: React.FC = () => {
   }, [id, profile.id]);
 
   const fetchInitialData = async () => {
+    if (!id) return;
     setLoading(true);
     try {
       const [commRes, msgRes, planRes, progRes] = await Promise.all([
@@ -65,14 +66,12 @@ const CommunityDetailPage: React.FC = () => {
         supabase.from('community_plan_progress').select('item_id').eq('user_id', profile.id).eq('completed_at', todayStr)
       ]);
 
-      if (commRes.data) {
-        setCommunity(commRes.data as Community);
-      }
+      if (commRes.data) setCommunity(commRes.data as Community);
       setMessages(msgRes.data || []);
       setPlans(planRes.data || []);
       setUserProgress((progRes.data || []).map((p: any) => p.item_id));
     } catch (err) {
-      console.error("Erro ao buscar dados da comunidade:", err);
+      console.error("Erro ao buscar dados:", err);
     } finally {
       setLoading(false);
     }
@@ -91,7 +90,7 @@ const CommunityDetailPage: React.FC = () => {
     const isDone = userProgress.includes(itemId);
     if (isDone) {
       await supabase.from('community_plan_progress').delete().eq('plan_id', planId).eq('user_id', profile.id).eq('item_id', itemId).eq('completed_at', todayStr);
-      setUserProgress(prev => prev.filter(id => id !== itemId));
+      setUserProgress(prev => prev.filter(pId => pId !== itemId));
     } else {
       await supabase.from('community_plan_progress').insert({ plan_id: planId, user_id: profile.id, item_id: itemId, completed_at: todayStr });
       setUserProgress(prev => [...prev, itemId]);
@@ -172,7 +171,7 @@ const CommunityDetailPage: React.FC = () => {
                   <p className="text-[9px] text-gray-500 uppercase mt-1">Meta de hoje • Marque ao finalizar</p>
                 </div>
                 <div className="divide-y divide-white/5">
-                  {(plan.items || []).map((item: any) => {
+                  {(plan.items || []).map((item: PlanItem) => {
                     const isChecked = userProgress.includes(item.id);
                     return (
                       <div key={item.id} className="flex items-center justify-between p-4 hover:bg-white/5 transition-colors">
@@ -215,11 +214,14 @@ const CommunityDetailPage: React.FC = () => {
               <h2 className="font-serif text-fiat-gold uppercase">Novo Plano Comunitário</h2>
               <button onClick={() => setShowCreatePlan(false)}><X className="text-gray-500" /></button>
             </div>
-            <Input label="Título do Plano" value={planTitle} onChange={(e: any) => setPlanTitle(e.target.value)} className="mb-4" />
             
-            <div className="relative mb-4">
-              <Search className="absolute left-3 top-2.5 text-gray-500" size={16} />
-              <Input placeholder="Buscar orações..." className="pl-10 h-10 text-xs" value={searchPrayer} onChange={(e: any) => setSearchPrayer(e.target.value)} />
+            <div className="space-y-4 mb-4">
+              <Input label="Título do Plano" value={planTitle} onChange={e => setPlanTitle(e.target.value)} />
+              
+              <div className="relative">
+                <Search className="absolute left-3 top-3.5 text-gray-500" size={16} />
+                <Input placeholder="Buscar orações..." className="pl-10 h-10 text-xs" value={searchPrayer} onChange={e => setSearchPrayer(e.target.value)} />
+              </div>
             </div>
 
             <div className="flex-1 overflow-y-auto mb-6 space-y-2">
