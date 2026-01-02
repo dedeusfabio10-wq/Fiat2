@@ -1,38 +1,40 @@
-import React from 'react';
-import { ChevronRight } from 'lucide-react';
 
-interface ButtonProps extends React.ButtonHTMLAttributes<HTMLButtonElement> {
-  variant?: 'primary' | 'outline' | 'ghost' | 'sacred';
+import React, { ButtonHTMLAttributes, InputHTMLAttributes } from 'react';
+
+// --- Button ---
+export interface ButtonProps extends ButtonHTMLAttributes<HTMLButtonElement> {
+  variant?: 'primary' | 'secondary' | 'ghost' | 'outline' | 'sacred';
   size?: 'sm' | 'md' | 'lg';
   fullWidth?: boolean;
 }
 
-export const Button: React.FC<ButtonProps> = ({
-  children,
-  variant = 'primary',
-  size = 'md',
+export const Button: React.FC<ButtonProps> = ({ 
+  variant = 'primary', 
+  size = 'md', 
   fullWidth = false,
-  className = '',
-  ...props
+  className = '', 
+  children, 
+  ...props 
 }) => {
-  const baseStyles = "rounded-lg font-serif font-semibold tracking-wider transition-all duration-300 flex items-center justify-center gap-2 active:scale-95";
-
-  const sizes = {
-    sm: "px-4 py-2 text-sm",
-    md: "px-6 py-3",
-    lg: "px-8 py-4 text-lg",
+  const baseStyles = "inline-flex items-center justify-center rounded-lg font-medium transition-all focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-offset-sacred-sapphire disabled:opacity-50 disabled:pointer-events-none";
+  
+  const variants = {
+    primary: "bg-sacred-gold text-sacred-sapphire hover:bg-yellow-400",
+    secondary: "bg-sacred-wine text-white hover:bg-red-900",
+    ghost: "hover:bg-white/10 text-white",
+    outline: "border border-sacred-gold text-sacred-gold hover:bg-sacred-gold/10",
+    sacred: "bg-gradient-to-r from-sacred-gold to-yellow-200 text-sacred-sapphire font-serif uppercase tracking-widest shadow-[0_0_15px_rgba(212,175,55,0.3)] hover:shadow-[0_0_25px_rgba(212,175,55,0.5)] border border-yellow-100/20"
   };
 
-  const variants = {
-    primary: "bg-gradient-to-r from-fiat-gold to-[#b8902b] text-fiat-navy shadow-lg shadow-fiat-gold/20 hover:shadow-fiat-gold/40",
-    outline: "border border-fiat-gold text-fiat-gold hover:bg-fiat-gold/10",
-    ghost: "text-fiat-gold/80 hover:text-fiat-gold hover:bg-white/5",
-    sacred: "bg-gradient-to-r from-fiat-gold to-yellow-400 text-black uppercase tracking-widest shadow-lg shadow-fiat-gold/50 hover:shadow-fiat-gold/70",
+  const sizes = {
+    sm: "h-8 px-3 text-xs",
+    md: "h-10 px-4 py-2 text-sm",
+    lg: "h-12 px-6 text-base",
   };
 
   return (
-    <button
-      className={`${baseStyles} ${variants[variant]} ${sizes[size]} ${fullWidth ? 'w-full' : ''} ${className}`}
+    <button 
+      className={`${baseStyles} ${variants[variant]} ${sizes[size]} ${fullWidth ? 'w-full' : ''} ${className}`} 
       {...props}
     >
       {children}
@@ -40,80 +42,47 @@ export const Button: React.FC<ButtonProps> = ({
   );
 };
 
-interface CardProps {
+// --- Card ---
+export interface CardProps {
   children: React.ReactNode;
   className?: string;
-  onClick?: () => void;
-  title?: string;
-  subtitle?: string;
-  icon?: React.ReactNode;
+  glass?: boolean;
+  onClick?: (e?: any) => void;
 }
 
-export const Card: React.FC<CardProps> = ({ children, className = '', onClick, title, subtitle, icon }) => {
+export const Card: React.FC<CardProps> = ({ children, className = '', glass = false, onClick }) => {
   return (
-    <div
+    <div 
       onClick={onClick}
-      className={`relative bg-fiat-card border border-white/5 rounded-2xl p-5 shadow-xl backdrop-blur-sm overflow-hidden ${onClick ? 'cursor-pointer hover:border-fiat-gold/30 transition-colors' : ''} ${className}`}
-    >
-      {/* Gradiente dourado sutil no topo (melhoria visual) */}
-      <div className="absolute inset-0 pointer-events-none">
-        <div className="absolute top-0 left-0 w-full h-px bg-gradient-to-r from-transparent via-fiat-gold/40 to-transparent" />
-      </div>
-
-      {(title || icon) && (
-        <div className="flex items-center justify-between mb-4">
-          <div className="flex items-center gap-3">
-            {icon && <div className="text-fiat-gold">{icon}</div>}
-            <div>
-              {title && <h3 className="font-serif text-lg text-fiat-gold">{title}</h3>}
-              {subtitle && <p className="text-xs text-fiat-muted uppercase tracking-widest">{subtitle}</p>}
-            </div>
-          </div>
-        </div>
-      )}
+      className={`
+      relative overflow-hidden rounded-xl border border-white/10 p-4 shadow-lg
+      ${glass ? 'bg-white/5 backdrop-blur-md' : 'bg-fiat-card'}
+      ${onClick ? 'cursor-pointer' : ''}
+      ${className}
+    `}>
+      <div className="absolute top-0 left-0 w-full h-px bg-gradient-to-r from-transparent via-sacred-gold/30 to-transparent" />
       {children}
     </div>
   );
 };
 
-interface InputProps extends React.InputHTMLAttributes<HTMLInputElement> {
+// --- Input ---
+export interface FiatInputProps extends InputHTMLAttributes<HTMLInputElement> {
   label?: string;
 }
 
-export const Input: React.FC<InputProps> = ({ label, className = '', ...props }) => {
+export const Input = ({ label, className = '', ...props }: FiatInputProps) => {
   return (
     <div className="w-full">
       {label && (
-        <label className="block text-[10px] uppercase tracking-wider text-fiat-muted mb-1 ml-1 font-bold">
+        <label className="block text-[10px] uppercase tracking-wider text-gray-500 mb-1 ml-1 font-bold">
           {label}
         </label>
       )}
-      <input
-        className={`w-full bg-black/20 border border-white/10 rounded-lg px-4 py-3 text-fiat-text focus:border-fiat-gold focus:ring-1 focus:ring-fiat-gold outline-none transition-all placeholder-white/20 ${className}`}
+      <input 
+        className={`flex h-10 w-full rounded-md border border-white/20 bg-white/5 px-3 py-2 text-sm text-white placeholder:text-gray-400 focus:outline-none focus:ring-1 focus:ring-sacred-gold focus:border-sacred-gold ${className}`}
         {...props}
       />
     </div>
   );
 };
-
-export const SectionHeader: React.FC<{
-  title: string;
-  subtitle?: string;
-  action?: () => void;
-  actionLabel?: string;
-}> = ({ title, subtitle, action, actionLabel }) => (
-  <div className="flex items-center justify-between mb-6 mt-8">
-    <div>
-      <h2 className="font-serif text-xl text-white">{title}</h2>
-      {subtitle && <p className="text-sm text-fiat-muted mt-1">{subtitle}</p>}
-    </div>
-    {action && (
-      <button
-        onClick={action}
-        className="text-xs text-fiat-gold uppercase tracking-wider flex items-center gap-1 hover:text-fiat-goldLight"
-      >
-        {actionLabel || 'Ver todos'} <ChevronRight size={14} />
-      </button>
-    )}
-  </div>
-);
