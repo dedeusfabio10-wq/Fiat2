@@ -1,14 +1,13 @@
-
 import React, { useState, useEffect, useContext, useRef } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { AppContext } from '../contexts/AppContext';
-import { supabase } from '../services/supabase';
-import { Community, CommunityMessage, CommunityPlan, PlanItem } from '../types';
-import { Button, Input } from '../../ui/UIComponents';  // sobe dois níveis
-import { PRAYERS } from '../constants';
-import { 
-  ArrowLeft, Send, Users, Loader2, BookOpen, CheckCircle2, 
-  Circle, Plus, X, Search, CalendarCheck, MessageCircle 
+import { AppContext } from '../../contexts/AppContext'; // ajustado se necessário
+import { supabase } from '../../services/supabase'; // ajustado se necessário
+import { Community, CommunityMessage, CommunityPlan, PlanItem } from '../../types'; // ajustado se necessário
+import { Button, Input } from '../../../ui/UIComponents'; // caminho corrigido (sobe 3 níveis + ui)
+import { PRAYERS } from '../../constants'; // ajustado se necessário
+import {
+  ArrowLeft, Send, Users, Loader2, BookOpen, CheckCircle2,
+  Circle, Plus, X, Search, CalendarCheck, MessageCircle
 } from 'lucide-react';
 import { toast } from 'sonner';
 
@@ -16,22 +15,19 @@ const CommunityDetailPage: React.FC = () => {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
   const { profile } = useContext(AppContext);
-
   const [community, setCommunity] = useState<Community | null>(null);
   const [messages, setMessages] = useState<CommunityMessage[]>([]);
   const [newMessage, setNewMessage] = useState('');
   const [loading, setLoading] = useState(true);
   const [sending, setSending] = useState(false);
   const [activeTab, setActiveTab] = useState<'chat' | 'plans' | 'members'>('chat');
-
   // Planos e Progresso
   const [plans, setPlans] = useState<CommunityPlan[]>([]);
-  const [userProgress, setUserProgress] = useState<string[]>([]); // Lista de item_ids completados hoje
+  const [userProgress, setUserProgress] = useState<string[]>([]);
   const [showCreatePlan, setShowCreatePlan] = useState(false);
   const [planTitle, setPlanTitle] = useState('');
   const [selectedPrayers, setSelectedPrayers] = useState<any[]>([]);
   const [searchPrayer, setSearchPrayer] = useState('');
-
   const scrollRef = useRef<HTMLDivElement>(null);
   const todayStr = new Date().toISOString().split('T')[0];
 
@@ -41,9 +37,9 @@ const CommunityDetailPage: React.FC = () => {
 
     const channel = supabase
       .channel(`chat_${id}`)
-      .on('postgres_changes', { 
-        event: 'INSERT', 
-        schema: 'public', 
+      .on('postgres_changes', {
+        event: 'INSERT',
+        schema: 'public',
         table: 'community_messages',
         filter: `community_id=eq.${id}`
       }, async (payload: any) => {
@@ -64,7 +60,6 @@ const CommunityDetailPage: React.FC = () => {
         supabase.from('community_plans').select('*').eq('community_id', id).order('created_at', { descending: true }),
         supabase.from('community_plan_progress').select('item_id').eq('user_id', profile.id).eq('completed_at', todayStr)
       ]);
-
       setCommunity(commRes.data as Community);
       setMessages(msgRes.data || []);
       setPlans(planRes.data || []);
@@ -78,7 +73,11 @@ const CommunityDetailPage: React.FC = () => {
     e.preventDefault();
     if (!newMessage.trim() || !id || sending) return;
     setSending(true);
-    const { error } = await supabase.from('community_messages').insert({ community_id: id, sender_id: profile.id, content: newMessage.trim() });
+    const { error } = await supabase.from('community_messages').insert({ 
+      community_id: id, 
+      sender_id: profile.id, 
+      content: newMessage.trim() 
+    });
     if (!error) setNewMessage('');
     setSending(false);
   };
@@ -86,10 +85,20 @@ const CommunityDetailPage: React.FC = () => {
   const handleToggleProgress = async (planId: string, itemId: string) => {
     const isDone = userProgress.includes(itemId);
     if (isDone) {
-      await supabase.from('community_plan_progress').delete().eq('plan_id', planId).eq('user_id', profile.id).eq('item_id', itemId).eq('completed_at', todayStr);
+      await supabase.from('community_plan_progress')
+        .delete()
+        .eq('plan_id', planId)
+        .eq('user_id', profile.id)
+        .eq('item_id', itemId)
+        .eq('completed_at', todayStr);
       setUserProgress(prev => prev.filter(id => id !== itemId));
     } else {
-      await supabase.from('community_plan_progress').insert({ plan_id: planId, user_id: profile.id, item_id: itemId, completed_at: todayStr });
+      await supabase.from('community_plan_progress').insert({ 
+        plan_id: planId, 
+        user_id: profile.id, 
+        item_id: itemId, 
+        completed_at: todayStr 
+      });
       setUserProgress(prev => [...prev, itemId]);
       if (navigator.vibrate) navigator.vibrate(50);
     }
@@ -102,7 +111,6 @@ const CommunityDetailPage: React.FC = () => {
       title: planTitle,
       items: selectedPrayers.map(p => ({ id: p.id, title: p.title, type: 'prayer', count: 1 }))
     }).select().single();
-
     if (!error) {
       setPlans(prev => [data, ...prev]);
       setShowCreatePlan(false);
@@ -158,9 +166,7 @@ const CommunityDetailPage: React.FC = () => {
                 <Plus size={16} className="mr-2" /> NOVO PLANO DA COMUNIDADE
               </Button>
             )}
-
             {plans.length === 0 && <p className="text-center py-20 text-gray-600 italic font-serif">Nenhum plano de oração ativo.</p>}
-
             {plans.map(plan => (
               <div key={plan.id} className="bg-fiat-card border border-white/5 rounded-2xl overflow-hidden shadow-xl animate-fade-in">
                 <div className="bg-black/40 p-4 border-b border-white/5">
@@ -195,7 +201,12 @@ const CommunityDetailPage: React.FC = () => {
       {activeTab === 'chat' && (
         <div className="p-4 pb-8 bg-black/60 border-t border-white/5 backdrop-blur-xl">
           <form onSubmit={handleSend} className="flex gap-3 max-w-3xl mx-auto">
-            <Input value={newMessage} onChange={e => setNewMessage(e.target.value)} placeholder="Sua oração..." className="flex-1 bg-white/5 border-white/10" />
+            <Input 
+              value={newMessage} 
+              onChange={(e: React.ChangeEvent<HTMLInputElement>) => setNewMessage(e.target.value)} 
+              placeholder="Sua oração..." 
+              className="flex-1 bg-white/5 border-white/10" 
+            />
             <Button type="submit" variant="sacred" disabled={!newMessage.trim() || sending} className="w-12 h-12 !p-0 rounded-xl">
               {sending ? <Loader2 className="animate-spin" /> : <Send size={20}/>}
             </Button>
@@ -211,18 +222,27 @@ const CommunityDetailPage: React.FC = () => {
               <h2 className="font-serif text-fiat-gold uppercase">Novo Plano Comunitário</h2>
               <button onClick={() => setShowCreatePlan(false)}><X className="text-gray-500" /></button>
             </div>
-            <Input label="Título do Plano" value={planTitle} onChange={(e: any) => setPlanTitle(e.target.value)} className="mb-4" />
-            
+            <Input 
+              label="Título do Plano" 
+              value={planTitle} 
+              onChange={(e: React.ChangeEvent<HTMLInputElement>) => setPlanTitle(e.target.value)} 
+              className="mb-4" 
+            />
+           
             <div className="relative mb-4">
               <Search className="absolute left-3 top-2.5 text-gray-500" size={16} />
-              <Input placeholder="Buscar orações..." className="pl-10 h-10 text-xs" value={searchPrayer} onChange={(e: any) => setSearchPrayer(e.target.value)} />
+              <Input 
+                placeholder="Buscar orações..." 
+                className="pl-10 h-10 text-xs" 
+                value={searchPrayer} 
+                onChange={(e: React.ChangeEvent<HTMLInputElement>) => setSearchPrayer(e.target.value)} 
+              />
             </div>
-
             <div className="flex-1 overflow-y-auto mb-6 space-y-2">
               {PRAYERS.filter(p => p.title.toLowerCase().includes(searchPrayer.toLowerCase())).map(p => {
                 const isSelected = selectedPrayers.some(s => s.id === p.id);
                 return (
-                  <button 
+                  <button
                     key={p.id}
                     onClick={() => isSelected ? setSelectedPrayers(prev => prev.filter(s => s.id !== p.id)) : setSelectedPrayers(prev => [...prev, p])}
                     className={`w-full p-3 rounded-xl border text-left text-xs transition-all ${isSelected ? 'border-fiat-gold bg-fiat-gold/10 text-fiat-gold' : 'border-white/5 text-gray-400'}`}
@@ -232,7 +252,6 @@ const CommunityDetailPage: React.FC = () => {
                 );
               })}
             </div>
-
             <Button variant="sacred" className="w-full h-12" onClick={handleCreatePlan} disabled={!planTitle || selectedPrayers.length === 0}>CRIAR AGORA</Button>
           </div>
         </div>
