@@ -46,7 +46,7 @@ const CommunityDetailPage: React.FC = () => {
         schema: 'public', 
         table: 'community_messages',
         filter: `community_id=eq.${id}`
-      }, async (payload) => {
+      }, async (payload: any) => {
         const { data: sender } = await supabase.from('profiles').select('name, photo').eq('id', payload.new.sender_id).single();
         setMessages(prev => [...prev, { ...payload.new as any, profiles: sender || { name: 'Usuário' } }]);
       })
@@ -65,10 +65,10 @@ const CommunityDetailPage: React.FC = () => {
         supabase.from('community_plan_progress').select('item_id').eq('user_id', profile.id).eq('completed_at', todayStr)
       ]);
 
-      setCommunity(commRes.data);
+      setCommunity(commRes.data as Community);
       setMessages(msgRes.data || []);
       setPlans(planRes.data || []);
-      setUserProgress((progRes.data || []).map(p => p.item_id));
+      setUserProgress((progRes.data || []).map((p: any) => p.item_id));
     } finally {
       setLoading(false);
     }
@@ -211,11 +211,11 @@ const CommunityDetailPage: React.FC = () => {
               <h2 className="font-serif text-fiat-gold uppercase">Novo Plano Comunitário</h2>
               <button onClick={() => setShowCreatePlan(false)}><X className="text-gray-500" /></button>
             </div>
-            <Input label="Título do Plano" value={planTitle} onChange={e => setPlanTitle(e.target.value)} className="mb-4" />
+            <Input label="Título do Plano" value={planTitle} onChange={(e: any) => setPlanTitle(e.target.value)} className="mb-4" />
             
             <div className="relative mb-4">
               <Search className="absolute left-3 top-2.5 text-gray-500" size={16} />
-              <Input placeholder="Buscar orações..." className="pl-10 h-10 text-xs" value={searchPrayer} onChange={e => setSearchPrayer(e.target.value)} />
+              <Input placeholder="Buscar orações..." className="pl-10 h-10 text-xs" value={searchPrayer} onChange={(e: any) => setSearchPrayer(e.target.value)} />
             </div>
 
             <div className="flex-1 overflow-y-auto mb-6 space-y-2">
