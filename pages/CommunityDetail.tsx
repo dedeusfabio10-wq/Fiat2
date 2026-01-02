@@ -1,10 +1,10 @@
 import React, { useState, useEffect, useContext, useRef } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { AppContext } from '../../contexts/AppContext'; // ajustado se necessário
-import { supabase } from '../../services/supabase'; // ajustado se necessário
-import { Community, CommunityMessage, CommunityPlan, PlanItem } from '../../types'; // ajustado se necessário
-import { Button, Input } from '../../../ui/UIComponents'; // caminho corrigido (sobe 3 níveis + ui)
-import { PRAYERS } from '../../constants'; // ajustado se necessário
+import { AppContext } from '../../../contexts/AppContext'; // sobe 3 níveis para src/contexts
+import { supabase } from '../../../services/supabase'; // sobe 3 níveis para src/services
+import { Community, CommunityMessage, CommunityPlan, PlanItem } from '../../../types'; // sobe 3 níveis para src/types
+import { Button, Input } from '../../../ui/UIComponents'; // sobe 3 níveis para src/ui
+import { PRAYERS } from '../../../constants'; // sobe 3 níveis para src/constants
 import {
   ArrowLeft, Send, Users, Loader2, BookOpen, CheckCircle2,
   Circle, Plus, X, Search, CalendarCheck, MessageCircle
@@ -21,7 +21,6 @@ const CommunityDetailPage: React.FC = () => {
   const [loading, setLoading] = useState(true);
   const [sending, setSending] = useState(false);
   const [activeTab, setActiveTab] = useState<'chat' | 'plans' | 'members'>('chat');
-  // Planos e Progresso
   const [plans, setPlans] = useState<CommunityPlan[]>([]);
   const [userProgress, setUserProgress] = useState<string[]>([]);
   const [showCreatePlan, setShowCreatePlan] = useState(false);
@@ -174,7 +173,7 @@ const CommunityDetailPage: React.FC = () => {
                   <p className="text-[9px] text-gray-500 uppercase mt-1">Meta de hoje • Marque ao finalizar</p>
                 </div>
                 <div className="divide-y divide-white/5">
-                  {plan.items.map((item: any) => {
+                  {plan.items.map((item: PlanItem) => {  // tipado como PlanItem
                     const isChecked = userProgress.includes(item.id);
                     return (
                       <div key={item.id} className="flex items-center justify-between p-4 hover:bg-white/5 transition-colors">
@@ -214,7 +213,7 @@ const CommunityDetailPage: React.FC = () => {
         </div>
       )}
 
-      {/* Modal de Criação de Plano (Apenas Criador) */}
+      {/* Modal de Criação de Plano */}
       {showCreatePlan && (
         <div className="fixed inset-0 z-50 bg-black/90 backdrop-blur-sm flex items-center justify-center p-4">
           <div className="bg-fiat-card border border-fiat-gold/30 w-full max-w-md rounded-3xl p-6 animate-scale-in flex flex-col max-h-[80vh]">
@@ -228,7 +227,6 @@ const CommunityDetailPage: React.FC = () => {
               onChange={(e: React.ChangeEvent<HTMLInputElement>) => setPlanTitle(e.target.value)} 
               className="mb-4" 
             />
-           
             <div className="relative mb-4">
               <Search className="absolute left-3 top-2.5 text-gray-500" size={16} />
               <Input 
@@ -239,7 +237,7 @@ const CommunityDetailPage: React.FC = () => {
               />
             </div>
             <div className="flex-1 overflow-y-auto mb-6 space-y-2">
-              {PRAYERS.filter(p => p.title.toLowerCase().includes(searchPrayer.toLowerCase())).map(p => {
+              {PRAYERS.filter((p: any) => p.title.toLowerCase().includes(searchPrayer.toLowerCase())).map((p: any) => {
                 const isSelected = selectedPrayers.some(s => s.id === p.id);
                 return (
                   <button
