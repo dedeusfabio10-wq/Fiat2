@@ -71,7 +71,7 @@ export interface FiatInputProps extends InputHTMLAttributes<HTMLInputElement> {
   label?: string;
 }
 
-export const Input = ({ label, className = '', ...props }: FiatInputProps) => {
+export const FiatInput = ({ label, className = '', ...props }: FiatInputProps) => {
   return (
     <div className="w-full">
       {label && (
