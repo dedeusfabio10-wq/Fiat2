@@ -285,10 +285,7 @@ const App: React.FC = () => {
             <Route path="/viasacra" element={<ViaSacraPage />} />
             <Route path="/novena/:id" element={<NovenaDetailPage />} />
 
-            {/* NOVAS ROTAS DE COMUNIDADE */}
-            <Route path="/communities" element={<CommunitiesPage />} />
-            <Route path="/communities/:id" element={<CommunityDetailPage />} />
-
+           
             <Route path="/admin" element={
               <React.Suspense fallback={<div className="flex items-center justify-center h-screen bg-[#05080f] text-fiat-gold">Carregando Admin...</div>}>
                 <AdminPage />
