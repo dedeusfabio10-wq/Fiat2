@@ -1,10 +1,9 @@
-
 import React, { useState, useEffect, useContext, useRef } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { AppContext } from '../contexts/AppContext';
 import { supabase } from '../services/supabase';
 import { Community, CommunityMessage, CommunityPlan, PlanItem } from '../types';
-import { Button, FiatInput } from '../ui/UIComponents';
+import { Button, FiatInput as Input } from '../../../ui/UIComponents'; // use FiatInput como Input
 import { PRAYERS } from '../constants';
 import {
   ArrowLeft, Send, Users, Loader2, BookOpen, CheckCircle2,
@@ -222,7 +221,6 @@ const CommunityDetailPage: React.FC = () => {
               <h2 className="font-serif text-fiat-gold uppercase">Novo Plano Comunitário</h2>
               <button onClick={() => setShowCreatePlan(false)}><X className="text-gray-500" /></button>
             </div>
-            {/* @ts-ignore — label existe no nosso Input, mas o TS não reconhece por cache */}
             <Input 
               label="Título do Plano" 
               value={planTitle} 
