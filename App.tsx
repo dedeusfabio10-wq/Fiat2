@@ -25,9 +25,7 @@ import NovenaDetailPage from './pages/NovenaDetail';
 import CenaculoPage from './pages/Cenaculo';
 import AdventoPage from './pages/Advento';
 
-// NOVAS PÁGINAS DE COMUNIDADE
-import CommunitiesPage from './pages/Communities';
-import CommunityDetailPage from './pages/CommunityDetail';
+
 
 const AdminPage = React.lazy(() => import('./pages/Admin'));
 
