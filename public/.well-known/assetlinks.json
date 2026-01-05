@@ -1,0 +1,8 @@
+[{
+  "relation": ["delegate_permission/common.handle_all_urls"],
+  "target": {
+    "namespace": "android_app",
+    "package_name": "br.com.fiatcatolico.www.twa",
+    "sha256_cert_fingerprints": ["99:10:84:6A:7C:25:8C:CA:77:B9:CE:C6:59:2D:C0:13:C7:E4:2E:6D:1F:A7:84:F6:96:BF:10:5B:D5:22:4A:9A"]
+  }
+}]
