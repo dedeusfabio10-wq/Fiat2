@@ -3,7 +3,7 @@ import { useParams, useNavigate } from 'react-router-dom';
 import { AppContext } from '../contexts/AppContext';
 import { supabase } from '../services/supabase';
 import { Community, CommunityMessage, CommunityPlan, PlanItem } from '../types';
-import { Button, Input } from '../../../ui/UIComponents';
+import { Button, Input } from '../../../ui/UIComponents'; 
 import { PRAYERS } from '../constants';
 import {
   ArrowLeft, Send, Users, Loader2, BookOpen, CheckCircle2,
