@@ -1,8 +1,16 @@
-[{
-  "relation": ["delegate_permission/common.handle_all_urls"],
-  "target": {
-    "namespace": "android_app",
-    "package_name": "br.com.fiatcatolico.www.twa",
-    "sha256_cert_fingerprints": ["99:10:84:6A:7C:25:8C:CA:77:B9:CE:C6:59:2D:C0:13:C7:E4:2E:6D:1F:A7:84:F6:96:BF:10:5B:D5:22:4A:9A"]
+[
+  {
+    "relation": [
+      "delegate_permission/common.handle_all_urls",
+      "delegate_permission/common.get_login_creds"
+    ],
+    "target": {
+      "namespace": "android_app",
+      "package_name": "br.com.fiatcatolico.www.twa",
+      "sha256_cert_fingerprints": [
+        "99:10:84:6A:7C:25:8C:CA:77:B9:CE:C6:59:2D:C0:13:C7:E4:2E:6D:1F:A7:84:F6:96:BF:10:5B:D5:22:4A:9A",
+        "A7:84:C1:C3:D6:7A:B1:32:F3:52:C2:AF:9E:DE:39:95:0B:6A:36:1A:0A:25:4E:2D:5D:AE:24:6F:B2:90:F7:02"
+      ]
+    }
   }
-}]
+]
